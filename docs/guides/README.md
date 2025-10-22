@@ -33,9 +33,9 @@ Comprehensive how-to guides for Laravel Work Manager. Each guide is a practical,
 ## Quick Links
 
 - **Main Documentation**: [README.md](../../README.md)
-- **Architecture**: [ARCHITECTURE.md](../../docs/ARCHITECTURE.md)
-- **MCP Server**: [MCP_SERVER.md](../../docs/MCP_SERVER.md)
-- **Examples**: [examples/](../../examples/)
+- **Architecture**: [Architecture Overview](../concepts/architecture-overview.md)
+- **MCP Server**: [MCP Server Integration](mcp-server-integration.md)
+- **Examples**: [Examples](../examples/overview.md)
 
 ## Guide Format
 

@@ -77,7 +77,7 @@ Configure in `config/work-manager.php`:
 
 ### Which Laravel versions are supported?
 
-Laravel 10 and Laravel 11.
+Laravel 11 and Laravel 12.
 
 ### Which PHP versions are supported?
 
@@ -426,7 +426,7 @@ php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 4. **Rate limiting**: Prevent abuse
 5. **Monitoring**: Log all MCP operations
 
-See [MCP_SERVER.md](../MCP_SERVER.md) for production deployment guide.
+See [MCP Server Integration](../guides/mcp-server-integration.md) for production deployment guide.
 
 ### Do MCP tools bypass the HTTP API?
 
@@ -463,7 +463,7 @@ With horizontal scaling (multiple servers + Redis), much higher.
 // config/work-manager.php
 'metrics' => [
     'enabled' => true,
-    'driver' => 'prometheus', // or 'statsd'
+    'driver' => 'log', // 'log' or 'null' available (prometheus/statsd planned)
     'namespace' => 'work_manager',
 ],
 ```
@@ -624,5 +624,5 @@ View queues in Horizon dashboard.
 - Check [Common Errors](common-errors.md) for troubleshooting
 - Review [Known Limitations](known-limitations.md) for edge cases
 - Search [GitHub issues](https://github.com/gregpriday/laravel-work-manager/issues)
-- Read [ARCHITECTURE.md](../ARCHITECTURE.md) for system design
+- Read [ARCHITECTURE.md](../concepts/architecture-overview.md) for system design
 - Check examples in `examples/` directory

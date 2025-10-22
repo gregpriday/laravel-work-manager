@@ -173,7 +173,15 @@ WorkManager::routes(
 );
 ```
 
-**Note**: This mounts routes at `/api/ai/work/*` (Laravel adds the `/api` prefix automatically).
+> **📝 Base Path Configuration**
+>
+> This mounts routes at `/api/ai/work/*` (Laravel adds the `/api` prefix automatically).
+>
+> To use a different base path, change the `basePath` parameter:
+> ```php
+> WorkManager::routes(basePath: 'agent/work', middleware: ['api', 'auth:sanctum']);
+> // Routes will be at /api/agent/work/*
+> ```
 
 ## Step 4: Test the Complete Workflow
 

@@ -46,7 +46,7 @@ php artisan vendor:publish --tag=work-manager-migrations
 php artisan migrate
 ```
 
-**Requirements:** PHP 8.2+, Laravel 10 or 11, MySQL 8+ or Postgres 13+.
+**Requirements:** PHP 8.2+, Laravel 11 or 12, MySQL 8+ or Postgres 13+.
 
 ---
 
@@ -474,9 +474,9 @@ public function apply(WorkOrder $order): Diff
 
 * **Database inserts**: `examples/DatabaseRecordInsertType.php` — batch inserts + verification + idempotent apply
 * **User data sync**: `examples/UserDataSyncType.php` — external API sync with per-batch items
-* **Quick start**: `examples/QUICK_START.md` — 5-minute getting started guide
+* **Quick start**: [Quickstart Guide](docs/getting-started/quickstart.md) — 5-minute getting started guide
 * **Lifecycle walk-through**: `examples/LIFECYCLE.md` — every hook and event documented
-* **Architecture**: `ARCHITECTURE.md` — system design and data flows
+* **Architecture**: [Architecture Overview](docs/concepts/architecture-overview.md) — system design and data flows
 
 ---
 

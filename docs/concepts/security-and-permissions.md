@@ -958,4 +958,4 @@ class WorkEvent extends Model
 - [Lifecycle and Flow](lifecycle-and-flow.md) - Work order lifecycle
 - [Configuration Model](configuration-model.md) - Configuration options
 - [State Management](state-management.md) - State machine
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Advanced security patterns
+- [ARCHITECTURE.md](architecture-overview.md) - Advanced security patterns

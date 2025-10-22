@@ -446,7 +446,7 @@ These are tracked in the test suite with `markTestSkipped()` and do not affect c
 
 ## Planned Improvements
 
-See [ARCHITECTURE.md](../ARCHITECTURE.md) "Recommended Improvements" section for detailed future enhancements:
+See [ARCHITECTURE.md](../concepts/architecture-overview.md) "Recommended Improvements" section for detailed future enhancements:
 
 1. Enhanced JSON schema validation
 2. Auto-approval by type (implemented, needs docs)

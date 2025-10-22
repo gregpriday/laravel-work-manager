@@ -151,7 +151,7 @@ Configure metrics driver:
 ```php
 'metrics' => [
     'enabled' => true,
-    'driver' => 'statsd',
+    'driver' => 'log', // 'log' or 'null' available
     'namespace' => 'work_manager',
 ],
 ```

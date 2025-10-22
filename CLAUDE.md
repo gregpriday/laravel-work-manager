@@ -234,7 +234,7 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 
 - `examples/DatabaseRecordInsertType.php` - Batch inserts with verification
 - `examples/UserDataSyncType.php` - External API sync with per-batch items
-- `examples/QUICK_START.md` - 5-minute getting started
+- `docs/getting-started/quickstart.md` - 5-minute getting started
 - `examples/LIFECYCLE.md` - Complete hook documentation
 
 ## Key Design Principles
@@ -249,8 +249,8 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 ## Documentation
 
 - `README.md` - Complete package documentation
-- `docs/ARCHITECTURE.md` - System design, data flows, integration points
-- `docs/MCP_SERVER.md` - MCP server setup and usage
+- `docs/concepts/architecture-overview.md` - System design, data flows, integration points
+- `docs/guides/mcp-server-integration.md` - MCP server setup and usage
 - `examples/LIFECYCLE.md` - All lifecycle hooks documented
-- `examples/QUICK_START.md` - Quick start guide
+- `docs/getting-started/quickstart.md` - Quick start guide
 - `LICENSE.md` - MIT license details

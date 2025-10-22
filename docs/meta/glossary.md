@@ -649,6 +649,6 @@ public function apply(WorkOrder $order): Diff
 ## See Also
 
 - [README.md](../../README.md) - Main documentation
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - System design
+- [ARCHITECTURE.md](../concepts/architecture-overview.md) - System design
 - [FAQ](../troubleshooting/faq.md) - Common questions
 - [Common Errors](../troubleshooting/common-errors.md) - Troubleshooting

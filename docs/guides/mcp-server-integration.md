@@ -46,7 +46,7 @@ Use this for:
 
 ## Available MCP Tools
 
-The server exposes 13 tools (see full documentation in [MCP_SERVER.md](../MCP_SERVER.md)):
+The server exposes 13 tools for complete work order management:
 
 ### Work Management
 - `work.propose` - Create new work orders
@@ -460,7 +460,7 @@ curl -X POST http://localhost:8090/mcp/message \
 
 ## See Also
 
-- [MCP_SERVER.md](../MCP_SERVER.md) - Complete MCP documentation
 - [HTTP API Guide](http-api.md) - REST API reference
 - [Deployment Guide](deployment-and-production.md) - Production setup
+- [Commands Reference](../reference/commands-reference.md) - work-manager:mcp command details
 - Main [README.md](../../README.md) - Package overview

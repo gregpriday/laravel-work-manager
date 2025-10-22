@@ -120,7 +120,7 @@ protected function validateAssembled(WorkItem $item, array $assembled): void
 
 ```bash
 # Part 1: Identity
-curl -X POST /api/agent/work/items/{item-id}/submit-part \
+curl -X POST /api/ai/work/items/{item-id}/submit-part \
   -H "X-Idempotency-Key: part-identity-1" \
   -d '{
     "part_key": "identity",
@@ -133,7 +133,7 @@ curl -X POST /api/agent/work/items/{item-id}/submit-part \
   }'
 
 # Part 2: Firmographics
-curl -X POST /api/agent/work/items/{item-id}/submit-part \
+curl -X POST /api/ai/work/items/{item-id}/submit-part \
   -H "X-Idempotency-Key: part-firmographics-1" \
   -d '{
     "part_key": "firmographics",
@@ -145,7 +145,7 @@ curl -X POST /api/agent/work/items/{item-id}/submit-part \
   }'
 
 # Part 3: Contacts
-curl -X POST /api/agent/work/items/{item-id}/submit-part \
+curl -X POST /api/ai/work/items/{item-id}/submit-part \
   -H "X-Idempotency-Key: part-contacts-1" \
   -d '{
     "part_key": "contacts",
@@ -161,7 +161,7 @@ curl -X POST /api/agent/work/items/{item-id}/submit-part \
 ### Finalize
 
 ```bash
-curl -X POST /api/agent/work/items/{item-id}/finalize \
+curl -X POST /api/ai/work/items/{item-id}/finalize \
   -H "X-Idempotency-Key: finalize-{item-id}-1" \
   -d '{"mode": "strict"}'
 ```

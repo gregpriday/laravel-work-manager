@@ -33,7 +33,7 @@ Work Manager uses **TTL-based leasing** to ensure single-agent processing of wor
 ### 1. Checkout (Acquire Lease)
 
 ```bash
-POST /api/agent/work/orders/{order}/checkout
+POST /api/ai/work/orders/{order}/checkout
 X-Agent-ID: my-agent-123
 ```
 
@@ -51,7 +51,7 @@ Response:
 ### 2. Heartbeat (Extend Lease)
 
 ```bash
-POST /api/agent/work/items/{item}/heartbeat
+POST /api/ai/work/items/{item}/heartbeat
 X-Agent-ID: my-agent-123
 ```
 
@@ -102,22 +102,89 @@ Lease automatically released when:
 
 **Configuration**:
 ```php
+// config/work-manager.php
 'lease' => [
     'backend' => 'redis',
-    'redis_connection' => 'default',
-    'redis_prefix' => 'work:lease:',
+    'redis_connection' => 'default', // Connection name from config/database.php
+    'redis_prefix' => 'work:lease:', // Key prefix for lease keys
+    'ttl_seconds' => 600,            // Lease duration
 ],
 ```
 
-Requires Redis in `config/database.php`:
+**Redis Connection Setup** in `config/database.php`:
 ```php
 'redis' => [
     'default' => [
+        'url' => env('REDIS_URL'),
         'host' => env('REDIS_HOST', '127.0.0.1'),
         'port' => env('REDIS_PORT', 6379),
+        'password' => env('REDIS_PASSWORD'),
+        'database' => env('REDIS_DB', 0),
+
+        // Important for lease operations
+        'read_timeout' => 60,
+        'retry_interval' => 100,
     ],
 ],
 ```
+
+**Environment Variables** (`.env`):
+```bash
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=null
+REDIS_DB=0
+
+# For Work Manager
+WORK_MANAGER_LEASE_BACKEND=redis
+```
+
+### Redis Production Considerations
+
+**Clock Synchronization**:
+- Ensure all application servers have synchronized clocks (use NTP)
+- Redis TTL is based on server time, not client time
+- Clock skew > 1 second can cause lease conflicts
+
+**TTL Resolution**:
+- Redis TTL is in seconds (not milliseconds)
+- `ttl_seconds` must be at least 60 (1 minute)
+- Recommended minimum: 300 seconds (5 minutes) for production
+
+**Connection Pooling**:
+- Use persistent connections when possible
+- Configure `max_connections` based on worker count
+- Monitor Redis connection count in production
+
+**Failover Strategy**:
+- Configure Redis Sentinel or Cluster for high availability
+- Application will fall back to database backend if Redis is unavailable (requires implementation)
+- Test failure scenarios in staging
+
+**Performance Tuning**:
+```php
+// config/database.php
+'redis' => [
+    'default' => [
+        'host' => env('REDIS_HOST'),
+        'port' => env('REDIS_PORT'),
+        'database' => 0,
+
+        // Performance tuning
+        'read_timeout' => 2,        // Fast timeout for failures
+        'timeout' => 2,              // Connection timeout
+        'persistent' => true,        // Reuse connections
+        'retry_interval' => 100,    // Retry delay in ms
+    ],
+],
+```
+
+**Monitoring**:
+Monitor these Redis metrics:
+- `work:lease:*` key count (current active leases)
+- Key expiration rate (lease reclamation)
+- Connection errors
+- Operation latency (SET/DEL commands)
 
 ---
 

@@ -1011,4 +1011,4 @@ X-Request-ID: req-abc-123
 - [State Management](state-management.md) - State machine deep dive
 - [Configuration Model](configuration-model.md) - Configuration and precedence
 - [Security and Permissions](security-and-permissions.md) - Authentication and authorization
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Full architecture document with future enhancements
+- [ARCHITECTURE.md](architecture-overview.md) - Full architecture document with future enhancements

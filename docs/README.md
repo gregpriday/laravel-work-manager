@@ -56,8 +56,8 @@ The documentation has been professionally restructured (January 2025) to provide
 docs/
 ├── index.md                    # Documentation homepage
 ├── README.md                   # This file
-├── DOCUMENTATION_INDEX.md      # Complete file index
-├── MIGRATION_GUIDE.md          # Migration from old structure
+├── documentation-index.md      # Complete file index
+├── migration-guide.md          # Migration from old structure
 │
 ├── getting-started/            # Essential guides (4 files)
 ├── concepts/                   # Core architecture (6 files)
@@ -162,15 +162,15 @@ All documentation follows these standards:
 - Added troubleshooting and FAQ sections
 - Fully cross-referenced all documentation
 
-See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for complete details.
+See [migration-guide.md](migration-guide.md) for complete details.
 
 ## Contributing to Documentation
 
 We welcome documentation contributions! Please see:
 
 - [Contributing Guidelines](meta/contributing.md) - How to contribute
-- [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) - Documentation structure
-- [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - Complete file list
+- [migration-guide.md](migration-guide.md) - Documentation structure
+- [documentation-index.md](documentation-index.md) - Complete file list
 
 When adding or updating documentation:
 1. Use kebab-case filenames

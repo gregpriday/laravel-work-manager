@@ -458,13 +458,13 @@ Metrics driver to use for collecting and reporting metrics.
 
 **Options:**
 - `'log'` - Logs metrics to Laravel log (default)
-- `'prometheus'` - Exports metrics in Prometheus format (requires additional setup)
 - `'statsd'` - Sends metrics to StatsD server (requires additional setup)
+- `'prometheus'` - Not yet available
 - `'null'` - Disables metrics collection
 
 **Example:**
 ```php
-'driver' => 'prometheus',
+'driver' => 'log',
 ```
 
 ### `metrics.namespace`

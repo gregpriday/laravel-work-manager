@@ -9,12 +9,12 @@ Where to get help, report issues, and connect with the Laravel Work Manager comm
 **Start with the docs:**
 
 - **[README.md](../../README.md)** - Complete package overview, installation, quick start
-- **[ARCHITECTURE.md](../ARCHITECTURE.md)** - System design and data flows
-- **[MCP_SERVER.md](../MCP_SERVER.md)** - MCP server setup and integration
-- **[USE_CASES.md](../USE_CASES.md)** - Real-world use cases and patterns
+- **[Architecture Overview](../concepts/architecture-overview.md)** - System design and data flows
+- **[MCP Server Integration](../guides/mcp-server-integration.md)** - MCP server setup and integration
+- **[Examples Overview](../examples/overview.md)** - Real-world use cases and patterns
 - **[Troubleshooting Guide](../troubleshooting/common-errors.md)** - Common errors and solutions
 - **[FAQ](../troubleshooting/faq.md)** - Frequently asked questions
-- **[Examples](../../examples/)** - Working code examples
+- **[Examples](../examples/overview.md)** - Working code examples
 
 ### Before Asking for Help
 
@@ -254,7 +254,7 @@ Follow for updates and Laravel Work Manager news:
 - `examples/CustomerResearchPartialType.php` - Partial submissions
 
 **Guides:**
-- `examples/QUICK_START.md` - 5-minute getting started
+- `docs/getting-started/quickstart.md` - 5-minute getting started
 - `examples/LIFECYCLE.md` - Complete lifecycle documentation
 
 ### Community Content

@@ -1134,4 +1134,4 @@ public function apply(WorkOrder $order): Diff
 - [Configuration Model](configuration-model.md) - Configuration options
 - [Security and Permissions](security-and-permissions.md) - Authorization
 - [Lifecycle Hooks Guide](../examples/LIFECYCLE.md) - Detailed hook documentation
-- [Quick Start Guide](../examples/QUICK_START.md) - Get started quickly
+- [Quick Start Guide](../getting-started/quickstart.md) - Get started quickly

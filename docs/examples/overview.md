@@ -545,7 +545,7 @@ php artisan tinker
 
 ## Additional Resources
 
-- [Architecture Documentation](../ARCHITECTURE.md) - System design and data flows
-- [MCP Server Guide](../MCP_SERVER.md) - AI agent integration
+- [Architecture Documentation](../concepts/architecture-overview.md) - System design and data flows
+- [MCP Server Guide](../guides/mcp-server-integration.md) - AI agent integration
 - [Lifecycle Guide](../../examples/LIFECYCLE.md) - Complete lifecycle hooks documentation
 - [API Reference](../reference/) - Complete API documentation

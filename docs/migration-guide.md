@@ -26,7 +26,7 @@ Laravel Work Manager's documentation has been completely rebuilt into a modern, 
 ```
 docs/
 ├── index.md                    # Main documentation homepage
-├── DOCUMENTATION_INDEX.md      # Complete documentation index
+├── documentation-index.md      # Complete documentation index
 │
 ├── getting-started/            # 4 files - Essential guides for new users
 │   ├── introduction.md

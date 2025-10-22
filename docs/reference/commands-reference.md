@@ -729,4 +729,4 @@ php artisan work-manager:maintain --check-stale
 - [API Surface](./api-surface.md) - Complete API reference
 - [Config Reference](./config-reference.md) - Configuration options
 - [Events Reference](./events-reference.md) - Event documentation
-- [MCP Server Documentation](../MCP_SERVER.md) - MCP integration guide
+- [MCP Server Documentation](../guides/mcp-server-integration.md) - MCP integration guide

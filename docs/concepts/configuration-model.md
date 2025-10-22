@@ -626,17 +626,12 @@ Records metrics to Laravel log.
 
 ---
 
-**Prometheus (Production, Recommended)**:
+**Prometheus (Not Available)**:
 ```php
-'driver' => 'prometheus',
+'driver' => 'prometheus',  // Not yet implemented
 ```
 
-Exposes metrics endpoint for Prometheus scraping.
-
-**Requirements**:
-```bash
-composer require prometheus/client_php
-```
+Use `'log'` or `'statsd'` instead.
 
 ---
 
@@ -980,4 +975,4 @@ $metrics->recordOrderCreated($order);
 - [Lifecycle and Flow](lifecycle-and-flow.md) - Work order lifecycle
 - [State Management](state-management.md) - State machine configuration
 - [Security and Permissions](security-and-permissions.md) - Auth and policies
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Scaling and performance considerations
+- [ARCHITECTURE.md](../concepts/architecture-overview.md) - Scaling and performance considerations

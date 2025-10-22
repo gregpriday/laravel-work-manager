@@ -445,8 +445,8 @@ Fixes #123
 
 - **README.md**: Main package documentation, installation, quick start
 - **CLAUDE.md**: AI assistant guidance (Claude Code)
-- **docs/ARCHITECTURE.md**: System design, data flows, integration
-- **docs/MCP_SERVER.md**: MCP server setup and usage
+- **docs/concepts/architecture-overview.md**: System design, data flows, integration
+- **docs/guides/mcp-server-integration.md**: MCP server setup and usage
 - **docs/USE_CASES.md**: Real-world use cases and patterns
 - **docs/troubleshooting/**: Troubleshooting guides
 - **docs/meta/**: Project meta information

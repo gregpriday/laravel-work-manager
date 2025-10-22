@@ -74,7 +74,7 @@ Designed for AI agents from the ground up:
 - **Commands**: Scheduled generation and maintenance tasks
 - **Middleware**: Enforce work-order-only mutations on legacy routes
 - **Policies**: Authorization via Laravel policies
-- **Metrics**: Pluggable metrics drivers (log, Prometheus, StatsD)
+- **Metrics**: Pluggable metrics drivers (log, null)
 
 ## Architecture at a Glance
 

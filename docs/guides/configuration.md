@@ -56,13 +56,13 @@ Control how the HTTP API is registered:
 ```php
 'routes' => [
     'enabled' => true,              // Auto-register routes on boot
-    'base_path' => 'agent/work',    // Base URL path
+    'base_path' => 'ai/work',       // Base URL path (default: 'ai/work')
     'middleware' => ['api'],        // Middleware stack
     'guard' => 'sanctum',           // Auth guard
 ],
 ```
 
-**Result**: Routes available at `/api/agent/work/*` (Laravel auto-prefixes with `/api`)
+**Result**: Routes available at `/api/ai/work/*` (Laravel auto-prefixes with `/api`)
 
 ### Manual Registration
 
@@ -327,13 +327,7 @@ Writes metrics to Laravel logs:
 
 ### Prometheus Driver
 
-```php
-'metrics' => [
-    'driver' => 'prometheus',
-    'namespace' => 'work_manager',
-    'prometheus_gateway' => env('PROMETHEUS_GATEWAY', 'http://localhost:9091'),
-],
-```
+*Not yet implemented. Use `'log'` or `'statsd'` instead.*
 
 ### StatsD Driver
 

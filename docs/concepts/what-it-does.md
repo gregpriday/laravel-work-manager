@@ -593,6 +593,6 @@ DB::transaction(function() use ($order) {
 - [State Management](state-management.md) - State machine deep dive
 - [Configuration Model](configuration-model.md) - Configuration and precedence
 - [Security and Permissions](security-and-permissions.md) - Authentication and authorization
-- [Quick Start Guide](../examples/QUICK_START.md) - Get started in 5 minutes
+- [Quick Start Guide](../getting-started/quickstart.md) - Get started in 5 minutes
 - [Lifecycle Hooks Guide](../examples/LIFECYCLE.md) - All available hooks
-- [MCP Server Documentation](../MCP_SERVER.md) - AI agent integration
+- [MCP Server Documentation](../guides/mcp-server-integration.md) - AI agent integration
