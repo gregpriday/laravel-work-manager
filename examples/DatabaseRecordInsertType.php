@@ -169,7 +169,7 @@ class DatabaseRecordInsertType extends AbstractOrderType
         ];
 
         // Mark records as "applied" (example: update a status field)
-        if ($model::where('id', $insertedIds[0])->value('id')) {
+        if (!empty($insertedIds) && $model::where('id', $insertedIds[0])->value('id')) {
             // Records exist, mark them as processed
             DB::table($table)
                 ->whereIn('id', $insertedIds)

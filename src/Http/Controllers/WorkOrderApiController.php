@@ -31,6 +31,8 @@ class WorkOrderApiController extends Controller
      */
     public function propose(Request $request): JsonResponse
     {
+        $this->authorize('propose', WorkOrder::class);
+
         $validated = $request->validate([
             'type' => 'required|string|max:120',
             'payload' => 'required|array',
@@ -40,7 +42,18 @@ class WorkOrderApiController extends Controller
 
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
-        if ($idempotencyKey && $this->idempotency->isRequired('propose')) {
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('propose') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
             $result = $this->idempotency->guard(
                 'propose:' . $validated['type'],
                 $idempotencyKey,
@@ -89,6 +102,8 @@ class WorkOrderApiController extends Controller
      */
     public function show(WorkOrder $order): JsonResponse
     {
+        $this->authorize('view', $order);
+
         $order->load(['items', 'events' => function ($query) {
             $query->latest()->limit(20);
         }]);
@@ -101,6 +116,8 @@ class WorkOrderApiController extends Controller
      */
     public function checkout(WorkOrder $order, Request $request): JsonResponse
     {
+        $this->authorize('checkout', $order);
+
         $agentId = $this->getAgentId($request);
 
         // Get next available item
@@ -165,6 +182,8 @@ class WorkOrderApiController extends Controller
      */
     public function submit(WorkItem $item, Request $request): JsonResponse
     {
+        $this->authorize('submit', $item->order);
+
         $validated = $request->validate([
             'result' => 'required|array',
             'evidence' => 'nullable|array',
@@ -174,7 +193,18 @@ class WorkOrderApiController extends Controller
         $agentId = $this->getAgentId($request);
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
-        if ($idempotencyKey && $this->idempotency->isRequired('submit')) {
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('submit') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
             $result = $this->idempotency->guard(
                 'submit:item:' . $item->id,
                 $idempotencyKey,
@@ -194,12 +224,25 @@ class WorkOrderApiController extends Controller
      */
     public function approve(WorkOrder $order, Request $request): JsonResponse
     {
+        $this->authorize('approve', $order);
+
         $actorType = ActorType::USER;
         $actorId = Auth::id();
 
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
-        if ($idempotencyKey && $this->idempotency->isRequired('approve')) {
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('approve') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
             $result = $this->idempotency->guard(
                 'approve:order:' . $order->id,
                 $idempotencyKey,
@@ -219,6 +262,8 @@ class WorkOrderApiController extends Controller
      */
     public function reject(WorkOrder $order, Request $request): JsonResponse
     {
+        $this->authorize('reject', $order);
+
         $validated = $request->validate([
             'errors' => 'required|array',
             'errors.*.code' => 'required|string',
@@ -229,6 +274,37 @@ class WorkOrderApiController extends Controller
 
         $actorType = ActorType::USER;
         $actorId = Auth::id();
+
+        $idempotencyKey = $request->header($this->idempotency->getHeaderName());
+
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('reject') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
+            $result = $this->idempotency->guard(
+                'reject:order:' . $order->id,
+                $idempotencyKey,
+                fn () => [
+                    'order' => $this->executor->reject(
+                        $order,
+                        $validated['errors'],
+                        $actorType,
+                        $actorId,
+                        $validated['allow_rework'] ?? false
+                    ),
+                ]
+            );
+
+            return response()->json($result);
+        }
 
         $order = $this->executor->reject(
             $order,

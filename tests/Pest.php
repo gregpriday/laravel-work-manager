@@ -1,5 +1,5 @@
 <?php
 
-use GregPriday\LaravelWorkManager\Tests\TestCase;
+use GregPriday\WorkManager\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

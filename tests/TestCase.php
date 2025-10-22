@@ -1,8 +1,8 @@
 <?php
 
-namespace GregPriday\LaravelWorkManager\Tests;
+namespace GregPriday\WorkManager\Tests;
 
-use GregPriday\LaravelWorkManager\WorkManagerServiceProvider;
+use GregPriday\WorkManager\WorkManagerServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra

@@ -148,34 +148,42 @@ class WorkExecutor
             // Execute the apply method
             $diff = $orderType->apply($order);
 
-            // Transition to applied
+            // Transition to applied (this records the event with diff)
             $this->stateMachine->transitionOrder(
                 $order,
                 OrderState::APPLIED,
                 ActorType::SYSTEM,
                 null,
                 null,
-                'Changes applied successfully'
-            );
-
-            // Record diff in event
-            $this->stateMachine->recordOrderEvent(
-                $order,
-                EventType::APPLIED,
-                ActorType::SYSTEM,
-                null,
-                null,
-                null,
+                'Changes applied successfully',
                 $diff->toArray()
             );
 
             event(new WorkOrderApplied($order, $diff));
 
-            // Mark all items as accepted/completed
-            $order->items()->where('state', ItemState::SUBMITTED->value)->update([
-                'state' => ItemState::ACCEPTED->value,
-                'accepted_at' => now(),
-            ]);
+            // Transition all submitted items to accepted, then to completed
+            $submittedItems = $order->items()->where('state', ItemState::SUBMITTED->value)->get();
+            foreach ($submittedItems as $item) {
+                // Transition to accepted
+                $this->stateMachine->transitionItem(
+                    $item,
+                    ItemState::ACCEPTED,
+                    ActorType::SYSTEM,
+                    null,
+                    null,
+                    'Work order applied'
+                );
+
+                // Then transition to completed
+                $this->stateMachine->transitionItem(
+                    $item->fresh(),
+                    ItemState::COMPLETED,
+                    ActorType::SYSTEM,
+                    null,
+                    null,
+                    'Work item completed'
+                );
+            }
 
             // Call afterApply hook if using AbstractOrderType
             if (method_exists($orderType, 'afterApply')) {
@@ -239,10 +247,30 @@ class WorkExecutor
     }
 
     /**
-     * Check if order should be auto-approved.
+     * Check if order should be transitioned to submitted state, and if ready for auto-approval.
      */
     protected function checkAutoApproval(WorkOrder $order): void
     {
+        $order = $order->fresh();
+
+        // Check if all items are submitted and order should transition to SUBMITTED state
+        if ($order->state === OrderState::QUEUED) {
+            $allItemsSubmitted = $order->items()
+                ->whereNotIn('state', [ItemState::SUBMITTED->value, ItemState::ACCEPTED->value, ItemState::COMPLETED->value])
+                ->doesntExist();
+
+            if ($allItemsSubmitted) {
+                $this->stateMachine->transitionOrder(
+                    $order,
+                    OrderState::SUBMITTED,
+                    ActorType::SYSTEM,
+                    null,
+                    null,
+                    'All items submitted'
+                );
+            }
+        }
+
         $orderType = $this->registry->get($order->type);
         $policy = $orderType->acceptancePolicy();
 

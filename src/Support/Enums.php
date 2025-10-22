@@ -75,8 +75,10 @@ enum EventType: string
     case PLANNED = 'planned';
     case CHECKED_OUT = 'checked_out';
     case LEASED = 'leased';
+    case IN_PROGRESS = 'in_progress';
     case HEARTBEAT = 'heartbeat';
     case SUBMITTED = 'submitted';
+    case ACCEPTED = 'accepted';
     case APPROVED = 'approved';
     case APPLIED = 'applied';
     case REJECTED = 'rejected';

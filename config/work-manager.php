@@ -71,7 +71,7 @@ return [
     */
     'state_machine' => [
         'order_transitions' => [
-            'queued' => ['checked_out', 'rejected', 'failed'],
+            'queued' => ['checked_out', 'submitted', 'rejected', 'failed'],
             'checked_out' => ['in_progress', 'queued', 'failed'],
             'in_progress' => ['submitted', 'failed', 'queued'],
             'submitted' => ['approved', 'rejected', 'failed'],

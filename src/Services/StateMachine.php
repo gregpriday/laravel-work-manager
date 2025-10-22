@@ -23,7 +23,8 @@ class StateMachine
         ?ActorType $actorType = null,
         ?string $actorId = null,
         ?array $payload = null,
-        ?string $message = null
+        ?string $message = null,
+        ?array $diff = null
     ): WorkOrder {
         if (!$order->state->canTransitionTo($newState)) {
             throw new IllegalStateTransitionException(
@@ -55,7 +56,8 @@ class StateMachine
                 $actorType,
                 $actorId,
                 $payload,
-                $message
+                $message,
+                $diff
             );
 
             return $order;
@@ -185,11 +187,11 @@ class StateMachine
             'queued' => EventType::PROPOSED,
             'checked_out' => EventType::CHECKED_OUT,
             'leased' => EventType::LEASED,
-            'in_progress' => EventType::PROPOSED,
+            'in_progress' => EventType::IN_PROGRESS,
             'submitted' => EventType::SUBMITTED,
             'approved' => EventType::APPROVED,
             'applied' => EventType::APPLIED,
-            'accepted' => EventType::SUBMITTED,
+            'accepted' => EventType::ACCEPTED,
             'rejected' => EventType::REJECTED,
             'completed' => EventType::COMPLETED,
             'failed' => EventType::FAILED,
