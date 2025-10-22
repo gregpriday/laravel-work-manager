@@ -274,10 +274,19 @@ class WorkExecutor
         $orderType = $this->registry->get($order->type);
         $policy = $orderType->acceptancePolicy();
 
-        if ($policy->readyForApproval($order)) {
-            // Auto-approve if all items are submitted and policy allows
-            // This can be configured per-type
-            // For now, we just check but don't auto-approve
+        // Check if order is ready and type allows auto-approval
+        if ($policy->readyForApproval($order) && $orderType->shouldAutoApprove()) {
+            try {
+                $this->approve($order, ActorType::SYSTEM, null);
+            } catch (\Exception $e) {
+                // Log auto-approval failure but don't throw
+                // Order will remain in submitted state for manual review
+                \Log::warning('Auto-approval failed for order', [
+                    'order_id' => $order->id,
+                    'type' => $order->type,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 }

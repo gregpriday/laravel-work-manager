@@ -25,10 +25,23 @@ return [
     | Configure the default lease duration and heartbeat interval for
     | work items. Agents must heartbeat before the lease expires.
     |
+    | Backend Options:
+    | - 'database': Uses work_items table with row-level locks (default)
+    | - 'redis': Uses Redis SET NX EX pattern for better performance
+    |
     */
     'lease' => [
+        'backend' => env('WORK_MANAGER_LEASE_BACKEND', 'database'),
         'ttl_seconds' => 600,        // default 10 minutes
         'heartbeat_every_seconds' => 120,
+
+        // Redis backend configuration (only used if backend = 'redis')
+        'redis_connection' => env('WORK_MANAGER_REDIS_CONNECTION', 'default'),
+        'redis_prefix' => 'work:lease:',
+
+        // Concurrency limits (optional)
+        'max_leases_per_agent' => env('WORK_MANAGER_MAX_LEASES_PER_AGENT', null),
+        'max_leases_per_type' => env('WORK_MANAGER_MAX_LEASES_PER_TYPE', null),
     ],
 
     /*

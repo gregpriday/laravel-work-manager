@@ -11,6 +11,7 @@ use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Services\WorkExecutor;
 use GregPriday\WorkManager\Support\ActorType;
 use GregPriday\WorkManager\Support\OrderState;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 
 class WorkOrderApiController extends Controller
 {
+    use AuthorizesRequests;
     public function __construct(
         protected WorkAllocator $allocator,
         protected WorkExecutor $executor,

@@ -13,12 +13,35 @@ use GregPriday\WorkManager\Models\WorkOrder;
 abstract class AbstractOrderType implements OrderType
 {
     /**
+     * Enable automatic approval when ready.
+     *
+     * When true, orders will be automatically approved and applied when
+     * readyForApproval() returns true. Use this for deterministic, safe
+     * operations that don't require human review.
+     *
+     * Default: false (requires manual approval)
+     *
+     * @var bool
+     */
+    protected bool $autoApprove = false;
+
+    /**
      * Get the acceptance policy for this order type.
      * Override this method to provide a custom policy.
      */
     public function acceptancePolicy(): AcceptancePolicy
     {
         return $this->getDefaultAcceptancePolicy();
+    }
+
+    /**
+     * Determine if this order type should auto-approve when ready.
+     *
+     * @return bool
+     */
+    public function shouldAutoApprove(): bool
+    {
+        return $this->autoApprove;
     }
 
     /**
@@ -79,7 +102,7 @@ abstract class AbstractOrderType implements OrderType
      *     'data.field' => 'required|string',
      * ];
      */
-    protected function submissionValidationRules(\GregPriday\WorkManager\Models\WorkItem $item): array
+    public function submissionValidationRules(\GregPriday\WorkManager\Models\WorkItem $item): array
     {
         return [];
     }
@@ -89,7 +112,7 @@ abstract class AbstractOrderType implements OrderType
      * Use this for custom business logic validation.
      * Throw ValidationException if validation fails.
      */
-    protected function afterValidateSubmission(\GregPriday\WorkManager\Models\WorkItem $item, array $result): void
+    public function afterValidateSubmission(\GregPriday\WorkManager\Models\WorkItem $item, array $result): void
     {
         // Override in subclass if needed
     }
@@ -99,7 +122,7 @@ abstract class AbstractOrderType implements OrderType
      * Called after checking all items are submitted.
      * Override for custom approval logic.
      */
-    protected function canApprove(WorkOrder $order): bool
+    public function canApprove(WorkOrder $order): bool
     {
         return true;
     }
@@ -108,7 +131,7 @@ abstract class AbstractOrderType implements OrderType
      * Hook called before apply() is executed.
      * Use this to perform pre-execution checks or setup.
      */
-    protected function beforeApply(WorkOrder $order): void
+    public function beforeApply(WorkOrder $order): void
     {
         // Override in subclass if needed
     }
@@ -117,7 +140,7 @@ abstract class AbstractOrderType implements OrderType
      * Hook called after apply() is executed successfully.
      * Use this for cleanup or post-processing.
      */
-    protected function afterApply(WorkOrder $order, Diff $diff): void
+    public function afterApply(WorkOrder $order, Diff $diff): void
     {
         // Override in subclass if needed
     }

@@ -34,7 +34,7 @@ class StateMachine
             );
         }
 
-        return DB::transaction(function () use ($order, $newState, $actorType, $actorId, $payload, $message) {
+        return DB::transaction(function () use ($order, $newState, $actorType, $actorId, $payload, $message, $diff) {
             $oldState = $order->state;
 
             $order->state = $newState;
