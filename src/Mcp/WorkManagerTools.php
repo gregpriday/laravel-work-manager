@@ -580,6 +580,216 @@ class WorkManagerTools
     }
 
     /**
+     * Submit a work item part (partial submission).
+     *
+     * Allows agents to incrementally submit parts of a work item result.
+     * Each part is validated independently before being stored.
+     */
+    #[McpTool(
+        name: 'work.submit_part',
+        description: 'Submit a partial result for a work item'
+    )]
+    public function submitPart(
+        #[Schema(description: 'The UUID of the work item')]
+        string $itemId,
+
+        #[Schema(description: 'The key identifying this part (e.g., "identity", "contacts")')]
+        string $partKey,
+
+        #[Schema(description: 'The partial result payload for this part')]
+        array $payload,
+
+        #[Schema(description: 'Optional sequence number for ordered chunks of the same key')]
+        ?int $seq = null,
+
+        #[Schema(description: 'Optional evidence/verification data')]
+        ?array $evidence = null,
+
+        #[Schema(description: 'Optional notes about this part')]
+        ?string $notes = null,
+
+        #[Schema(description: 'Agent identifier (must match the lease holder)')]
+        ?string $agentId = null,
+
+        #[Schema(description: 'Idempotency key to prevent duplicate submissions')]
+        ?string $idempotencyKey = null
+    ): array {
+        $agentId = $agentId ?? $this->getAgentId();
+
+        // Use idempotency if key provided
+        if ($idempotencyKey) {
+            $cached = $this->idempotency->check(
+                'submit-part:item:' . $itemId . ':' . $partKey . ':' . ($seq ?? 'null'),
+                $idempotencyKey
+            );
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
+        try {
+            $item = WorkItem::findOrFail($itemId);
+            $part = $this->executor->submitPart($item, $partKey, $seq, $payload, $agentId, $evidence, $notes);
+
+            $response = [
+                'success' => true,
+                'part' => [
+                    'id' => $part->id,
+                    'part_key' => $part->part_key,
+                    'seq' => $part->seq,
+                    'status' => $part->status->value,
+                ],
+                'item_parts_state' => $item->fresh()->parts_state,
+            ];
+
+            // Store in idempotency cache if key provided
+            if ($idempotencyKey) {
+                $this->idempotency->store(
+                    'submit-part:item:' . $itemId . ':' . $partKey . ':' . ($seq ?? 'null'),
+                    $idempotencyKey,
+                    $response
+                );
+            }
+
+            return $response;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return [
+                'success' => false,
+                'error' => 'Validation failed',
+                'code' => 'validation_failed',
+                'details' => $e->errors(),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'code' => 'submit_part_error',
+            ];
+        }
+    }
+
+    /**
+     * List work item parts.
+     *
+     * Returns all parts submitted for a work item, optionally filtered by part key.
+     */
+    #[McpTool(
+        name: 'work.list_parts',
+        description: 'List all parts submitted for a work item'
+    )]
+    public function listParts(
+        #[Schema(description: 'The UUID of the work item')]
+        string $itemId,
+
+        #[Schema(description: 'Optional filter by part key')]
+        ?string $partKey = null
+    ): array {
+        try {
+            $item = WorkItem::with('parts')->findOrFail($itemId);
+
+            $query = $item->parts();
+
+            if ($partKey) {
+                $query->where('part_key', $partKey);
+            }
+
+            $parts = $query->orderBy('part_key')
+                ->orderByDesc('seq')
+                ->orderByDesc('created_at')
+                ->get();
+
+            return [
+                'success' => true,
+                'count' => $parts->count(),
+                'parts' => $parts->map(fn ($part) => [
+                    'id' => $part->id,
+                    'part_key' => $part->part_key,
+                    'seq' => $part->seq,
+                    'status' => $part->status->value,
+                    'payload' => $part->payload,
+                    'evidence' => $part->evidence,
+                    'notes' => $part->notes,
+                    'errors' => $part->errors,
+                    'checksum' => $part->checksum,
+                    'submitted_by_agent_id' => $part->submitted_by_agent_id,
+                    'created_at' => $part->created_at->toIso8601String(),
+                ])->toArray(),
+                'parts_state' => $item->parts_state,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'code' => 'list_parts_error',
+            ];
+        }
+    }
+
+    /**
+     * Finalize a work item by assembling all parts.
+     *
+     * Validates that all required parts are present, assembles them into a complete result,
+     * and transitions the item to submitted state.
+     */
+    #[McpTool(
+        name: 'work.finalize',
+        description: 'Finalize a work item by assembling all submitted parts'
+    )]
+    public function finalize(
+        #[Schema(description: 'The UUID of the work item')]
+        string $itemId,
+
+        #[Schema(description: 'Validation mode', enum: ['strict', 'best_effort'])]
+        string $mode = 'strict',
+
+        #[Schema(description: 'Idempotency key to prevent duplicate finalizations')]
+        ?string $idempotencyKey = null
+    ): array {
+        // Use idempotency if key provided
+        if ($idempotencyKey) {
+            $cached = $this->idempotency->check('finalize:item:' . $itemId, $idempotencyKey);
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
+        try {
+            $item = WorkItem::findOrFail($itemId);
+            $item = $this->executor->finalizeItem($item, $mode);
+
+            $response = [
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'state' => $item->state->value,
+                    'assembled_result' => $item->assembled_result,
+                ],
+                'order_state' => $item->order->state->value,
+            ];
+
+            // Store in idempotency cache if key provided
+            if ($idempotencyKey) {
+                $this->idempotency->store('finalize:item:' . $itemId, $idempotencyKey, $response);
+            }
+
+            return $response;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return [
+                'success' => false,
+                'error' => 'Validation failed',
+                'code' => 'validation_failed',
+                'details' => $e->errors(),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'code' => 'finalize_error',
+            ];
+        }
+    }
+
+    /**
      * Get the current agent ID from the session or generate one.
      */
     protected function getAgentId(): string

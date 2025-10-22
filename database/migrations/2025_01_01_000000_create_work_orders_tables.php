@@ -75,6 +75,9 @@ return new class extends Migration
             // Data
             $table->json('input');
             $table->json('result')->nullable();
+            $table->json('assembled_result')->nullable();
+            $table->json('parts_required')->nullable();
+            $table->json('parts_state')->nullable();
             $table->json('error')->nullable();
 
             // Timestamps
@@ -165,10 +168,46 @@ return new class extends Migration
             // Unique constraint
             $table->unique(['scope', 'key_hash']);
         });
+
+        // Work Item Parts table (for partial submissions)
+        Schema::create('work_item_parts', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('work_item_id');
+            $table->string('part_key', 120)->index();
+            $table->unsignedInteger('seq')->nullable();
+            $table->enum('status', ['draft', 'validated', 'rejected'])->default('draft')->index();
+
+            // Data
+            $table->json('payload');
+            $table->json('evidence')->nullable();
+            $table->text('notes')->nullable();
+            $table->json('errors')->nullable();
+            $table->string('checksum')->nullable();
+
+            // Agent tracking
+            $table->string('submitted_by_agent_id');
+            $table->string('idempotency_key_hash')->nullable();
+
+            $table->timestamps();
+
+            // Foreign key
+            $table->foreign('work_item_id')
+                ->references('id')
+                ->on('work_items')
+                ->onDelete('cascade');
+
+            // Unique constraint for part_key and seq
+            $table->unique(['work_item_id', 'part_key', 'seq']);
+
+            // Additional indexes
+            $table->index(['work_item_id', 'status']);
+            $table->index(['work_item_id', 'part_key']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('work_item_parts');
         Schema::dropIfExists('work_idempotency_keys');
         Schema::dropIfExists('work_provenances');
         Schema::dropIfExists('work_events');

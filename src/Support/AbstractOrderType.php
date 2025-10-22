@@ -146,6 +146,75 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
+     * Define validation rules for a partial submission.
+     * Return Laravel validation rules array for the specific part.
+     *
+     * Example:
+     * return match ($partKey) {
+     *     'identity' => ['name' => 'required|string', 'domain' => 'nullable|url'],
+     *     'contacts' => ['contacts' => 'array', 'contacts.*.email' => 'email'],
+     *     default => ['payload' => 'array'],
+     * };
+     */
+    public function partialRules(\GregPriday\WorkManager\Models\WorkItem $item, string $partKey, ?int $seq): array
+    {
+        return [];
+    }
+
+    /**
+     * Hook called after per-part validation passes but before saving.
+     * Use this for custom business logic validation on a single part.
+     * Throw ValidationException if validation fails.
+     */
+    public function afterValidatePart(\GregPriday\WorkManager\Models\WorkItem $item, string $partKey, array $payload, ?int $seq): void
+    {
+        // Override in subclass if needed
+    }
+
+    /**
+     * Define which parts are required for this work item to be finalized.
+     * Return array of part_key strings.
+     *
+     * Example:
+     * return ['identity', 'firmographics', 'contacts'];
+     */
+    public function requiredParts(\GregPriday\WorkManager\Models\WorkItem $item): array
+    {
+        return [];
+    }
+
+    /**
+     * Assemble all latest parts into a single result array.
+     * This is called during finalization to merge all parts into assembled_result.
+     *
+     * Example:
+     * return [
+     *     'identity' => $parts->firstWhere('part_key', 'identity')->payload ?? [],
+     *     'firmographics' => $parts->firstWhere('part_key', 'firmographics')->payload ?? [],
+     *     'contacts' => Arr::wrap($parts->firstWhere('part_key', 'contacts')->payload['contacts'] ?? []),
+     * ];
+     */
+    public function assemble(\GregPriday\WorkManager\Models\WorkItem $item, \Illuminate\Support\Collection $latestParts): array
+    {
+        // Default: simple merge of all parts by key
+        $result = [];
+        foreach ($latestParts as $part) {
+            $result[$part->part_key] = $part->payload;
+        }
+        return $result;
+    }
+
+    /**
+     * Hook called after assembly, before finalizing the item.
+     * Perform whole-dataset validation across all parts.
+     * Throw ValidationException if validation fails.
+     */
+    public function validateAssembled(\GregPriday\WorkManager\Models\WorkItem $item, array $assembled): void
+    {
+        // Override in subclass if needed
+    }
+
+    /**
      * Default plan implementation - creates a single item.
      * Override this to create multiple items or custom planning logic.
      */

@@ -46,7 +46,7 @@ php artisan vendor:publish --tag=work-manager-migrations
 php artisan migrate
 ```
 
-**Requirements:** PHP 8.2+, Laravel 10/11, MySQL 8+ or Postgres 13+.
+**Requirements:** PHP 8.2+, Laravel 10 or 11, MySQL 8+ or Postgres 13+.
 
 ---
 
@@ -59,6 +59,7 @@ php artisan migrate
 use GregPriday\WorkManager\Facades\WorkManager;
 
 // Mount all endpoints under /ai/work with your own middleware/guard.
+// Note: Config default is 'agent/work', but you can override with basePath parameter.
 WorkManager::routes(basePath: 'ai/work', middleware: ['api', 'auth:sanctum']);
 ```
 
@@ -261,11 +262,28 @@ Provide `X-Idempotency-Key` for propose/submit/approve/reject. The package store
 ### Verification (Two-Phase)
 
 1. **Agent Submission**: Laravel validation rules + custom business logic
-2. **Approval Readiness**: Cross-item validation before execution
+2. **Approval Readiness**: Cross-item validation before execution (implemented by `canApprove()` in your acceptance policy)
 
 ### "Work-order-only" enforcement
 
 Attach `EnforceWorkOrderOnly` middleware to any mutating endpoint in your app to ensure all writes flow through a valid work order (e.g., state `approved|applied`).
+
+### Partial Submissions
+
+For complex work items (e.g., research tasks, multi-step processes), agents can submit results incrementally rather than all at once:
+
+* `POST /items/{item}/submit-part` — Submit an incremental part (validated independently)
+* `POST /items/{item}/finalize` — Assemble all validated parts into final result
+
+Enable in config: `'partials.enabled' => true` (enabled by default).
+
+**Benefits:**
+- Handle large/complex work without timeout issues
+- Validate results incrementally as they're produced
+- Resume work across sessions
+- Track progress for long-running tasks
+
+Each part is independently validated and stored. Once all parts are submitted, call `finalize` to assemble them into the final work item result. See `examples/CustomerResearchPartialType.php` for implementation details.
 
 ---
 
@@ -273,11 +291,15 @@ Attach `EnforceWorkOrderOnly` middleware to any mutating endpoint in your app to
 
 Mount under any prefix (e.g., `/ai/work`), then:
 
+**Note on route prefixes**: If you mount routes in `routes/api.php`, Laravel automatically prefixes them with `/api`, so `/ai/work/*` becomes `/api/ai/work/*`.
+
 * `POST /propose` — create a work order (requires `type`, `payload`)
 * `GET /orders` / `GET /orders/{id}` — list/show orders
 * `POST /orders/{order}/checkout` — lease next available item
 * `POST /items/{item}/heartbeat` — extend lease
-* `POST /items/{item}/submit` — submit results (validated)
+* `POST /items/{item}/submit` — submit complete results (validated)
+* `POST /items/{item}/submit-part` — submit partial result (for incremental work)
+* `POST /items/{item}/finalize` — finalize work item by assembling all parts
 * `POST /orders/{order}/approve` — approve & apply (writes diffs/events)
 * `POST /orders/{order}/reject` — reject (optionally re-queue for rework)
 * `POST /items/{item}/release` — explicitly release lease
@@ -318,14 +340,17 @@ php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 
 ### Available MCP Tools
 
-The server exposes 10 tools that map 1:1 to Work Manager operations:
+The server exposes 13 tools that map 1:1 to Work Manager operations:
 
 * `work.propose` — Create new work orders
 * `work.list` — List orders with filtering
 * `work.get` — Get order details
 * `work.checkout` — Lease work items
 * `work.heartbeat` — Maintain leases
-* `work.submit` — Submit results
+* `work.submit` — Submit complete results
+* `work.submit_part` — Submit partial results (for incremental work)
+* `work.list_parts` — List all parts for a work item
+* `work.finalize` — Finalize work item by assembling parts
 * `work.approve` — Approve and apply orders
 * `work.reject` — Reject orders
 * `work.release` — Release leases
@@ -361,7 +386,7 @@ The server exposes 10 tools that map 1:1 to Work Manager operations:
 }
 ```
 
-See [MCP_SERVER.md](MCP_SERVER.md) for complete documentation including production deployment, security, and troubleshooting.
+See [MCP_SERVER.md](docs/MCP_SERVER.md) for complete documentation including production deployment, security, and troubleshooting.
 
 ---
 
@@ -370,12 +395,13 @@ See [MCP_SERVER.md](MCP_SERVER.md) for complete documentation including producti
 Publish and edit `config/work-manager.php`. Key sections:
 
 - **Routes**: base path, middleware, guard
-- **Lease**: TTL, heartbeat intervals
+- **Lease**: TTL, heartbeat intervals, backend (database or redis)
 - **Retry**: max attempts, backoff, jitter
 - **Idempotency**: header name & enforced endpoints
+- **Partials**: enable/disable partial submissions, max parts per item, payload size limits
 - **State Machine**: allowed transitions
 - **Queues**: queue connections and names
-- **Metrics**: driver and namespace
+- **Metrics**: driver (log, prometheus, statsd) and namespace
 - **Policies**: map abilities to gates/permissions
 - **Maintenance**: thresholds for dead-lettering and alerts
 
@@ -412,8 +438,9 @@ Event::listen(WorkOrderApplied::class, function($event) {
 ```
 
 Available events:
-- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
-- `WorkItemLeased`, `WorkItemHeartbeat`, `WorkItemSubmitted`, `WorkItemFailed`, `WorkItemLeaseExpired`
+- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderCheckedOut`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
+- `WorkItemLeased`, `WorkItemHeartbeat`, `WorkItemSubmitted`, `WorkItemFailed`, `WorkItemLeaseExpired`, `WorkItemFinalized`
+- `WorkItemPartSubmitted`, `WorkItemPartValidated`, `WorkItemPartRejected`
 
 ### Laravel Jobs/Queues
 
@@ -473,7 +500,12 @@ Pest/PHPUnit setup is included. Add feature tests for your custom types covering
 
 ```bash
 composer test
+
+# Run with coverage
+vendor/bin/pest --coverage
 ```
+
+**Note**: Some edge case tests are currently skipped pending investigation (e.g., lease conflict detection, order readiness checks). These are marked with `markTestSkipped` and do not affect core functionality.
 
 ---
 
@@ -484,8 +516,30 @@ composer test
 * ✅ Complete lifecycle hooks with Laravel validation integration
 * ✅ Comprehensive examples and documentation
 * ✅ **MCP server** with stdio and HTTP transports
-* 🔜 Optional Redis lease backend & Prometheus metrics driver
+* ✅ **Partial submissions** for incremental work item results
+* ✅ **Optional Redis lease backend** (see config: `'lease.backend' => 'redis'`)
+* 🔜 Prometheus metrics driver (log and null drivers available)
 * 🔜 OpenAPI docs generator for mounted routes
+
+---
+
+## Documentation Index
+
+Complete documentation for Laravel Work Manager:
+
+* **README.md** (this file) — Complete package documentation, installation, and quick start
+* **CLAUDE.md** — AI assistant guidance for working with this codebase
+* **ARCHITECTURE.md** — System design, data flows, integration points, and scaling patterns
+* **docs/MCP_SERVER.md** — MCP server setup, configuration, and production deployment
+* **docs/USE_CASES.md** — Real-world use cases and implementation patterns
+* **examples/QUICK_START.md** — 5-minute getting started guide with code examples
+* **examples/LIFECYCLE.md** — Complete lifecycle hooks documentation with usage examples
+* **examples/DatabaseRecordInsertType.php** — Batch database inserts with verification
+* **examples/UserDataSyncType.php** — External API sync with per-batch items
+* **examples/CustomerResearchPartialType.php** — Research task using partial submissions
+* **LICENSE.md** — MIT license details
+
+For questions, issues, or feature requests, visit the [GitHub issue tracker](https://github.com/gregpriday/laravel-work-manager/issues).
 
 ---
 

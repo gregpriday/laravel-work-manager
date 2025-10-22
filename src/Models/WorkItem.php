@@ -23,6 +23,9 @@ class WorkItem extends Model
         'last_heartbeat_at',
         'input',
         'result',
+        'assembled_result',
+        'parts_required',
+        'parts_state',
         'error',
         'accepted_at',
     ];
@@ -36,6 +39,9 @@ class WorkItem extends Model
         'accepted_at' => 'datetime',
         'input' => 'array',
         'result' => 'array',
+        'assembled_result' => 'array',
+        'parts_required' => 'array',
+        'parts_state' => 'array',
         'error' => 'array',
     ];
 
@@ -61,6 +67,14 @@ class WorkItem extends Model
     public function provenances(): HasMany
     {
         return $this->hasMany(WorkProvenance::class, 'item_id');
+    }
+
+    /**
+     * Get the parts for this item.
+     */
+    public function parts(): HasMany
+    {
+        return $this->hasMany(WorkItemPart::class, 'work_item_id');
     }
 
     /**
@@ -141,5 +155,58 @@ class WorkItem extends Model
         return $query->where('leased_by_agent_id', $agentId)
             ->whereNotNull('lease_expires_at')
             ->where('lease_expires_at', '>', now());
+    }
+
+    /**
+     * Check if the item supports partial submissions.
+     */
+    public function supportsPartialSubmissions(): bool
+    {
+        return !empty($this->parts_required);
+    }
+
+    /**
+     * Get the latest part for a given key.
+     */
+    public function getLatestPart(string $partKey): ?WorkItemPart
+    {
+        return $this->parts()
+            ->where('part_key', $partKey)
+            ->orderBy('seq', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get all latest parts (one per key).
+     */
+    public function getLatestParts(): \Illuminate\Support\Collection
+    {
+        return $this->parts()
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('work_item_parts')
+                    ->where('work_item_id', $this->id)
+                    ->groupBy('part_key');
+            })
+            ->get();
+    }
+
+    /**
+     * Check if all required parts have been submitted.
+     */
+    public function hasAllRequiredParts(): bool
+    {
+        if (empty($this->parts_required)) {
+            return true;
+        }
+
+        $submittedKeys = $this->parts()
+            ->where('status', 'validated')
+            ->distinct()
+            ->pluck('part_key')
+            ->toArray();
+
+        return empty(array_diff($this->parts_required, $submittedKeys));
     }
 }

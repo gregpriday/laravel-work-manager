@@ -398,6 +398,183 @@ class WorkOrderApiController extends Controller
     }
 
     /**
+     * Submit a work item part.
+     */
+    public function submitPart(WorkItem $item, Request $request): JsonResponse
+    {
+        $this->authorize('submit', $item->order);
+
+        $validated = $request->validate([
+            'part_key' => 'required|string|max:120',
+            'seq' => 'nullable|integer|min:0',
+            'payload' => 'required|array',
+            'evidence' => 'nullable|array',
+            'notes' => 'nullable|string',
+        ]);
+
+        $agentId = $this->getAgentId($request);
+        $idempotencyKey = $request->header($this->idempotency->getHeaderName());
+
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('submit-part') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
+            $result = $this->idempotency->guard(
+                'submit-part:item:' . $item->id . ':' . $validated['part_key'] . ':' . ($validated['seq'] ?? 'null'),
+                $idempotencyKey,
+                fn () => $this->submitPartInternal($item, $validated, $agentId)
+            );
+
+            return response()->json($result, 202);
+        }
+
+        $result = $this->submitPartInternal($item, $validated, $agentId);
+
+        return response()->json($result, 202);
+    }
+
+    /**
+     * List work item parts.
+     */
+    public function listParts(WorkItem $item, Request $request): JsonResponse
+    {
+        $this->authorize('view', $item->order);
+
+        $query = $item->parts();
+
+        if ($request->has('part_key')) {
+            $query->where('part_key', $request->input('part_key'));
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $parts = $query->orderBy('part_key')
+            ->orderByDesc('seq')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'parts' => $parts->map(fn ($part) => [
+                'id' => $part->id,
+                'part_key' => $part->part_key,
+                'seq' => $part->seq,
+                'status' => $part->status->value,
+                'payload' => $part->payload,
+                'evidence' => $part->evidence,
+                'notes' => $part->notes,
+                'errors' => $part->errors,
+                'checksum' => $part->checksum,
+                'submitted_by_agent_id' => $part->submitted_by_agent_id,
+                'created_at' => $part->created_at->toIso8601String(),
+            ])->toArray(),
+            'parts_state' => $item->parts_state,
+        ]);
+    }
+
+    /**
+     * Finalize a work item.
+     */
+    public function finalize(WorkItem $item, Request $request): JsonResponse
+    {
+        $this->authorize('submit', $item->order);
+
+        $validated = $request->validate([
+            'mode' => 'nullable|string|in:strict,best_effort',
+        ]);
+
+        $mode = $validated['mode'] ?? 'strict';
+        $idempotencyKey = $request->header($this->idempotency->getHeaderName());
+
+        // Enforce idempotency key if required
+        if ($this->idempotency->isRequired('finalize') && !$idempotencyKey) {
+            return response()->json([
+                'error' => [
+                    'code' => 'idempotency_key_required',
+                    'message' => 'Idempotency key is required for this endpoint',
+                    'header' => $this->idempotency->getHeaderName(),
+                ],
+            ], 428);
+        }
+
+        if ($idempotencyKey) {
+            $result = $this->idempotency->guard(
+                'finalize:item:' . $item->id,
+                $idempotencyKey,
+                fn () => $this->finalizeInternal($item, $mode)
+            );
+
+            return response()->json($result, 202);
+        }
+
+        $result = $this->finalizeInternal($item, $mode);
+
+        return response()->json($result, 202);
+    }
+
+    /**
+     * Helper to submit a part.
+     */
+    protected function submitPartInternal(WorkItem $item, array $data, string $agentId): array
+    {
+        try {
+            $part = $this->executor->submitPart(
+                $item,
+                $data['part_key'],
+                $data['seq'] ?? null,
+                $data['payload'],
+                $agentId,
+                $data['evidence'] ?? null,
+                $data['notes'] ?? null
+            );
+
+            return [
+                'success' => true,
+                'part' => [
+                    'id' => $part->id,
+                    'part_key' => $part->part_key,
+                    'seq' => $part->seq,
+                    'status' => $part->status->value,
+                ],
+                'item_parts_state' => $item->fresh()->parts_state,
+            ];
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Helper to finalize an item.
+     */
+    protected function finalizeInternal(WorkItem $item, string $mode): array
+    {
+        try {
+            $item = $this->executor->finalizeItem($item, $mode);
+
+            return [
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'state' => $item->state->value,
+                    'assembled_result' => $item->assembled_result,
+                ],
+                'order_state' => $item->order->state->value,
+            ];
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * Get the agent ID from the request.
      */
     protected function getAgentId(Request $request): string

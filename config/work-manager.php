@@ -70,7 +70,23 @@ return [
     */
     'idempotency' => [
         'header' => 'X-Idempotency-Key',
-        'enforce_on' => ['submit', 'propose', 'approve', 'reject'],
+        'enforce_on' => ['submit', 'propose', 'approve', 'reject', 'submit-part', 'finalize'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Partial Submissions Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure partial submission settings including limits and validation.
+    | Partial submissions allow agents to incrementally build up work item
+    | results by submitting parts that are validated and assembled.
+    |
+    */
+    'partials' => [
+        'enabled' => true,
+        'max_parts_per_item' => env('WORK_MANAGER_MAX_PARTS_PER_ITEM', 100),
+        'max_payload_bytes' => env('WORK_MANAGER_MAX_PART_PAYLOAD_BYTES', 1048576), // 1MB default
     ],
 
     /*

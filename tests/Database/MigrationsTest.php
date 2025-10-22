@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schema;
 it('creates all required tables', function () {
     expect(Schema::hasTable('work_orders'))->toBeTrue();
     expect(Schema::hasTable('work_items'))->toBeTrue();
+    expect(Schema::hasTable('work_item_parts'))->toBeTrue();
     expect(Schema::hasTable('work_events'))->toBeTrue();
     expect(Schema::hasTable('work_provenances'))->toBeTrue();
     expect(Schema::hasTable('work_idempotency_keys'))->toBeTrue();
@@ -33,7 +34,7 @@ it('work_items table has all required columns', function () {
         'id', 'order_id', 'type', 'state',
         'attempts', 'max_attempts',
         'leased_by_agent_id', 'lease_expires_at', 'last_heartbeat_at',
-        'input', 'result', 'error',
+        'input', 'result', 'assembled_result', 'parts_required', 'parts_state', 'error',
         'accepted_at', 'created_at', 'updated_at',
     ];
 
@@ -76,6 +77,21 @@ it('work_idempotency_keys table has all required columns', function () {
 
     $required = [
         'id', 'scope', 'key_hash', 'response_snapshot', 'created_at',
+    ];
+
+    foreach ($required as $column) {
+        expect($columns)->toContain($column);
+    }
+});
+
+it('work_item_parts table has all required columns', function () {
+    $columns = Schema::getColumnListing('work_item_parts');
+
+    $required = [
+        'id', 'work_item_id', 'part_key', 'seq', 'status',
+        'payload', 'evidence', 'notes', 'errors', 'checksum',
+        'submitted_by_agent_id', 'idempotency_key_hash',
+        'created_at', 'updated_at',
     ];
 
     foreach ($required as $column) {

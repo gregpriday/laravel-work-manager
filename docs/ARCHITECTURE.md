@@ -339,9 +339,9 @@ protected function validatePayload(array $payload): void
 
 ### 2. Auto-Approval by Type
 
-**Current State**: `checkAutoApproval()` checks readiness but doesn't auto-approve.
+**Current State**: Auto-approval is implemented via `$autoApprove` property on your order type and `WorkExecutor::checkAutoApproval()`.
 
-**Recommendation**: Add per-type configuration for deterministic auto-approval.
+**Recommendation**: Enable auto-approval only for deterministic, well-validated types where manual review is unnecessary.
 
 **Benefits**:
 - Reduce manual approval overhead for safe operations

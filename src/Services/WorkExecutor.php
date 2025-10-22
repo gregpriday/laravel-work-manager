@@ -4,12 +4,17 @@ namespace GregPriday\WorkManager\Services;
 
 use GregPriday\WorkManager\Contracts\OrderType;
 use GregPriday\WorkManager\Events\WorkItemFailed;
+use GregPriday\WorkManager\Events\WorkItemFinalized;
+use GregPriday\WorkManager\Events\WorkItemPartRejected;
+use GregPriday\WorkManager\Events\WorkItemPartSubmitted;
+use GregPriday\WorkManager\Events\WorkItemPartValidated;
 use GregPriday\WorkManager\Events\WorkItemSubmitted;
 use GregPriday\WorkManager\Events\WorkOrderApplied;
 use GregPriday\WorkManager\Events\WorkOrderApproved;
 use GregPriday\WorkManager\Events\WorkOrderRejected;
 use GregPriday\WorkManager\Exceptions\LeaseExpiredException;
 use GregPriday\WorkManager\Models\WorkItem;
+use GregPriday\WorkManager\Models\WorkItemPart;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\Registry\OrderTypeRegistry;
 use GregPriday\WorkManager\Support\ActorType;
@@ -17,6 +22,7 @@ use GregPriday\WorkManager\Support\Diff;
 use GregPriday\WorkManager\Support\EventType;
 use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
+use GregPriday\WorkManager\Support\PartStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -244,6 +250,214 @@ class WorkExecutor
 
             return $item;
         });
+    }
+
+    /**
+     * Submit a work item part.
+     */
+    public function submitPart(
+        WorkItem $item,
+        string $partKey,
+        ?int $seq,
+        array $payload,
+        string $agentId,
+        ?array $evidence = null,
+        ?string $notes = null
+    ): WorkItemPart {
+        // Verify lease ownership
+        if ($item->leased_by_agent_id !== $agentId) {
+            throw new \Exception('Item is not leased by this agent');
+        }
+
+        if ($item->isLeaseExpired()) {
+            throw new LeaseExpiredException();
+        }
+
+        $orderType = $this->registry->get($item->type);
+
+        try {
+            return DB::transaction(function () use ($item, $partKey, $seq, $payload, $agentId, $evidence, $notes, $orderType) {
+                // Run validation rules
+                $rules = $orderType->partialRules($item, $partKey, $seq);
+
+                if (!empty($rules)) {
+                    $validator = validator($payload, $rules);
+
+                    if ($validator->fails()) {
+                        throw new ValidationException($validator);
+                    }
+                }
+
+                // Run custom validation hook
+                $orderType->afterValidatePart($item, $partKey, $payload, $seq);
+
+                // Create or update the part
+                $part = WorkItemPart::updateOrCreate(
+                    [
+                        'work_item_id' => $item->id,
+                        'part_key' => $partKey,
+                        'seq' => $seq,
+                    ],
+                    [
+                        'status' => PartStatus::VALIDATED,
+                        'payload' => $payload,
+                        'evidence' => $evidence,
+                        'notes' => $notes,
+                        'errors' => null,
+                        'checksum' => hash('sha256', json_encode($payload)),
+                        'submitted_by_agent_id' => $agentId,
+                    ]
+                );
+
+                // Update parts_state on the item
+                $this->updatePartsState($item);
+
+                // Record events
+                event(new WorkItemPartSubmitted($part));
+                event(new WorkItemPartValidated($part));
+
+                $this->stateMachine->recordItemEvent(
+                    $item,
+                    EventType::SUBMITTED,
+                    ActorType::AGENT,
+                    $agentId,
+                    [
+                        'part_key' => $partKey,
+                        'seq' => $seq,
+                        'evidence' => $evidence,
+                        'notes' => $notes,
+                    ]
+                );
+
+                return $part->fresh();
+            });
+        } catch (ValidationException $e) {
+            // Store validation errors in a rejected part (outside transaction)
+            $part = WorkItemPart::updateOrCreate(
+                [
+                    'work_item_id' => $item->id,
+                    'part_key' => $partKey,
+                    'seq' => $seq,
+                ],
+                [
+                    'status' => PartStatus::REJECTED,
+                    'payload' => $payload,
+                    'evidence' => $evidence,
+                    'notes' => $notes,
+                    'errors' => ['validation' => $e->errors()],
+                    'submitted_by_agent_id' => $agentId,
+                ]
+            );
+
+            // Update parts_state for rejected parts too
+            $this->updatePartsState($item->fresh());
+
+            event(new WorkItemPartRejected($part));
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Finalize a work item by assembling all parts.
+     */
+    public function finalizeItem(
+        WorkItem $item,
+        string $mode = 'strict'
+    ): WorkItem {
+        $orderType = $this->registry->get($item->type);
+
+        return DB::transaction(function () use ($item, $mode, $orderType) {
+            // Check required parts in strict mode
+            if ($mode === 'strict') {
+                $requiredParts = $orderType->requiredParts($item);
+                $submittedKeys = $item->parts()
+                    ->where('status', PartStatus::VALIDATED->value)
+                    ->distinct()
+                    ->pluck('part_key')
+                    ->toArray();
+
+                $missingParts = array_diff($requiredParts, $submittedKeys);
+
+                if (!empty($missingParts)) {
+                    throw ValidationException::withMessages([
+                        'parts' => ['Missing required parts: ' . implode(', ', $missingParts)],
+                    ]);
+                }
+            }
+
+            // Get latest validated parts per key
+            $latestParts = $item->parts()
+                ->where('status', PartStatus::VALIDATED->value)
+                ->whereIn('id', function ($query) use ($item) {
+                    $query->selectRaw('MAX(id)')
+                        ->from('work_item_parts')
+                        ->where('work_item_id', $item->id)
+                        ->where('status', PartStatus::VALIDATED->value)
+                        ->groupBy('part_key');
+                })
+                ->get();
+
+            // Assemble parts
+            $assembled = $orderType->assemble($item, $latestParts);
+
+            // Validate assembled result
+            $orderType->validateAssembled($item, $assembled);
+
+            // Store assembled result and set as item result
+            $item->assembled_result = $assembled;
+            $item->result = $assembled;
+            $item->state = ItemState::SUBMITTED;
+            $item->save();
+
+            // Record event
+            $this->stateMachine->recordItemEvent(
+                $item,
+                EventType::SUBMITTED,
+                ActorType::AGENT,
+                $item->leased_by_agent_id,
+                [
+                    'assembled' => true,
+                    'parts_count' => $latestParts->count(),
+                ]
+            );
+
+            event(new WorkItemFinalized($item));
+
+            // Check if order should transition to submitted
+            $this->checkAutoApproval($item->order);
+
+            return $item->fresh();
+        });
+    }
+
+    /**
+     * Update the parts_state materialized view on a work item.
+     */
+    protected function updatePartsState(WorkItem $item): void
+    {
+        $partsState = [];
+
+        $latestParts = $item->parts()
+            ->whereIn('id', function ($query) use ($item) {
+                $query->selectRaw('MAX(id)')
+                    ->from('work_item_parts')
+                    ->where('work_item_id', $item->id)
+                    ->groupBy('part_key');
+            })
+            ->get();
+
+        foreach ($latestParts as $part) {
+            $partsState[$part->part_key] = [
+                'status' => $part->status->value,
+                'seq' => $part->seq,
+                'checksum' => $part->checksum,
+                'submitted_at' => $part->created_at->toIso8601String(),
+            ];
+        }
+
+        $item->parts_state = $partsState;
+        $item->save();
     }
 
     /**

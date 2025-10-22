@@ -36,6 +36,7 @@ This is a Laravel package with the following namespace: `GregPriday\WorkManager`
 **Data Models** (`src/Models/`):
 - `WorkOrder` - High-level contract (type, payload, state, priority, meta)
 - `WorkItem` - Unit of work that agents lease and process (state, input, result, lease info)
+- `WorkItemPart` - Partial submission for incremental work item results
 - `WorkEvent` - Audit trail of all state changes and actions
 - `WorkProvenance` - Agent metadata and request fingerprints
 - `WorkIdempotencyKey` - Stored idempotency keys with cached responses
@@ -47,11 +48,11 @@ This is a Laravel package with the following namespace: `GregPriday\WorkManager`
 - `AcceptancePolicy` interface - Defines validateSubmission(), readyForApproval()
 
 **HTTP Layer** (`src/Http/`):
-- `Controllers/WorkOrderApiController` - All REST endpoints (propose, checkout, heartbeat, submit, approve, reject, release, logs)
+- `Controllers/WorkOrderApiController` - All REST endpoints (propose, checkout, heartbeat, submit, submit-part, finalize, approve, reject, release, logs)
 - `Middleware/EnforceWorkOrderOnly` - Prevents direct mutations outside work orders
 
 **MCP Integration** (`src/Mcp/`, `src/Console/McpCommand.php`):
-- `WorkManagerTools` - Exposes 10 MCP tools for AI agent integration
+- `WorkManagerTools` - Exposes 13 MCP tools for AI agent integration (including partial submission support)
 - Supports both STDIO (local AI IDEs) and HTTP (remote agents) transports
 - See `docs/MCP_SERVER.md` for complete MCP documentation
 
@@ -113,29 +114,57 @@ public function apply(WorkOrder $order): Diff
 
 - Leases are TTL-based (default 600s, configurable in `config/work-manager.php`)
 - Agents must heartbeat every 120s (configurable)
+- **Backend options**:
+  - `'database'` (default) — Row-level locks on work_items table
+  - `'redis'` — Redis SET NX EX pattern for better performance and scalability
 - Expired leases are automatically reclaimed by `work-manager:maintain` command
 - Single agent per work item (prevents concurrent processing)
 - Max retry attempts configurable per item
+- Optional concurrency limits per agent and per type
 
 ## Idempotency
 
 Always use `X-Idempotency-Key` header (configurable) for:
 - propose
 - submit
+- submit-part
+- finalize
 - approve
 - reject
 
 The system stores key hashes and caches responses. Retries with same key return cached response.
 
+## Partial Submissions
+
+For complex work items (e.g., research tasks, multi-step processes), agents can submit results incrementally:
+
+**Key endpoints**:
+- `POST /items/{item}/submit-part` — Submit an incremental part with validation
+- `GET /items/{item}/parts` — List all submitted parts
+- `POST /items/{item}/finalize` — Assemble all validated parts into final result
+
+**Configuration**: Enable/disable and set limits in `config/work-manager.php` under `'partials'`:
+- `'enabled' => true` — Enable partial submissions (default)
+- `'max_parts_per_item' => 100` — Maximum parts per work item
+- `'max_payload_bytes' => 1048576` — Maximum payload size per part (1MB default)
+
+**Models**: `WorkItemPart` stores each partial submission with status (`submitted`, `validated`, `rejected`), checksum, and agent metadata.
+
+**Events**: `WorkItemPartSubmitted`, `WorkItemPartValidated`, `WorkItemPartRejected`, `WorkItemFinalized`
+
+**Use cases**: Large research tasks, multi-step data collection, resumable work across sessions.
+
 ## Configuration
 
 Key configuration in `config/work-manager.php`:
 - `routes.*` - Route registration, middleware, auth guard
-- `lease.*` - TTL, heartbeat intervals
+- `lease.*` - TTL, heartbeat intervals, backend ('database' or 'redis'), concurrency limits
 - `retry.*` - Max attempts, backoff, jitter
-- `idempotency.*` - Header name, enforced endpoints
+- `idempotency.*` - Header name, enforced endpoints (includes 'submit-part' and 'finalize')
+- `partials.*` - Enable/disable, max parts per item, payload size limits
 - `state_machine.*` - Allowed transitions (rarely modified)
 - `queues.*` - Queue connections for background jobs
+- `metrics.*` - Driver ('log', 'prometheus', 'statsd'), namespace
 - `maintenance.*` - Dead-letter thresholds, alerts
 
 ## Scheduled Commands
@@ -165,15 +194,16 @@ php artisan work-manager:mcp --transport=stdio
 php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 ```
 
-**Available MCP tools**: work.propose, work.list, work.get, work.checkout, work.heartbeat, work.submit, work.approve, work.reject, work.release, work.logs
+**Available MCP tools**: work.propose, work.list, work.get, work.checkout, work.heartbeat, work.submit, work.submit_part, work.list_parts, work.finalize, work.approve, work.reject, work.release, work.logs
 
 See `docs/MCP_SERVER.md` for integration examples and production deployment.
 
 ## Events
 
 Subscribe to Laravel events for observability:
-- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
-- `WorkItemLeased`, `WorkItemHeartbeat`, `WorkItemSubmitted`, `WorkItemFailed`, `WorkItemLeaseExpired`
+- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderCheckedOut`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
+- `WorkItemLeased`, `WorkItemHeartbeat`, `WorkItemSubmitted`, `WorkItemFailed`, `WorkItemLeaseExpired`, `WorkItemFinalized`
+- `WorkItemPartSubmitted`, `WorkItemPartValidated`, `WorkItemPartRejected`
 
 All events carry relevant model instances and metadata.
 
@@ -181,6 +211,7 @@ All events carry relevant model instances and metadata.
 
 **Route registration** (in `routes/api.php` or service provider):
 ```php
+// Config default is 'agent/work', but override with basePath as needed
 WorkManager::routes(basePath: 'ai/work', middleware: ['api', 'auth:sanctum']);
 ```
 
@@ -222,3 +253,4 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 - `docs/MCP_SERVER.md` - MCP server setup and usage
 - `examples/LIFECYCLE.md` - All lifecycle hooks documented
 - `examples/QUICK_START.md` - Quick start guide
+- `LICENSE.md` - MIT license details

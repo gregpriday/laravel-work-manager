@@ -52,6 +52,18 @@ class RouteRegistrar
                 $router->post('/items/{item}/submit', [WorkOrderApiController::class, 'submit'])
                     ->name('work-manager.submit');
 
+                // Submit work item part (partial submission)
+                $router->post('/items/{item}/parts', [WorkOrderApiController::class, 'submitPart'])
+                    ->name('work-manager.submit-part');
+
+                // List work item parts
+                $router->get('/items/{item}/parts', [WorkOrderApiController::class, 'listParts'])
+                    ->name('work-manager.list-parts');
+
+                // Finalize work item (assemble parts)
+                $router->post('/items/{item}/finalize', [WorkOrderApiController::class, 'finalize'])
+                    ->name('work-manager.finalize');
+
                 // Release work item lease
                 $router->post('/items/{item}/release', [WorkOrderApiController::class, 'release'])
                     ->name('work-manager.release');

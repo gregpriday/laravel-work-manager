@@ -20,11 +20,7 @@ The MCP server is included with the package. No additional installation needed b
 composer require gregpriday/laravel-work-manager
 ```
 
-The MCP server automatically registers when the `php-mcp/laravel` package is installed:
-
-```bash
-composer require php-mcp/laravel
-```
+**Note**: This package already depends on `php-mcp/laravel`, so it's installed automatically. You typically don't need to require it separately unless you want to pin a specific MCP version in your application.
 
 ## Running the Server
 
