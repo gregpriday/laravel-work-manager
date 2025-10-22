@@ -58,9 +58,9 @@ php artisan migrate
 // routes/api.php
 use GregPriday\WorkManager\Facades\WorkManager;
 
-// Mount all endpoints under /ai/work with your own middleware/guard.
+// Mount all endpoints under /agent/work with your own middleware/guard.
 // Note: Config default is 'agent/work', but you can override with basePath parameter.
-WorkManager::routes(basePath: 'ai/work', middleware: ['api', 'auth:sanctum']);
+WorkManager::routes(basePath: 'agent/work', middleware: ['api', 'auth:sanctum']);
 ```
 
 Or wire them manually to pick endpoints individually.
@@ -181,18 +181,18 @@ $schedule->command('work-manager:maintain')->everyMinute();
 
 ```bash
 # Propose
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "Authorization: Bearer <token>" \
   -H "X-Idempotency-Key: propose-1" \
   -d '{"type":"user.data.sync","payload":{"source":"crm","user_ids":[1,2,3]}}'
 
 # Checkout → heartbeat → submit → approve
-curl -X POST /api/ai/work/orders/{order}/checkout -H "X-Agent-ID: agent-1"
-curl -X POST /api/ai/work/items/{item}/heartbeat -H "X-Agent-ID: agent-1"
-curl -X POST /api/ai/work/items/{item}/submit \
+curl -X POST /api/agent/work/orders/{order}/checkout -H "X-Agent-ID: agent-1"
+curl -X POST /api/agent/work/items/{item}/heartbeat -H "X-Agent-ID: agent-1"
+curl -X POST /api/agent/work/items/{item}/submit \
   -H "X-Idempotency-Key: submit-1" \
   -d '{"result":{"success":true,"synced_users":[...],"verified":true}}'
-curl -X POST /api/ai/work/orders/{order}/approve -H "X-Idempotency-Key: approve-1"
+curl -X POST /api/agent/work/orders/{order}/approve -H "X-Idempotency-Key: approve-1"
 ```
 
 ---
@@ -289,9 +289,9 @@ Each part is independently validated and stored. Once all parts are submitted, c
 
 ## HTTP API overview
 
-Mount under any prefix (e.g., `/ai/work`), then:
+Mount under any prefix (e.g., `/agent/work`), then:
 
-**Note on route prefixes**: If you mount routes in `routes/api.php`, Laravel automatically prefixes them with `/api`, so `/ai/work/*` becomes `/api/ai/work/*`.
+**Note on route prefixes**: If you mount routes in `routes/api.php`, Laravel automatically prefixes them with `/api`, so `/agent/work/*` becomes `/api/agent/work/*`.
 
 * `POST /propose` — create a work order (requires `type`, `payload`)
 * `GET /orders` / `GET /orders/{id}` — list/show orders

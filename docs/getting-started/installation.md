@@ -56,12 +56,12 @@ In `routes/api.php`, mount the routes under your preferred path:
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum']
 );
 ```
 
-**Note**: Routes registered in `routes/api.php` are automatically prefixed with `/api`, so the above will be accessible at `/api/ai/work/*`.
+**Note**: Routes registered in `routes/api.php` are automatically prefixed with `/api`, so the above will be accessible at `/api/agent/work/*`.
 
 ### Option B: Auto-Registration via Config
 
@@ -212,9 +212,9 @@ php artisan route:list | grep work
 ```
 
 You should see routes like:
-- `POST api/ai/work/propose`
-- `POST api/ai/work/orders/{order}/checkout`
-- `POST api/ai/work/items/{item}/submit`
+- `POST api/agent/work/propose`
+- `POST api/agent/work/orders/{order}/checkout`
+- `POST api/agent/work/items/{item}/submit`
 - etc.
 
 ## Redis Setup (If Using Redis Backend)
@@ -272,7 +272,7 @@ Redis::ping();  // Should return "+PONG"
 
 ### Route Not Found
 
-**Error**: 404 when accessing `/api/ai/work/propose`
+**Error**: 404 when accessing `/api/agent/work/propose`
 
 **Solution**:
 1. Check that routes are registered (see "Test Route Registration" above)

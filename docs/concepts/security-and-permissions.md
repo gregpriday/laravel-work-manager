@@ -84,7 +84,7 @@ $token = $user->createToken('agent-1', ['work:*'])->plainTextToken;
 
 **Agent Request**:
 ```http
-POST /api/ai/work/propose
+POST /api/agent/work/propose
 Authorization: Bearer {token}
 X-Agent-ID: agent-1
 Content-Type: application/json
@@ -328,7 +328,7 @@ Idempotency ensures that retrying a request multiple times has the same effect a
 
 **Agent Request**:
 ```http
-POST /api/ai/work/propose
+POST /api/agent/work/propose
 Authorization: Bearer {token}
 X-Idempotency-Key: prop-{uuid}
 Content-Type: application/json
@@ -485,7 +485,7 @@ $approvals = WorkEvent::where('event', EventType::APPROVED)
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum', 'throttle:60,1']
 );
 ```
@@ -599,7 +599,7 @@ server {
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
 
-    location /api/ai/work {
+    location /api/agent/work {
         proxy_pass http://laravel-app;
     }
 }

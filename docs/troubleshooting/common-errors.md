@@ -154,7 +154,7 @@ public function apply(WorkOrder $order): Diff
 
 **Prevention**: Ensure agents call `release` when done:
 ```bash
-curl -X POST /api/ai/work/items/{item}/release \
+curl -X POST /api/agent/work/items/{item}/release \
   -H "X-Agent-ID: my-agent"
 ```
 
@@ -167,7 +167,7 @@ curl -X POST /api/ai/work/items/{item}/release \
 - Ensure long-running agents send heartbeats:
 ```bash
 # Every 100 seconds (before 120s expires)
-curl -X POST /api/ai/work/items/{item}/heartbeat \
+curl -X POST /api/agent/work/items/{item}/heartbeat \
   -H "X-Agent-ID: my-agent"
 ```
 
@@ -184,7 +184,7 @@ curl -X POST /api/ai/work/items/{item}/heartbeat \
 **Cause**: Work item failed multiple times and hit retry limit.
 
 **Solution**:
-1. Check why it's failing: `curl /api/ai/work/items/{item}/logs`
+1. Check why it's failing: `curl /api/agent/work/items/{item}/logs`
 2. Increase max attempts in your order type:
 ```php
 public function plan(WorkOrder $order): array
@@ -312,7 +312,7 @@ queued → leased → in_progress → submitted → accepted → completed
 
 **Solution**: Check current state before operations:
 ```bash
-curl /api/ai/work/orders/{order}
+curl /api/agent/work/orders/{order}
 ```
 
 ### Error: "Cannot approve order: not all items are submitted"
@@ -322,7 +322,7 @@ curl /api/ai/work/orders/{order}
 **Solution**: Ensure all work items are submitted before approving:
 ```bash
 # Check order status
-curl /api/ai/work/orders/{order}
+curl /api/agent/work/orders/{order}
 
 # Look for items still in 'leased' or 'in_progress'
 ```
@@ -333,7 +333,7 @@ curl /api/ai/work/orders/{order}
 
 **Solution**: Completed orders are final. Create a new order instead:
 ```bash
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "Content-Type: application/json" \
   -d '{
     "type": "your.type",
@@ -374,7 +374,7 @@ curl -X POST /api/ai/work/propose \
 - `reject`
 
 ```bash
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "X-Idempotency-Key: unique-key-here" \
   ...
 ```
@@ -450,7 +450,7 @@ Gate::define('work.propose', function ($user) {
 POST /api/users  # Blocked
 
 # Do:
-POST /api/ai/work/propose
+POST /api/agent/work/propose
 {
   "type": "user.create",
   "payload": {...}
@@ -626,7 +626,7 @@ protected function beforeApply(WorkOrder $order): void
 
 View full history of an order:
 ```bash
-curl /api/ai/work/items/{item}/logs?limit=100
+curl /api/agent/work/items/{item}/logs?limit=100
 ```
 
 ### Run Maintenance

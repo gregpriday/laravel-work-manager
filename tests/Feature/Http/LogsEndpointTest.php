@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
     $this->actingAs(new TestUser());
@@ -37,7 +37,7 @@ it('returns events for item and its order', function () {
     // Submit creates an event
     $executor->submit($item->fresh(), ['ok' => true, 'verified' => true, 'echoed_message' => 'log-test'], 'agent-1');
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/logs");
+    $response = $this->getJson("/agent/work/items/{$item->id}/logs");
 
     $response->assertOk()
         ->assertJsonStructure(['events']);
@@ -87,7 +87,7 @@ it('orders events by created_at desc (newest first)', function () {
         'created_at' => now()->subMinute(),
     ]);
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/logs");
+    $response = $this->getJson("/agent/work/items/{$item->id}/logs");
 
     $response->assertOk();
     $events = $response->json('events');
@@ -124,7 +124,7 @@ it('limits results to 100 events', function () {
         ]);
     }
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/logs");
+    $response = $this->getJson("/agent/work/items/{$item->id}/logs");
 
     $response->assertOk();
     $events = $response->json('events');
@@ -148,7 +148,7 @@ it('includes order-level events with null item_id', function () {
         'event' => EventType::APPROVED,
     ]);
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/logs");
+    $response = $this->getJson("/agent/work/items/{$item->id}/logs");
 
     $response->assertOk();
     $events = $response->json('events');
@@ -168,7 +168,7 @@ it('returns events with full structure', function () {
 
     $item = $order->items()->first();
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/logs");
+    $response = $this->getJson("/agent/work/items/{$item->id}/logs");
 
     $response->assertOk();
     $events = $response->json('events');

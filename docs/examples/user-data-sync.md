@@ -275,7 +275,7 @@ public function apply(WorkOrder $order): Diff
 ### 1. Propose Sync for 150 Users
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: sync-$(date +%s)" \
@@ -318,7 +318,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 ### 2. Checkout First Batch
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/checkout \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: sync-agent-01"
 ```
@@ -383,7 +383,7 @@ $result = [
 ### 4. Submit First Batch
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-1-uuid/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-1-uuid/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-1-$(date +%s)" \
@@ -424,7 +424,7 @@ Other agents (or the same agent) would checkout and process the remaining batche
 ### 6. Approve After All Batches Complete
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

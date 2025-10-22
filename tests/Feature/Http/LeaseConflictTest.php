@@ -8,7 +8,7 @@ use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
     $this->actingAs(new TestUser());
@@ -25,7 +25,7 @@ it('returns 409 lease_conflict when item already leased', function () {
     $item = $order->items()->first();
 
     // First agent checks out successfully
-    $response1 = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response1 = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -37,7 +37,7 @@ it('returns 409 lease_conflict when item already leased', function () {
 
     // Second agent tries to checkout the same item (simulating concurrent request)
     // Since there's only one item and it's already leased, should get no_items_available
-    $response2 = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response2 = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-2',
     ]);
 
@@ -52,7 +52,7 @@ it('returns 409 when heartbeat from wrong agent', function () {
     $allocator->plan($order);
 
     // Agent 1 checks out
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -60,7 +60,7 @@ it('returns 409 when heartbeat from wrong agent', function () {
     $itemId = $response->json('item.id');
 
     // Agent 2 tries to heartbeat
-    $heartbeatResponse = $this->postJson("/ai/work/items/{$itemId}/heartbeat", [], [
+    $heartbeatResponse = $this->postJson("/agent/work/items/{$itemId}/heartbeat", [], [
         'X-Agent-ID' => 'agent-2',
     ]);
 
@@ -79,7 +79,7 @@ it('returns 409 when release from wrong agent', function () {
     $allocator->plan($order);
 
     // Agent 1 checks out
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -87,7 +87,7 @@ it('returns 409 when release from wrong agent', function () {
     $itemId = $response->json('item.id');
 
     // Agent 2 tries to release
-    $releaseResponse = $this->postJson("/ai/work/items/{$itemId}/release", [], [
+    $releaseResponse = $this->postJson("/agent/work/items/{$itemId}/release", [], [
         'X-Agent-ID' => 'agent-2',
     ]);
 
@@ -106,7 +106,7 @@ it('allows same agent to heartbeat successfully', function () {
     $allocator->plan($order);
 
     // Agent 1 checks out
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -114,7 +114,7 @@ it('allows same agent to heartbeat successfully', function () {
     $itemId = $response->json('item.id');
 
     // Same agent heartbeats successfully
-    $heartbeatResponse = $this->postJson("/ai/work/items/{$itemId}/heartbeat", [], [
+    $heartbeatResponse = $this->postJson("/agent/work/items/{$itemId}/heartbeat", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -131,7 +131,7 @@ it('returns no_items_available when order has no planned items', function () {
 
     // Don't plan the order - no items available
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -160,7 +160,7 @@ it('returns no_items_available when all items already leased', function () {
     }
 
     // Try to checkout
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-2',
     ]);
 

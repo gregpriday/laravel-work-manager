@@ -56,13 +56,13 @@ Control how the HTTP API is registered:
 ```php
 'routes' => [
     'enabled' => true,              // Auto-register routes on boot
-    'base_path' => 'ai/work',       // Base URL path (default: 'ai/work')
+    'base_path' => 'agent/work',       // Base URL path (default: 'agent/work')
     'middleware' => ['api'],        // Middleware stack
     'guard' => 'sanctum',           // Auth guard
 ],
 ```
 
-**Result**: Routes available at `/api/ai/work/*` (Laravel auto-prefixes with `/api`)
+**Result**: Routes available at `/api/agent/work/*` (Laravel auto-prefixes with `/api`)
 
 ### Manual Registration
 
@@ -80,7 +80,7 @@ Then in `routes/api.php`:
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum', 'throttle:60,1']
 );
 ```

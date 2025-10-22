@@ -85,7 +85,7 @@ Control how Work Manager API endpoints are registered and protected.
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum', 'throttle:60,1']
 );
 ```

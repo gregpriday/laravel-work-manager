@@ -8,7 +8,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     $this->actingAs(new TestUser());
 });
 
@@ -25,7 +25,7 @@ it('requires idempotency key for submit-part when enforced', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -54,7 +54,7 @@ it('requires idempotency key for finalize when enforced', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -82,7 +82,7 @@ it('allows submit-part with idempotency key', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -118,7 +118,7 @@ it('allows finalize with idempotency key', function () {
     $leaseService->acquire($item->id, 'agent-1');
         $item = $item->fresh();
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -148,7 +148,7 @@ it('allows submit-part without idempotency key when not enforced', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -183,7 +183,7 @@ it('allows finalize without idempotency key when not enforced', function () {
     $leaseService->acquire($item->id, 'agent-1');
         $item = $item->fresh();
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',

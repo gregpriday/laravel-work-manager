@@ -202,7 +202,7 @@ public function apply(WorkOrder $order): Diff
 ### 1. Propose Fact-Check Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: factcheck-$(date +%s)" \
@@ -240,7 +240,7 @@ Agent researches the claim using web search, official sources, databases, etc.
 ### 3. Submit Verification Result
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-$(date +%s)" \
@@ -276,7 +276,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit \
 ### 4. Submit False Claim with Correction
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid-2/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid-2/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-2-$(date +%s)" \
@@ -312,7 +312,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid-2/submit \
 ### 5. Attempt Approval (Blocked)
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

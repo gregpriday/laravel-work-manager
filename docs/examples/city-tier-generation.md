@@ -210,7 +210,7 @@ public function apply(WorkOrder $order): Diff
 ### 1. Propose City Rating Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: city-rating-$(date +%s)" \
@@ -239,7 +239,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 Agent researches safety data for Austin:
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-safety-uuid/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-safety-uuid/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-safety-$(date +%s)" \
@@ -294,7 +294,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-safety-uuid/submit \
 ### 3. Submit Cost of Living Dimension
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-col-uuid/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-col-uuid/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-col-$(date +%s)" \
@@ -344,7 +344,7 @@ Job market, housing, and internet quality dimensions are submitted by other agen
 ### 5. Approve and Calculate Overall Tier
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

@@ -168,14 +168,14 @@ In `routes/api.php`:
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum']
 );
 ```
 
 > **📝 Base Path Configuration**
 >
-> This mounts routes at `/api/ai/work/*` (Laravel adds the `/api` prefix automatically).
+> This mounts routes at `/api/agent/work/*` (Laravel adds the `/api` prefix automatically).
 >
 > To use a different base path, change the `basePath` parameter:
 > ```php
@@ -188,7 +188,7 @@ WorkManager::routes(
 ### 4.1 Propose a Work Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: test-propose-1" \
@@ -222,7 +222,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 ### 4.2 Checkout a Work Item
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/9c8f3d2e-1234-5678-90ab-cdef12345678/checkout \
+curl -X POST http://your-app.test/api/agent/work/orders/9c8f3d2e-1234-5678-90ab-cdef12345678/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: test-agent-1"
 ```
@@ -248,7 +248,7 @@ curl -X POST http://your-app.test/api/ai/work/orders/9c8f3d2e-1234-5678-90ab-cde
 ### 4.3 Submit Results
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid-here/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid-here/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: test-submit-1" \
@@ -281,7 +281,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid-here/submit \
 ### 4.4 Approve and Apply
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/9c8f3d2e-1234-5678-90ab-cdef12345678/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/9c8f3d2e-1234-5678-90ab-cdef12345678/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: test-approve-1"
 ```
@@ -351,7 +351,7 @@ queued → leased → in_progress → submitted → accepted → completed
 Every action was recorded. View the event log:
 
 ```bash
-curl http://your-app.test/api/ai/work/items/item-uuid-here/logs \
+curl http://your-app.test/api/agent/work/items/item-uuid-here/logs \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 

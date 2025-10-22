@@ -44,10 +44,10 @@ Base path prefix for all package routes. Only used if `routes.enabled` is `true`
 
 **Example:**
 ```php
-'base_path' => 'ai/work',
+'base_path' => 'agent/work',
 ```
 
-**Result:** Routes will be available at `/ai/work/propose`, `/ai/work/orders`, etc.
+**Result:** Routes will be available at `/agent/work/propose`, `/agent/work/orders`, etc.
 
 ### `routes.middleware`
 

@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     $this->actingAs(new TestUser());
 });
 
@@ -33,7 +33,7 @@ it('returns cached response when finalize called with same idempotency key', fun
     $idempotencyKey = 'test-finalize-' . uniqid();
 
     // First finalize
-    $response1 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response1 = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
@@ -52,7 +52,7 @@ it('returns cached response when finalize called with same idempotency key', fun
     $firstItemState = $response1->json('item.state');
 
     // Second finalize with same key should return cached response
-    $response2 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response2 = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
@@ -79,7 +79,7 @@ it('returns cached response for submit-part with same idempotency key', function
     $idempotencyKey = 'test-submit-part-' . uniqid();
 
     // First submit
-    $response1 = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response1 = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -99,7 +99,7 @@ it('returns cached response for submit-part with same idempotency key', function
     $firstPartId = $response1->json('part.id');
 
     // Second submit with same key should return cached response
-    $response2 = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response2 = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'Jane Smith'], // Different payload, should be ignored
     ], [
@@ -132,7 +132,7 @@ it('creates new finalize result with different idempotency key', function () {
         $item1 = $item1->fresh();
 
     // First finalize with first key
-    $response1 = $this->postJson("/ai/work/items/{$item1->id}/finalize", [
+    $response1 = $this->postJson("/agent/work/items/{$item1->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
@@ -154,7 +154,7 @@ it('creates new finalize result with different idempotency key', function () {
         $item2 = $item2->fresh();
 
     // Finalize with different key should create new result
-    $response2 = $this->postJson("/ai/work/items/{$item2->id}/finalize", [
+    $response2 = $this->postJson("/agent/work/items/{$item2->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
@@ -184,7 +184,7 @@ it('handles concurrent finalize requests with different idempotency keys', funct
         $item = $item->fresh();
 
     // Two requests with different keys
-    $response1 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response1 = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,

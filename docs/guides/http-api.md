@@ -15,16 +15,16 @@ The Work Manager HTTP API provides RESTful endpoints for:
 
 **Base Path**: Configured in `config/work-manager.php` or via `WorkManager::routes()`
 
-**Default**: `/api/ai/work/*` (Laravel auto-prefixes with `/api`)
+**Default**: `/api/agent/work/*` (Laravel auto-prefixes with `/api`)
 
 > **💡 Customizing the Base Path**
 >
-> The examples in this guide use `/api/ai/work` as the base path. To customize this for your application, use:
+> The examples in this guide use `/api/agent/work` as the base path. To customize this for your application, use:
 >
 > ```php
 > // In routes/api.php or AppServiceProvider
 > WorkManager::routes(basePath: 'agent/work', middleware: ['api', 'auth:sanctum']);
-> // Routes will be at /api/ai/work/*
+> // Routes will be at /api/agent/work/*
 > ```
 >
 > Or set in `config/work-manager.php`:
@@ -97,7 +97,7 @@ curl -X POST https://yourapp.com/api/tokens/create \
 # Response: {"token": "1|abc123..."}
 
 # 2. Use token in all requests
-curl -X GET https://yourapp.com/api/ai/work/orders \
+curl -X GET https://yourapp.com/api/agent/work/orders \
   -H "Authorization: Bearer 1|abc123..."
 ```
 
@@ -186,19 +186,19 @@ Keys are scoped by:
 **Example**:
 ```bash
 # First request - processed
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "X-Idempotency-Key: propose-123" \
   -d '{"type":"user.sync","payload":{...}}'
 # Response: 201 Created
 
 # Retry with same key and payload - cached response returned
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "X-Idempotency-Key: propose-123" \
   -d '{"type":"user.sync","payload":{...}}'
 # Response: 201 Created (from cache)
 
 # Same key, different payload - conflict
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "X-Idempotency-Key: propose-123" \
   -d '{"type":"different.type","payload":{...}}'
 # Response: 409 Conflict (idempotency_mismatch)
@@ -282,7 +282,7 @@ Create a new work order.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/propose \
+curl -X POST /api/agent/work/propose \
   -H "Authorization: Bearer {token}" \
   -H "X-Idempotency-Key: propose-123" \
   -H "Content-Type: application/json" \
@@ -327,7 +327,7 @@ List work orders with optional filtering.
 
 **Request**:
 ```bash
-curl -X GET "/api/ai/work/orders?state=queued&type=user.data.sync&limit=20" \
+curl -X GET "/api/agent/work/orders?state=queued&type=user.data.sync&limit=20" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -368,7 +368,7 @@ Get detailed information about a specific order.
 
 **Request**:
 ```bash
-curl -X GET /api/ai/work/orders/9a7c8f2e-5b4d-4e3a-8c9d-1a2b3c4d5e6f \
+curl -X GET /api/agent/work/orders/9a7c8f2e-5b4d-4e3a-8c9d-1a2b3c4d5e6f \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -394,7 +394,7 @@ Lease the next available work item from an order.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/orders/9a7c8f2e.../checkout \
+curl -X POST /api/agent/work/orders/9a7c8f2e.../checkout \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: my-agent-123"
 ```
@@ -433,7 +433,7 @@ Extend lease on a work item.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/items/item-uuid/heartbeat \
+curl -X POST /api/agent/work/items/item-uuid/heartbeat \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: my-agent-123"
 ```
@@ -455,7 +455,7 @@ Submit complete work item results.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/items/item-uuid/submit \
+curl -X POST /api/agent/work/items/item-uuid/submit \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: my-agent-123" \
   -H "X-Idempotency-Key: submit-item-uuid-1" \
@@ -506,7 +506,7 @@ Submit partial result (for incremental work).
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/items/item-uuid/submit-part \
+curl -X POST /api/agent/work/items/item-uuid/submit-part \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: my-agent-123" \
   -H "X-Idempotency-Key: submit-part-identity-1" \
@@ -550,7 +550,7 @@ List all parts for a work item.
 
 **Request**:
 ```bash
-curl -X GET "/api/ai/work/items/item-uuid/parts?part_key=identity" \
+curl -X GET "/api/agent/work/items/item-uuid/parts?part_key=identity" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -582,7 +582,7 @@ Finalize work item by assembling all parts.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/items/item-uuid/finalize \
+curl -X POST /api/agent/work/items/item-uuid/finalize \
   -H "Authorization: Bearer {token}" \
   -H "X-Idempotency-Key: finalize-item-uuid-1" \
   -H "Content-Type: application/json" \
@@ -618,7 +618,7 @@ Approve and apply a work order.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/orders/order-uuid/approve \
+curl -X POST /api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer {token}" \
   -H "X-Idempotency-Key: approve-order-uuid-1"
 ```
@@ -646,7 +646,7 @@ Reject a work order with errors.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/orders/order-uuid/reject \
+curl -X POST /api/agent/work/orders/order-uuid/reject \
   -H "Authorization: Bearer {token}" \
   -H "X-Idempotency-Key: reject-order-uuid-1" \
   -H "Content-Type: application/json" \
@@ -680,7 +680,7 @@ Release lease on a work item.
 
 **Request**:
 ```bash
-curl -X POST /api/ai/work/items/item-uuid/release \
+curl -X POST /api/agent/work/items/item-uuid/release \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: my-agent-123"
 ```
@@ -703,7 +703,7 @@ Get event logs for a work item.
 
 **Request**:
 ```bash
-curl -X GET /api/ai/work/items/item-uuid/logs \
+curl -X GET /api/agent/work/items/item-uuid/logs \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -836,7 +836,7 @@ def checkout_with_retry(order_id, agent_id, max_attempts=5):
     for attempt in range(max_attempts):
         try:
             response = http_client.post(
-                f"/api/ai/work/orders/{order_id}/checkout",
+                f"/api/agent/work/orders/{order_id}/checkout",
                 headers={"X-Agent-ID": agent_id}
             )
             return response.json()
@@ -861,7 +861,7 @@ def submit_with_retry(item_id, result, idempotency_key, max_attempts=3):
     for attempt in range(max_attempts):
         try:
             response = http_client.post(
-                f"/api/ai/work/items/{item_id}/submit",
+                f"/api/agent/work/items/{item_id}/submit",
                 headers={
                     "X-Idempotency-Key": idempotency_key,  # Same key for retries
                     "X-Agent-ID": agent_id
@@ -886,7 +886,7 @@ def submit_parts_with_resume(item_id, parts):
     submitted_parts = set()
 
     # Check which parts already submitted
-    response = http_client.get(f"/api/ai/work/items/{item_id}/parts")
+    response = http_client.get(f"/api/agent/work/items/{item_id}/parts")
     for part in response.json()["parts"]:
         submitted_parts.add(part["part_number"])
 
@@ -899,7 +899,7 @@ def submit_parts_with_resume(item_id, parts):
 
         try:
             http_client.post(
-                f"/api/ai/work/items/{item_id}/submit-part",
+                f"/api/agent/work/items/{item_id}/submit-part",
                 headers={"X-Idempotency-Key": idempotency_key},
                 json={
                     "part_number": part_num,
@@ -926,7 +926,7 @@ def maintain_heartbeat(item_id, heartbeat_interval, stop_event):
 
         try:
             http_client.post(
-                f"/api/ai/work/items/{item_id}/heartbeat",
+                f"/api/agent/work/items/{item_id}/heartbeat",
                 timeout=5
             )
         except Exception as e:
@@ -1021,29 +1021,29 @@ Complete workflow for processing a work order:
 
 ```bash
 # 1. List available orders
-curl -X GET "/api/ai/work/orders?state=queued" \
+curl -X GET "/api/agent/work/orders?state=queued" \
   -H "Authorization: Bearer {token}"
 
 # 2. Checkout first item
-curl -X POST /api/ai/work/orders/{order-id}/checkout \
+curl -X POST /api/agent/work/orders/{order-id}/checkout \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: agent-1"
 
 # 3. Start heartbeat loop (every 100 seconds)
 # while processing...
-curl -X POST /api/ai/work/items/{item-id}/heartbeat \
+curl -X POST /api/agent/work/items/{item-id}/heartbeat \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: agent-1"
 
 # 4. Submit results
-curl -X POST /api/ai/work/items/{item-id}/submit \
+curl -X POST /api/agent/work/items/{item-id}/submit \
   -H "Authorization: Bearer {token}" \
   -H "X-Agent-ID: agent-1" \
   -H "X-Idempotency-Key: submit-{item-id}-1" \
   -d '{"result": {...}}'
 
 # 5. Check order status
-curl -X GET /api/ai/work/orders/{order-id} \
+curl -X GET /api/agent/work/orders/{order-id} \
   -H "Authorization: Bearer {token}"
 ```
 

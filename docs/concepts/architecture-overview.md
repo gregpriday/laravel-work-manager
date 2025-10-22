@@ -122,10 +122,10 @@ Laravel Work Manager is built as a layered architecture with clear separation of
 
 **Example Endpoints**:
 ```
-POST   /api/ai/work/propose              → WorkAllocator::propose()
-POST   /api/ai/work/orders/{id}/checkout → LeaseService::acquire()
-POST   /api/ai/work/items/{id}/submit    → WorkExecutor::submit()
-POST   /api/ai/work/orders/{id}/approve  → WorkExecutor::approve()
+POST   /api/agent/work/propose              → WorkAllocator::propose()
+POST   /api/agent/work/orders/{id}/checkout → LeaseService::acquire()
+POST   /api/agent/work/items/{id}/submit    → WorkExecutor::submit()
+POST   /api/agent/work/orders/{id}/approve  → WorkExecutor::approve()
 ```
 
 ---
@@ -915,7 +915,7 @@ protected function beforeApply(WorkOrder $order): void
 Query event history:
 
 ```
-GET /api/ai/work/items/{item}/logs
+GET /api/agent/work/items/{item}/logs
 ```
 
 Returns:

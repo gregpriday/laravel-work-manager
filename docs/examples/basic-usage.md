@@ -272,7 +272,7 @@ Now let's test the complete lifecycle using API requests.
 ### 3.1: Propose a Work Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: task-$(date +%s)" \
@@ -330,7 +330,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 The agent leases a work item to process:
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6b/checkout \
+curl -X POST http://your-app.test/api/agent/work/orders/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6b/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: agent-001"
 ```
@@ -362,7 +362,7 @@ curl -X POST http://your-app.test/api/ai/work/orders/9d5f8a2b-3c1e-4d6f-8b9a-1c2
 If the work takes longer than 2 minutes, the agent must send heartbeats:
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6c/heartbeat \
+curl -X POST http://your-app.test/api/agent/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6c/heartbeat \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: agent-001"
 ```
@@ -372,7 +372,7 @@ curl -X POST http://your-app.test/api/ai/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d
 After completing the work, the agent submits results:
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6c/submit \
+curl -X POST http://your-app.test/api/agent/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6c/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-$(date +%s)" \
@@ -415,7 +415,7 @@ curl -X POST http://your-app.test/api/ai/work/items/9d5f8a2b-3c1e-4d6f-8b9a-1c2d
 A human or system approves the work, triggering the apply() method:
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6b/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/9d5f8a2b-3c1e-4d6f-8b9a-1c2d3e4f5a6b/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

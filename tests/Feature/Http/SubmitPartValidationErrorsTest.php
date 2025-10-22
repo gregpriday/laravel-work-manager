@@ -7,7 +7,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     config()->set('work-manager.idempotency.enforce_on', []);
     $this->actingAs(new TestUser());
 });
@@ -23,7 +23,7 @@ it('returns 422 when part_key is missing', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'payload' => ['name' => 'John Doe'],
         // Missing part_key
     ], [
@@ -45,7 +45,7 @@ it('returns 422 when payload is missing', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         // Missing payload
     ], [
@@ -67,7 +67,7 @@ it('returns 422 when part_key is not a string', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 123,
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -89,7 +89,7 @@ it('returns 422 when payload is not an array', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => 'not an array',
     ], [
@@ -111,7 +111,7 @@ it('returns 422 when seq is not an integer', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'seq' => 'not-a-number',
         'payload' => ['name' => 'John Doe'],
@@ -134,7 +134,7 @@ it('returns 422 when evidence is not an array', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
         'evidence' => 'not an array',
@@ -157,7 +157,7 @@ it('returns 422 when notes is not a string', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
         'notes' => 123,
@@ -180,7 +180,7 @@ it('accepts valid submit-part request', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'seq' => 1,
         'payload' => ['name' => 'John Doe'],
@@ -212,7 +212,7 @@ it('accepts submit-part with optional fields omitted', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
         // seq, evidence, notes omitted

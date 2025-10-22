@@ -7,7 +7,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 use Illuminate\Support\Facades\Gate;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 
     // Clear the permissive gate from TestCase for these authorization tests
     Gate::before(fn () => null);
@@ -18,7 +18,7 @@ beforeEach(function () {
 
 it('blocks propose without authorization', function () {
     // No authenticated user, policy should deny
-    $response = $this->postJson('/ai/work/propose', [
+    $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',
         'payload' => ['message' => 'test'],
     ]);
@@ -33,7 +33,7 @@ it('blocks approve without authorization', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/approve");
+    $response = $this->postJson("/agent/work/orders/{$order->id}/approve");
 
     $response->assertStatus(403);
 });
@@ -45,7 +45,7 @@ it('blocks reject without authorization', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/reject", [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/reject", [
         'errors' => [
             ['code' => 'validation_failed', 'message' => 'Invalid data'],
         ],
@@ -63,7 +63,7 @@ it('blocks checkout without authorization', function () {
 
     app(\GregPriday\WorkManager\Services\WorkAllocator::class)->plan($order);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -86,7 +86,7 @@ it('blocks submit without authorization', function () {
         'lease_expires_at' => now()->addMinutes(10),
     ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/submit", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/submit", [
         'result' => ['ok' => true],
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -102,7 +102,7 @@ it('allows authorized actions when user has permission', function () {
     // Authenticate as test user
     $this->actingAs(new TestUser());
 
-    $response = $this->postJson('/ai/work/propose', [
+    $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',
         'payload' => ['message' => 'test'],
     ], [
@@ -120,7 +120,7 @@ it('blocks view without authorization', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->getJson("/ai/work/orders/{$order->id}");
+    $response = $this->getJson("/agent/work/orders/{$order->id}");
 
     $response->assertStatus(403);
 });

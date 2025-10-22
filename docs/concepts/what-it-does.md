@@ -253,10 +253,10 @@ protected function canApprove(WorkOrder $order): bool
 All mutating operations support **idempotency keys** to make retries safe:
 
 ```http
-POST /api/ai/work/propose
+POST /api/agent/work/propose
 X-Idempotency-Key: propose-123-abc
 
-POST /api/ai/work/items/456/submit
+POST /api/agent/work/items/456/submit
 X-Idempotency-Key: submit-456-xyz
 ```
 
@@ -284,7 +284,7 @@ For complex or long-running work items, agents can submit results **incrementall
 
 ```http
 # Submit first part
-POST /api/ai/work/items/123/submit-part
+POST /api/agent/work/items/123/submit-part
 {
     "part_key": "research_findings",
     "seq": 1,
@@ -292,7 +292,7 @@ POST /api/ai/work/items/123/submit-part
 }
 
 # Submit second part
-POST /api/ai/work/items/123/submit-part
+POST /api/agent/work/items/123/submit-part
 {
     "part_key": "evidence",
     "seq": 1,
@@ -300,7 +300,7 @@ POST /api/ai/work/items/123/submit-part
 }
 
 # Finalize (assemble all parts into final result)
-POST /api/ai/work/items/123/finalize
+POST /api/agent/work/items/123/finalize
 ```
 
 **Benefits**:

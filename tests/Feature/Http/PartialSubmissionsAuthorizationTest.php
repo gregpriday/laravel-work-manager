@@ -8,7 +8,7 @@ use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Support\Facades\Gate;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     config()->set('work-manager.idempotency.enforce_on', []);
 
     // Clear the permissive gate from TestCase for these authorization tests
@@ -34,7 +34,7 @@ it('blocks submit-part without authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -60,7 +60,7 @@ it('blocks list-parts without authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts");
 
     $response->assertStatus(403);
 });
@@ -81,7 +81,7 @@ it('blocks finalize without authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -112,7 +112,7 @@ it('allows submit-part with proper authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
@@ -144,7 +144,7 @@ it('allows list-parts with proper authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts");
 
     $response->assertStatus(200)
         ->assertJsonStructure(['parts']);
@@ -172,7 +172,7 @@ it('allows finalize with proper authorization', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -201,7 +201,7 @@ it('respects authorization on submit-part even with valid lease', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/parts", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [

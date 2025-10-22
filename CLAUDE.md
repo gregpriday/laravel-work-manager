@@ -212,7 +212,7 @@ All events carry relevant model instances and metadata.
 **Route registration** (in `routes/api.php` or service provider):
 ```php
 // Config default is 'agent/work', but override with basePath as needed
-WorkManager::routes(basePath: 'ai/work', middleware: ['api', 'auth:sanctum']);
+WorkManager::routes(basePath: 'agent/work', middleware: ['api', 'auth:sanctum']);
 ```
 
 **Enforce work-order-only mutations** (apply to legacy routes):

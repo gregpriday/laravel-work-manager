@@ -506,7 +506,7 @@ public function validateAssembled(WorkItem $item, array $assembled): void
 ### 1. Propose Research Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: research-$(date +%s)" \
@@ -547,7 +547,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 ### 2. Checkout Work Item
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/checkout \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: research-agent-01"
 ```
@@ -574,7 +574,7 @@ curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/checkout \
 ### 3. Submit First Part (Identity)
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit-part \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid/submit-part \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: part-identity-$(date +%s)" \
@@ -625,7 +625,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit-part \
 ### 4. Submit Second Part (Firmographics)
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit-part \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid/submit-part \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: part-firmo-$(date +%s)" \
@@ -675,7 +675,7 @@ Continue submitting web_presence and contacts parts...
 ### 6. List Submitted Parts
 
 ```bash
-curl -X GET http://your-app.test/api/ai/work/items/item-uuid/parts \
+curl -X GET http://your-app.test/api/agent/work/items/item-uuid/parts \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -721,7 +721,7 @@ curl -X GET http://your-app.test/api/ai/work/items/item-uuid/parts \
 ### 7. Finalize (Assemble All Parts)
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid/finalize \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid/finalize \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: finalize-$(date +%s)" \
   -H "X-Agent-ID: research-agent-01"
@@ -753,7 +753,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid/finalize \
 ### 8. Approve and Apply
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

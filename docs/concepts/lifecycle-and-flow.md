@@ -49,7 +49,7 @@ Create a work order representing the intent to perform work of a specific type.
 
 ### API Endpoint
 ```http
-POST /api/ai/work/propose
+POST /api/agent/work/propose
 X-Idempotency-Key: propose-{uuid}
 Content-Type: application/json
 
@@ -185,7 +185,7 @@ Agent acquires an exclusive lease on a work item to process.
 
 ### API Endpoint
 ```http
-POST /api/ai/work/orders/42/checkout
+POST /api/agent/work/orders/42/checkout
 X-Agent-ID: agent-1
 X-Agent-Name: SyncAgent
 X-Agent-Version: 1.0.0
@@ -251,7 +251,7 @@ Agent performs the actual work described in the item's input.
 
 ### Heartbeat API
 ```http
-POST /api/ai/work/items/101/heartbeat
+POST /api/agent/work/items/101/heartbeat
 X-Agent-ID: agent-1
 ```
 
@@ -289,7 +289,7 @@ Agent submits completed work for verification.
 #### Option A: Complete Submission (Single Call)
 
 ```http
-POST /api/ai/work/items/101/submit
+POST /api/agent/work/items/101/submit
 X-Agent-ID: agent-1
 X-Idempotency-Key: submit-101-xyz
 Content-Type: application/json
@@ -325,7 +325,7 @@ For complex or long-running work:
 
 ```http
 # Step 1: Submit first part
-POST /api/ai/work/items/101/submit-part
+POST /api/agent/work/items/101/submit-part
 X-Agent-ID: agent-1
 X-Idempotency-Key: part-101-1
 Content-Type: application/json
@@ -342,7 +342,7 @@ Content-Type: application/json
 }
 
 # Step 2: Submit second part
-POST /api/ai/work/items/101/submit-part
+POST /api/agent/work/items/101/submit-part
 X-Agent-ID: agent-1
 X-Idempotency-Key: part-101-2
 
@@ -358,7 +358,7 @@ X-Idempotency-Key: part-101-2
 }
 
 # Step 3: Finalize (assemble all parts)
-POST /api/ai/work/items/101/finalize
+POST /api/agent/work/items/101/finalize
 X-Agent-ID: agent-1
 X-Idempotency-Key: finalize-101
 Content-Type: application/json
@@ -564,7 +564,7 @@ protected function canApprove(WorkOrder $order): bool
 
 ### Approval Readiness Query
 ```http
-GET /api/ai/work/orders/42
+GET /api/agent/work/orders/42
 ```
 
 Response includes `ready_for_approval` flag:
@@ -591,7 +591,7 @@ Backend or user explicitly approves the work for execution.
 
 ### API Endpoint
 ```http
-POST /api/ai/work/orders/42/approve
+POST /api/agent/work/orders/42/approve
 X-Idempotency-Key: approve-42-xyz
 Authorization: Bearer {user_token}
 ```
@@ -811,7 +811,7 @@ Agent can:
 ### Approval Rejection
 
 ```http
-POST /api/ai/work/orders/42/reject
+POST /api/agent/work/orders/42/reject
 X-Idempotency-Key: reject-42-xyz
 Content-Type: application/json
 

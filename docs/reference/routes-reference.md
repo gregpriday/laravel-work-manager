@@ -36,7 +36,7 @@ In `routes/api.php` or service provider:
 ```php
 use GregPriday\WorkManager\Facades\WorkManager;
 
-WorkManager::routes('ai/work', ['api', 'auth:sanctum']);
+WorkManager::routes('agent/work', ['api', 'auth:sanctum']);
 ```
 
 ---
@@ -45,9 +45,9 @@ WorkManager::routes('ai/work', ['api', 'auth:sanctum']);
 
 All routes are prefixed with the configured base path (default: `agent/work`).
 
-**Example:** If `base_path` is `ai/work`, routes will be:
-- `POST /ai/work/propose`
-- `GET /ai/work/orders`
+**Example:** If `base_path` is `agent/work`, routes will be:
+- `POST /agent/work/propose`
+- `GET /agent/work/orders`
 - etc.
 
 **Default Middleware:** `['api']`
@@ -873,7 +873,7 @@ Configure which endpoints require idempotency keys:
 
 **First Request:**
 ```http
-POST /ai/work/items/{item}/submit
+POST /agent/work/items/{item}/submit
 X-Idempotency-Key: abc123-unique-key
 Content-Type: application/json
 
@@ -890,7 +890,7 @@ Content-Type: application/json
 
 **Retry with Same Key:**
 ```http
-POST /ai/work/items/{item}/submit
+POST /agent/work/items/{item}/submit
 X-Idempotency-Key: abc123-unique-key
 Content-Type: application/json
 
@@ -918,7 +918,7 @@ Content-Type: application/json
 Apply rate limiting via middleware in route registration:
 
 ```php
-WorkManager::routes('ai/work', ['api', 'auth:sanctum', 'throttle:60,1']);
+WorkManager::routes('agent/work', ['api', 'auth:sanctum', 'throttle:60,1']);
 ```
 
 **Per-User Rate Limit:**
@@ -940,7 +940,7 @@ RateLimiter::for('rate_limit', function (Request $request) {
 If accessing from browser-based agents, configure CORS in `config/cors.php`:
 
 ```php
-'paths' => ['api/*', 'ai/work/*'],
+'paths' => ['api/*', 'agent/work/*'],
 'allowed_methods' => ['*'],
 'allowed_origins' => ['https://your-agent-ui.com'],
 'allowed_headers' => ['*', 'X-Idempotency-Key', 'X-Agent-ID'],

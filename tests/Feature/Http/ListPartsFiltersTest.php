@@ -10,7 +10,7 @@ use GregPriday\WorkManager\Support\PartStatus;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     $this->actingAs(new TestUser());
 });
 
@@ -46,19 +46,19 @@ it('filters parts by status', function () {
     ]);
 
     // List all parts (no filter)
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(3);
 
     // Filter by validated status
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?status=validated");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?status=validated");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(2)
         ->and($response->json('parts.0.status'))->toBe('validated')
         ->and($response->json('parts.1.status'))->toBe('validated');
 
     // Filter by rejected status
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?status=rejected");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?status=rejected");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(1)
         ->and($response->json('parts.0.status'))->toBe('rejected')
@@ -87,14 +87,14 @@ it('filters parts by part_key', function () {
     $executor->submitPart($item, 'contact', 2, ['phone' => '555-1234'], $agentId);
 
     // Filter by specific part_key
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?part_key=contact");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?part_key=contact");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(2)
         ->and($response->json('parts.0.part_key'))->toBe('contact')
         ->and($response->json('parts.1.part_key'))->toBe('contact');
 
     // Filter by another part_key
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?part_key=identity");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?part_key=identity");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(1)
         ->and($response->json('parts.0.part_key'))->toBe('identity');
@@ -133,14 +133,14 @@ it('combines status and part_key filters', function () {
     $executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
 
     // Filter by both status and part_key
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?part_key=contact&status=validated");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?part_key=contact&status=validated");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(1)
         ->and($response->json('parts.0.part_key'))->toBe('contact')
         ->and($response->json('parts.0.status'))->toBe('validated');
 
     // Filter for rejected contact parts
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?part_key=contact&status=rejected");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?part_key=contact&status=rejected");
     $response->assertStatus(200);
     expect($response->json('parts'))->toHaveCount(1)
         ->and($response->json('parts.0.part_key'))->toBe('contact')
@@ -157,12 +157,12 @@ it('returns empty array when no parts match filter', function () {
         ]);
 
     // No parts submitted, filter should return empty
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?status=validated");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?status=validated");
     $response->assertStatus(200);
     expect($response->json('parts'))->toBeArray()->toBeEmpty();
 
     // Non-existent part_key
-    $response = $this->getJson("/ai/work/items/{$item->id}/parts?part_key=nonexistent");
+    $response = $this->getJson("/agent/work/items/{$item->id}/parts?part_key=nonexistent");
     $response->assertStatus(200);
     expect($response->json('parts'))->toBeArray()->toBeEmpty();
 });

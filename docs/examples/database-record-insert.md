@@ -380,7 +380,7 @@ public function apply(WorkOrder $order): Diff
 ### 1. Propose Work Order
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: insert-$(date +%s)" \
@@ -439,7 +439,7 @@ curl -X POST http://your-app.test/api/ai/work/propose \
 ### 2. Checkout Work Item
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/checkout \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/checkout \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Agent-ID: import-agent-01"
 ```
@@ -499,7 +499,7 @@ $result = [
 ### 4. Submit Results
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit \
+curl -X POST http://your-app.test/api/agent/work/items/item-uuid/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: submit-$(date +%s)" \
@@ -538,7 +538,7 @@ curl -X POST http://your-app.test/api/ai/work/items/item-uuid/submit \
 ### 5. Approve and Apply
 
 ```bash
-curl -X POST http://your-app.test/api/ai/work/orders/order-uuid/approve \
+curl -X POST http://your-app.test/api/agent/work/orders/order-uuid/approve \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "X-Idempotency-Key: approve-$(date +%s)"
 ```

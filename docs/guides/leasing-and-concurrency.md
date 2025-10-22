@@ -33,7 +33,7 @@ Work Manager uses **TTL-based leasing** to ensure single-agent processing of wor
 ### 1. Checkout (Acquire Lease)
 
 ```bash
-POST /api/ai/work/orders/{order}/checkout
+POST /api/agent/work/orders/{order}/checkout
 X-Agent-ID: my-agent-123
 ```
 
@@ -51,7 +51,7 @@ Response:
 ### 2. Heartbeat (Extend Lease)
 
 ```bash
-POST /api/ai/work/items/{item}/heartbeat
+POST /api/agent/work/items/{item}/heartbeat
 X-Agent-ID: my-agent-123
 ```
 

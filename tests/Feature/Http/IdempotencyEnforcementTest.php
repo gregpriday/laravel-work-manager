@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
     $this->actingAs(new TestUser());
@@ -18,7 +18,7 @@ beforeEach(function () {
 it('requires idempotency key for propose when enforced', function () {
     config()->set('work-manager.idempotency.enforce_on', ['propose']);
 
-    $response = $this->postJson('/ai/work/propose', [
+    $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',
         'payload' => ['message' => 'test'],
     ]);
@@ -47,7 +47,7 @@ it('requires idempotency key for submit when enforced', function () {
         'lease_expires_at' => now()->addMinutes(10),
     ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/submit", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/submit", [
         'result' => ['ok' => true],
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -71,7 +71,7 @@ it('requires idempotency key for approve when enforced', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/approve");
+    $response = $this->postJson("/agent/work/orders/{$order->id}/approve");
 
     $response->assertStatus(428)
         ->assertJson([
@@ -91,7 +91,7 @@ it('requires idempotency key for reject when enforced', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/reject", [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/reject", [
         'errors' => [
             ['code' => 'validation_failed', 'message' => 'Invalid data'],
         ],
@@ -109,7 +109,7 @@ it('requires idempotency key for reject when enforced', function () {
 it('allows propose without idempotency key when not enforced', function () {
     config()->set('work-manager.idempotency.enforce_on', []);
 
-    $response = $this->postJson('/ai/work/propose', [
+    $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',
         'payload' => ['message' => 'test'],
     ]);
@@ -145,7 +145,7 @@ it('returns cached response when same idempotency key used for approve', functio
     $idempotencyKey = 'test-approve-' . uniqid();
 
     // First approval
-    $response1 = $this->postJson("/ai/work/orders/{$order->id}/approve", [], [
+    $response1 = $this->postJson("/agent/work/orders/{$order->id}/approve", [], [
         'X-Idempotency-Key' => $idempotencyKey,
     ]);
 
@@ -154,7 +154,7 @@ it('returns cached response when same idempotency key used for approve', functio
     $firstDiff = $response1->json('diff');
 
     // Second approval with same key should return cached response
-    $response2 = $this->postJson("/ai/work/orders/{$order->id}/approve", [], [
+    $response2 = $this->postJson("/agent/work/orders/{$order->id}/approve", [], [
         'X-Idempotency-Key' => $idempotencyKey,
     ]);
 

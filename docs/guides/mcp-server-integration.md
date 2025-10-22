@@ -313,7 +313,7 @@ MCP server uses Laravel's auth system:
 ```php
 // In routes/api.php or config
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum']  // Enforces auth
 );
 ```

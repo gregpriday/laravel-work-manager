@@ -76,7 +76,7 @@ Mount the work manager routes in your `routes/api.php`:
 use GregPriday\WorkManager\Facades\WorkManager;
 
 WorkManager::routes(
-    basePath: 'ai/work',
+    basePath: 'agent/work',
     middleware: ['api', 'auth:sanctum']
 );
 ```
@@ -140,7 +140,7 @@ Use the API examples in each guide to test the workflow:
 export TOKEN="your-sanctum-token-here"
 
 # Propose work
-curl -X POST http://your-app.test/api/ai/work/propose \
+curl -X POST http://your-app.test/api/agent/work/propose \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "X-Idempotency-Key: test-$(date +%s)" \
@@ -417,7 +417,7 @@ class UserDataSyncTypeTest extends TestCase
 public function test_complete_workflow()
 {
     // 1. Propose
-    $response = $this->postJson('/api/ai/work/propose', [
+    $response = $this->postJson('/api/agent/work/propose', [
         'type' => 'user.data.sync',
         'payload' => [
             'source' => 'crm',
@@ -428,11 +428,11 @@ public function test_complete_workflow()
     $orderId = $response->json('order.id');
 
     // 2. Checkout
-    $response = $this->postJson("/api/ai/work/orders/{$orderId}/checkout");
+    $response = $this->postJson("/api/agent/work/orders/{$orderId}/checkout");
     $itemId = $response->json('item.id');
 
     // 3. Submit
-    $response = $this->postJson("/api/ai/work/items/{$itemId}/submit", [
+    $response = $this->postJson("/api/agent/work/items/{$itemId}/submit", [
         'result' => [
             'success' => true,
             'synced_users' => [
@@ -445,7 +445,7 @@ public function test_complete_workflow()
     $response->assertStatus(200);
 
     // 4. Approve
-    $response = $this->postJson("/api/ai/work/orders/{$orderId}/approve");
+    $response = $this->postJson("/api/agent/work/orders/{$orderId}/approve");
     $response->assertStatus(200);
 
     // Verify apply was successful

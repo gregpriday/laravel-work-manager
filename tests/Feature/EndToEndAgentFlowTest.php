@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 beforeEach(function () {
     // Mount API routes for testing
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 });
 
 it('completes full agent workflow from propose to approve', function () {
@@ -20,7 +20,7 @@ it('completes full agent workflow from propose to approve', function () {
     $agentId = 'agent-1';
 
     // Step 1: Propose work order
-    $response = $this->postJson('/ai/work/propose', [
+    $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',
         'payload' => ['message' => 'test workflow'],
     ], [
@@ -42,7 +42,7 @@ it('completes full agent workflow from propose to approve', function () {
     expect($events->count())->toBeGreaterThanOrEqual(2);
 
     // Step 2: Checkout work order
-    $checkoutResponse = $this->postJson("/ai/work/orders/{$orderId}/checkout", [], [
+    $checkoutResponse = $this->postJson("/agent/work/orders/{$orderId}/checkout", [], [
         'X-Agent-ID' => $agentId,
     ]);
 
@@ -55,7 +55,7 @@ it('completes full agent workflow from propose to approve', function () {
     expect($checkoutResponse->json('item.lease_expires_at'))->not->toBeNull();
 
     // Step 3: Send heartbeat
-    $heartbeatResponse = $this->postJson("/ai/work/items/{$itemId}/heartbeat", [], [
+    $heartbeatResponse = $this->postJson("/agent/work/items/{$itemId}/heartbeat", [], [
         'X-Agent-ID' => $agentId,
     ]);
 
@@ -64,7 +64,7 @@ it('completes full agent workflow from propose to approve', function () {
 
     // Step 4: Submit work item
     $submitKey = 'submit-key-'.Str::random(8);
-    $submitResponse = $this->postJson("/ai/work/items/{$itemId}/submit", [
+    $submitResponse = $this->postJson("/agent/work/items/{$itemId}/submit", [
         'result' => [
             'ok' => true,
             'verified' => true,
@@ -80,7 +80,7 @@ it('completes full agent workflow from propose to approve', function () {
     expect($submitResponse->json('item.result'))->toHaveKeys(['ok', 'verified', 'echoed_message']);
 
     // Verify idempotency - resubmitting returns same result
-    $resubmitResponse = $this->postJson("/ai/work/items/{$itemId}/submit", [
+    $resubmitResponse = $this->postJson("/agent/work/items/{$itemId}/submit", [
         'result' => [
             'ok' => false, // Different data
             'verified' => false,
@@ -95,7 +95,7 @@ it('completes full agent workflow from propose to approve', function () {
 
     // Step 5: Approve work order
     $approveKey = 'approve-key-'.Str::random(8);
-    $approveResponse = $this->postJson("/ai/work/orders/{$orderId}/approve", [], [
+    $approveResponse = $this->postJson("/agent/work/orders/{$orderId}/approve", [], [
         'X-Idempotency-Key' => $approveKey,
     ]);
 
@@ -133,7 +133,7 @@ it('handles checkout when no items available', function () {
         'payload' => ['message' => 'test'],
     ]);
 
-    $response = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
@@ -157,14 +157,14 @@ it('prevents heartbeat from wrong agent', function () {
 
     app(\GregPriday\WorkManager\Services\WorkAllocator::class)->plan($order);
 
-    $checkoutResponse = $this->postJson("/ai/work/orders/{$order->id}/checkout", [], [
+    $checkoutResponse = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
     $itemId = $checkoutResponse->json('item.id');
 
     // Try heartbeat with different agent
-    $response = $this->postJson("/ai/work/items/{$itemId}/heartbeat", [], [
+    $response = $this->postJson("/agent/work/items/{$itemId}/heartbeat", [], [
         'X-Agent-ID' => 'agent-2', // Different agent
     ]);
 

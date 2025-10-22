@@ -5,7 +5,7 @@ use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\OrderState;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
 });
 
 it('filters orders by state', function () {
@@ -30,7 +30,7 @@ it('filters orders by state', function () {
         'priority' => 1,
     ]);
 
-    $response = $this->getJson('/ai/work/orders?state=queued');
+    $response = $this->getJson('/agent/work/orders?state=queued');
 
     $response->assertOk();
     $data = $response->json('data');
@@ -54,7 +54,7 @@ it('filters orders by type', function () {
         'priority' => 1,
     ]);
 
-    $response = $this->getJson('/ai/work/orders?type=test.echo');
+    $response = $this->getJson('/agent/work/orders?type=test.echo');
 
     $response->assertOk();
     $data = $response->json('data');
@@ -107,7 +107,7 @@ it('orders by priority desc then created_at asc', function () {
         'created_at' => now()->subMinutes(5),
     ]);
 
-    $response = $this->getJson("/ai/work/orders?type={$testType}");
+    $response = $this->getJson("/agent/work/orders?type={$testType}");
 
     $response->assertOk();
     $data = $response->json('data');
@@ -132,7 +132,7 @@ it('respects pagination limit', function () {
         ]);
     }
 
-    $response = $this->getJson('/ai/work/orders?limit=5');
+    $response = $this->getJson('/agent/work/orders?limit=5');
 
     $response->assertOk();
     $data = $response->json('data');
@@ -151,7 +151,7 @@ it('enforces maximum limit of 100', function () {
         ]);
     }
 
-    $response = $this->getJson('/ai/work/orders?limit=200');
+    $response = $this->getJson('/agent/work/orders?limit=200');
 
     $response->assertOk();
     // Should be capped at 100
@@ -180,7 +180,7 @@ it('filters by multiple criteria', function () {
         'priority' => 1,
     ]);
 
-    $response = $this->getJson('/ai/work/orders?state=queued&type=test.echo');
+    $response = $this->getJson('/agent/work/orders?state=queued&type=test.echo');
 
     $response->assertOk();
     $data = $response->json('data');
@@ -196,7 +196,7 @@ it('includes items relationship in response', function () {
     $order = $allocator->propose('test.echo', ['message' => 'test']);
     $allocator->plan($order);
 
-    $response = $this->getJson('/ai/work/orders');
+    $response = $this->getJson('/agent/work/orders');
 
     $response->assertOk();
     $data = $response->json('data');

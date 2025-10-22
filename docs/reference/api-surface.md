@@ -39,7 +39,7 @@ Primary facade for interacting with the package.
 use GregPriday\WorkManager\Facades\WorkManager;
 
 // Register routes
-WorkManager::routes('ai/work', ['api', 'auth:sanctum']);
+WorkManager::routes('agent/work', ['api', 'auth:sanctum']);
 
 // Register an order type
 WorkManager::registry()->register(new MyOrderType());
@@ -624,10 +624,10 @@ Service class for registering package routes.
 **Usage:**
 ```php
 app(\GregPriday\WorkManager\Routing\RouteRegistrar::class)
-    ->register('ai/work', ['api', 'auth:sanctum']);
+    ->register('agent/work', ['api', 'auth:sanctum']);
 
 // Or via facade
-WorkManager::routes('ai/work', ['api', 'auth:sanctum']);
+WorkManager::routes('agent/work', ['api', 'auth:sanctum']);
 ```
 
 ---

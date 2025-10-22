@@ -7,7 +7,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
-    WorkManager::routes('ai/work', ['api']);
+    WorkManager::routes('agent/work', ['api']);
     config()->set('work-manager.idempotency.enforce_on', []);
     $this->actingAs(new TestUser());
 });
@@ -23,7 +23,7 @@ it('returns 422 for invalid finalize mode parameter', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'invalid_mode',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -44,7 +44,7 @@ it('returns 422 for non-string finalize mode parameter', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 123,
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -66,7 +66,7 @@ it('accepts strict mode for finalize', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -90,7 +90,7 @@ it('accepts best_effort mode for finalize', function () {
             'input' => [],
         ]);
 
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
@@ -115,7 +115,7 @@ it('defaults to strict mode when mode parameter is omitted', function () {
         ]);
 
     // Should fail in strict mode because required part is missing
-    $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [], [
+    $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
