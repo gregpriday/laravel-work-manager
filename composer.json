@@ -1,0 +1,49 @@
+{
+    "name": "gregpriday/laravel-work-manager",
+    "description": "A Laravel package for work management",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Greg Priday",
+            "email": "greg@siteorigin.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GregPriday\\LaravelWorkManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GregPriday\\LaravelWorkManager\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "GregPriday\\LaravelWorkManager\\WorkManagerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
