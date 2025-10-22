@@ -1,6 +1,6 @@
 {
     "name": "gregpriday/laravel-work-manager",
-    "description": "A Laravel package for work management",
+    "description": "AI-agent oriented work order control plane for Laravel.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,21 +11,28 @@
     ],
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^12.0"
+        "illuminate/support": "^10.0|^11.0",
+        "illuminate/database": "^10.0|^11.0",
+        "illuminate/console": "^10.0|^11.0",
+        "illuminate/http": "^10.0|^11.0",
+        "illuminate/validation": "^10.0|^11.0",
+        "ramsey/uuid": "^4.7",
+        "php-mcp/laravel": "^1.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^10.0",
-        "pestphp/pest": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0"
+        "orchestra/testbench": "^8.0|^9.0",
+        "pestphp/pest": "^2.0|^3.0",
+        "pestphp/pest-plugin-laravel": "^2.0|^3.0",
+        "phpunit/phpunit": "^10.0|^11.0"
     },
     "autoload": {
         "psr-4": {
-            "GregPriday\\LaravelWorkManager\\": "src/"
+            "GregPriday\\WorkManager\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "GregPriday\\LaravelWorkManager\\Tests\\": "tests/"
+            "GregPriday\\WorkManager\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -40,7 +47,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GregPriday\\LaravelWorkManager\\WorkManagerServiceProvider"
+                "GregPriday\\WorkManager\\WorkManagerServiceProvider"
             ]
         }
     },
