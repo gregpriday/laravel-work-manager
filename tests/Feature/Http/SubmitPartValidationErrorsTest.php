@@ -8,6 +8,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
     WorkManager::routes('ai/work', ['api']);
+    config()->set('work-manager.idempotency.enforce_on', []);
     $this->actingAs(new TestUser());
 });
 

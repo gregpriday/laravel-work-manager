@@ -39,6 +39,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // First submission
         $part1 = $this->executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -67,6 +68,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit with seq=1
         $part1 = $this->executor->submitPart($item, 'contact', 1, ['email' => 'john@example.com'], $agentId);
@@ -91,6 +93,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit with seq=null
         $part1 = $this->executor->submitPart($item, 'contact', null, ['email' => 'john@example.com'], $agentId);
@@ -115,6 +118,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Simulate concurrent submissions by directly using updateOrCreate
         // This tests the database constraint handling
@@ -161,6 +165,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Create a rejected part
         $rejectedPart = WorkItemPart::create([
@@ -203,9 +208,11 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item1->id, $agentId);
+        $item1 = $item1->fresh();
 
         $agentId2 = 'agent-2';
         $this->leaseService->acquire($item2->id, $agentId2);
+        $item2 = $item2->fresh();
 
         // Submit same part_key and seq for different items
         $part1 = $this->executor->submitPart($item1, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -229,6 +236,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // First submission
         $this->executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -294,6 +302,7 @@ class ConcurrentPartsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit multiple parts with different keys
         $this->executor->submitPart($item, 'identity', null, ['name' => 'John'], $agentId);

@@ -40,13 +40,14 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
         // Lease the item
         $agentId = 'test-agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit only 2 of 3 required parts
         $this->executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
         $this->executor->submitPart($item, 'contact', null, ['email' => 'john@example.com'], $agentId);
 
         // Best-effort mode should succeed even with missing 'preferences'
-        $finalized = $this->executor->finalizeItem($item->fresh(), 'best-effort');
+        $finalized = $this->executor->finalizeItem($item->fresh(), 'best_effort');
 
         expect($finalized->state)->toBe(ItemState::SUBMITTED)
             ->and($finalized->result)->toHaveKeys(['identity', 'contact'])
@@ -67,6 +68,7 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
 
         $agentId = 'test-agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit only 2 of 3 required parts
         $this->executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -96,13 +98,14 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
 
         $agentId = 'test-agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit all required parts
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Jane Smith'], $agentId);
         $this->executor->submitPart($item, 'contact', null, ['email' => 'jane@example.com'], $agentId);
 
         // Best-effort mode should work fine with all parts present
-        $finalized = $this->executor->finalizeItem($item->fresh(), 'best-effort');
+        $finalized = $this->executor->finalizeItem($item->fresh(), 'best_effort');
 
         expect($finalized->state)->toBe(ItemState::SUBMITTED)
             ->and($finalized->result)->toHaveKeys(['identity', 'contact'])
@@ -122,6 +125,7 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
 
         $agentId = 'test-agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit one valid part and one that will be rejected
         $this->executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -137,7 +141,7 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
         ]);
 
         // Best-effort mode should only use validated parts
-        $finalized = $this->executor->finalizeItem($item->fresh(), 'best-effort');
+        $finalized = $this->executor->finalizeItem($item->fresh(), 'best_effort');
 
         expect($finalized->state)->toBe(ItemState::SUBMITTED)
             ->and($finalized->result)->toHaveKey('identity')
@@ -158,9 +162,10 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
 
         $agentId = 'test-agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Don't submit any parts, just try to finalize
-        $finalized = $this->executor->finalizeItem($item->fresh(), 'best-effort');
+        $finalized = $this->executor->finalizeItem($item->fresh(), 'best_effort');
 
         expect($finalized->state)->toBe(ItemState::SUBMITTED)
             ->and($finalized->result)->toBeArray()

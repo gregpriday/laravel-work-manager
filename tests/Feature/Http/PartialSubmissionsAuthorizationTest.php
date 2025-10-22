@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 
 beforeEach(function () {
     WorkManager::routes('ai/work', ['api']);
+    config()->set('work-manager.idempotency.enforce_on', []);
 
     // Clear the permissive gate from TestCase for these authorization tests
     Gate::before(fn () => null);
@@ -172,7 +173,7 @@ it('allows finalize with proper authorization', function () {
         ]);
 
     $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
     ]);

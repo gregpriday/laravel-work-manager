@@ -56,6 +56,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit a part
         $part = $this->executor->submitPart(
@@ -94,6 +95,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Try to submit invalid data
         try {
@@ -128,6 +130,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit all required parts
         $this->executor->submitPart($item, 'identity', null, [
@@ -163,6 +166,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit only one of two required parts
         $this->executor->submitPart($item, 'identity', null, [
@@ -190,6 +194,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit initial version
         $part1 = $this->executor->submitPart($item, 'identity', null, [
@@ -223,6 +228,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit multiple parts
         $this->executor->submitPart($item, 'identity', null, [
@@ -259,6 +265,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Try to submit as different agent
         $this->expectException(\Exception::class);
@@ -281,6 +288,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit required parts
         $this->executor->submitPart($item, 'identity', null, [
@@ -314,6 +322,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit a part
         $this->executor->submitPart($item, 'identity', null, [
@@ -340,6 +349,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Expire the lease
         $item->lease_expires_at = now()->subMinutes(10);
@@ -363,6 +373,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $payload = ['name' => 'Acme Corporation', 'domain' => 'acme.com'];
 
@@ -389,6 +400,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Test with seq = 0
         $part1 = $this->executor->submitPart($item, 'contacts', 0, [
@@ -416,6 +428,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit invalid data
         try {
@@ -453,6 +466,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Acme Corp'], 'agent-1');
         $this->executor->submitPart($item, 'contacts', null, [
@@ -477,6 +491,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit multiple sequences for same key
         $this->executor->submitPart($item, 'contacts', 1, [
@@ -507,6 +522,7 @@ class PartialSubmissionsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         // Submit identity (no seq)
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Acme Corp V1'], 'agent-1');

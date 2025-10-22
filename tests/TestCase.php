@@ -5,6 +5,7 @@ namespace GregPriday\WorkManager\Tests;
 use GregPriday\WorkManager\Facades\WorkManager;
 use GregPriday\WorkManager\Tests\Fixtures\OrderTypes\BatchOrderType;
 use GregPriday\WorkManager\Tests\Fixtures\OrderTypes\EchoOrderType;
+use GregPriday\WorkManager\Tests\Fixtures\OrderTypes\TestPartialOrderType;
 use GregPriday\WorkManager\WorkManagerServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -67,5 +68,6 @@ class TestCase extends Orchestra
     {
         WorkManager::registry()->register(new EchoOrderType());
         WorkManager::registry()->register(new BatchOrderType());
+        WorkManager::registry()->register(new TestPartialOrderType());
     }
 }

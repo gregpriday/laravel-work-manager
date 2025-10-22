@@ -52,6 +52,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Acme'], 'agent-1');
 
@@ -78,6 +79,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         try {
             $this->executor->submitPart($item, 'identity', null, [], 'agent-1'); // Missing required field
@@ -105,6 +107,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Acme'], 'agent-1');
         $this->executor->submitPart($item, 'contacts', null, ['email' => 'test@acme.com'], 'agent-1');
@@ -128,6 +131,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $evidence = [['url' => 'https://acme.com']];
         $notes = 'Found on website';
@@ -169,6 +173,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $this->executor->submitPart($item, 'identity', null, ['name' => 'Acme'], 'agent-1');
         $this->executor->submitPart($item, 'contacts', null, ['email' => 'test@acme.com'], 'agent-1');
@@ -200,6 +205,7 @@ class PartialSubmissionsEventsTest extends TestCase
 
         $item = $order->items()->first();
         $item = $this->leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
         $payload = ['name' => 'Acme Corporation', 'industry' => 'Technology'];
         $this->executor->submitPart($item, 'identity', null, $payload, 'agent-1');

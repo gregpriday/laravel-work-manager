@@ -29,6 +29,7 @@ it('filters parts by status', function () {
     // Lease the item
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
     // Submit validated parts
     $executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -78,6 +79,7 @@ it('filters parts by part_key', function () {
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
     // Submit multiple parts
     $executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -112,6 +114,7 @@ it('combines status and part_key filters', function () {
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
     // Submit validated contact part
     $executor->submitPart($item, 'contact', null, ['email' => 'john@example.com'], $agentId);

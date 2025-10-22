@@ -116,9 +116,10 @@ it('allows finalize with idempotency key', function () {
 
     // Lease the item properly
     $leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
     $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
         'X-Idempotency-Key' => 'test-finalize-' . uniqid(),
@@ -180,9 +181,10 @@ it('allows finalize without idempotency key when not enforced', function () {
 
     // Lease the item properly
     $leaseService->acquire($item->id, 'agent-1');
+        $item = $item->fresh();
 
     $response = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
     ]);

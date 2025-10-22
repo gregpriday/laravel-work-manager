@@ -46,6 +46,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit parts up to limit (using smaller number for test performance)
         $testLimit = min(10, $maxParts);
@@ -77,6 +78,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Create payload close to limit (90% of max)
         $payloadSize = (int)($maxBytes * 0.9);
@@ -103,6 +105,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit multiple parts
         for ($i = 1; $i <= 5; $i++) {
@@ -133,6 +136,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Create a sizable payload
         $payload = [
@@ -183,6 +187,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         // Submit parts of varying sizes
         $this->executor->submitPart($item, 'small', null, ['value' => 'x'], $agentId);
@@ -215,6 +220,7 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
         $payload = [
             'unicode' => '你好世界',
@@ -252,7 +258,9 @@ class PartialsLimitsTest extends TestCase
 
         $agentId = 'agent-1';
         $this->leaseService->acquire($item1->id, $agentId);
+        $item1 = $item1->fresh();
         $this->leaseService->acquire($item2->id, 'agent-2');
+        $item2 = $item2->fresh();
 
         // Item 1: Many small parts
         for ($i = 1; $i <= 20; $i++) {

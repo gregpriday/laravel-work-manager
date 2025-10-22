@@ -28,12 +28,13 @@ it('returns cached response when finalize called with same idempotency key', fun
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
     $idempotencyKey = 'test-finalize-' . uniqid();
 
     // First finalize
     $response1 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
         'X-Idempotency-Key' => $idempotencyKey,
@@ -52,7 +53,7 @@ it('returns cached response when finalize called with same idempotency key', fun
 
     // Second finalize with same key should return cached response
     $response2 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
         'X-Idempotency-Key' => $idempotencyKey,
@@ -128,10 +129,11 @@ it('creates new finalize result with different idempotency key', function () {
 
     $agentId = 'agent-1';
     $leaseService->acquire($item1->id, $agentId);
+        $item1 = $item1->fresh();
 
     // First finalize with first key
     $response1 = $this->postJson("/ai/work/items/{$item1->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
         'X-Idempotency-Key' => 'key-1',
@@ -149,10 +151,11 @@ it('creates new finalize result with different idempotency key', function () {
         ]);
 
     $leaseService->acquire($item2->id, $agentId);
+        $item2 = $item2->fresh();
 
     // Finalize with different key should create new result
     $response2 = $this->postJson("/ai/work/items/{$item2->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
         'X-Idempotency-Key' => 'key-2',
@@ -178,10 +181,11 @@ it('handles concurrent finalize requests with different idempotency keys', funct
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
+        $item = $item->fresh();
 
     // Two requests with different keys
     $response1 = $this->postJson("/ai/work/items/{$item->id}/finalize", [
-        'mode' => 'best-effort',
+        'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => $agentId,
         'X-Idempotency-Key' => 'concurrent-key-1',

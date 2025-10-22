@@ -523,21 +523,50 @@ vendor/bin/pest --coverage
 
 ---
 
-## Documentation Index
+## Documentation
 
-Complete documentation for Laravel Work Manager:
+Laravel Work Manager includes comprehensive, production-ready documentation covering all aspects of the package.
 
-* **README.md** (this file) — Complete package documentation, installation, and quick start
-* **CLAUDE.md** — AI assistant guidance for working with this codebase
-* **ARCHITECTURE.md** — System design, data flows, integration points, and scaling patterns
-* **docs/MCP_SERVER.md** — MCP server setup, configuration, and production deployment
-* **docs/USE_CASES.md** — Real-world use cases and implementation patterns
-* **examples/QUICK_START.md** — 5-minute getting started guide with code examples
-* **examples/LIFECYCLE.md** — Complete lifecycle hooks documentation with usage examples
-* **examples/DatabaseRecordInsertType.php** — Batch database inserts with verification
-* **examples/UserDataSyncType.php** — External API sync with per-batch items
-* **examples/CustomerResearchPartialType.php** — Research task using partial submissions
-* **LICENSE.md** — MIT license details
+### 📚 Complete Documentation
+
+**[→ View Complete Documentation](docs/index.md)** | **[→ Documentation Index](docs/documentation-index.md)**
+
+The documentation is organized into the following sections:
+
+- **[Getting Started](docs/getting-started/introduction.md)** - Introduction, requirements, installation, and quickstart guide
+- **[Concepts](docs/concepts/what-it-does.md)** - Core architecture, lifecycle, state management, and security
+- **[Guides](docs/guides/creating-order-types.md)** - Practical how-to guides for building and deploying
+- **[Examples](docs/examples/overview.md)** - Real-world implementations with complete working code
+- **[Reference](docs/reference/api-surface.md)** - Complete API, configuration, routes, events, and schema reference
+- **[Troubleshooting](docs/troubleshooting/common-errors.md)** - Common errors, FAQ, and known limitations
+- **[Contributing](docs/meta/contributing.md)** - How to contribute, security policy, and community support
+
+### 🚀 Quick Start Path
+
+New to Laravel Work Manager? Follow this learning path:
+
+1. **[Introduction](docs/getting-started/introduction.md)** - Understand what it does and why you need it
+2. **[Installation](docs/getting-started/installation.md)** - Install and configure the package
+3. **[Quickstart Guide](docs/getting-started/quickstart.md)** - Build your first order type in 5 minutes
+4. **[Basic Usage Example](docs/examples/basic-usage.md)** - See a complete working example
+
+### 📖 Popular Topics
+
+- **[Creating Order Types](docs/guides/creating-order-types.md)** - Complete guide to building custom order types
+- **[MCP Server Integration](docs/guides/mcp-server-integration.md)** - Connect AI agents via Model Context Protocol
+- **[HTTP API Reference](docs/guides/http-api.md)** - Complete REST API documentation
+- **[Partial Submissions](docs/guides/partial-submissions.md)** - Incremental work submission for complex tasks
+- **[Events & Listeners](docs/guides/events-and-listeners.md)** - React to lifecycle events
+- **[Deployment Guide](docs/guides/deployment-and-production.md)** - Production deployment and scaling
+
+### 📦 Legacy Documentation
+
+The following files contain legacy documentation (will be archived):
+- `ARCHITECTURE.md` → Migrated to [Architecture Overview](docs/concepts/architecture-overview.md)
+- `docs/MCP_SERVER.md` → Migrated to [MCP Server Integration](docs/guides/mcp-server-integration.md)
+- `docs/USE_CASES.md` → Content distributed across [Examples](docs/examples/overview.md)
+- `examples/QUICK_START.md` → Migrated to [Quickstart Guide](docs/getting-started/quickstart.md)
+- `examples/LIFECYCLE.md` → Migrated to [Lifecycle & Flow](docs/concepts/lifecycle-and-flow.md)
 
 For questions, issues, or feature requests, visit the [GitHub issue tracker](https://github.com/gregpriday/laravel-work-manager/issues).
 
@@ -545,8 +574,15 @@ For questions, issues, or feature requests, visit the [GitHub issue tracker](htt
 
 ## Contributing
 
-See `ARCHITECTURE.md` for system design. Key components:
+We welcome contributions! Please see [CONTRIBUTING.md](docs/meta/contributing.md) for:
+- How to report bugs
+- How to suggest features
+- Development setup
+- Running tests
+- Coding standards
+- Pull request process
 
+**Key components** (see `ARCHITECTURE.md` for system design):
 * `src/Http/Controllers/WorkOrderApiController.php` — API endpoints
 * `src/Services/{WorkAllocator,WorkExecutor,LeaseService,IdempotencyService,StateMachine}` — core services
 * `src/Support/{AbstractOrderType,AbstractAcceptancePolicy,Enums,Diff,Helpers}` — primitives & base classes
@@ -563,7 +599,13 @@ MIT © Greg Priday. See `LICENSE.md`.
 
 ## Support
 
-For issues and feature requests, please use the [GitHub issue tracker](https://github.com/gregpriday/laravel-work-manager/issues).
+**Need help?**
+- **Documentation**: Start with the [FAQ](docs/troubleshooting/faq.md) and [Common Errors](docs/troubleshooting/common-errors.md)
+- **Issues**: Report bugs or request features on [GitHub](https://github.com/gregpriday/laravel-work-manager/issues)
+- **Security**: Report vulnerabilities via email (see [Security Policy](docs/meta/security-policy.md))
+- **Commercial Support**: Contact greg@siteorigin.com for consulting and priority support
+
+See [Support and Community](docs/meta/support-and-community.md) for more resources.
 
 ---
 
