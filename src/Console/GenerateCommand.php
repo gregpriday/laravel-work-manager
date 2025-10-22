@@ -83,7 +83,9 @@ class GenerateCommand extends Command
     {
         // Strategies should be bound in the service container with a tag
         // or registered in a collection that the app can configure
-        return app()->tagged('work-manager.strategies') ?? [];
+        $tagged = app()->tagged('work-manager.strategies');
+
+        return $tagged ? iterator_to_array($tagged) : [];
     }
 
     /**

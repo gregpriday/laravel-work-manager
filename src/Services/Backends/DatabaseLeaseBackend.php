@@ -139,16 +139,16 @@ class DatabaseLeaseBackend implements LeaseBackend
     /**
      * Extract item ID from lease key.
      *
-     * @param  string  $key  Lease key (e.g., "item:123")
-     * @return int Item ID
+     * @param  string  $key  Lease key (e.g., "item:uuid" or "uuid")
+     * @return string Item ID
      */
-    protected function extractItemId(string $key): int
+    protected function extractItemId(string $key): string
     {
-        // Handle both "item:123" and "123" formats
+        // Handle both "item:uuid" and "uuid" formats
         if (str_starts_with($key, 'item:')) {
-            return (int) substr($key, 5);
+            return substr($key, 5);
         }
 
-        return (int) $key;
+        return $key;
     }
 }
