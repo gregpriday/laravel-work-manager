@@ -25,7 +25,7 @@ it('propose returns success structure with order data', function () {
 
 it('propose uses idempotency caching', function () {
     $tools = app(WorkManagerTools::class);
-    $key = 'test-key-' . uniqid();
+    $key = 'test-key-'.uniqid();
 
     // First call
     $result1 = $tools->propose(
@@ -251,7 +251,7 @@ it('submit uses idempotency for duplicate submissions', function () {
     $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
-    $key = 'submit-key-' . uniqid();
+    $key = 'submit-key-'.uniqid();
 
     // First submit
     $result1 = $tools->submit(

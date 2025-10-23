@@ -47,7 +47,7 @@ class EchoOrderType extends AbstractOrderType
     public function afterValidateSubmission(WorkItem $item, array $result): void
     {
         // Custom business logic: must be both ok and verified
-        if (!$result['verified']) {
+        if (! $result['verified']) {
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'verified' => ['Result must be verified'],
             ]);

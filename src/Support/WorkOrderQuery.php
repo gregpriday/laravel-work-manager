@@ -24,7 +24,7 @@ final class WorkOrderQuery
      * Supports filtering, sorting, including relations, and field selection.
      * Preloads items by default.
      *
-     * @param Request $request The HTTP request or synthetic request with query parameters
+     * @param  Request  $request  The HTTP request or synthetic request with query parameters
      * @return QueryBuilder The configured query builder
      */
     public static function make(Request $request): QueryBuilder

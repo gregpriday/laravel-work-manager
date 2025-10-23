@@ -5,8 +5,8 @@ namespace GregPriday\WorkManager\Services;
 use GregPriday\WorkManager\Contracts\OrderType;
 use GregPriday\WorkManager\Events\WorkOrderPlanned;
 use GregPriday\WorkManager\Events\WorkOrderProposed;
-use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Models\WorkItem;
+use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\Registry\OrderTypeRegistry;
 use GregPriday\WorkManager\Support\ActorType;
 use GregPriday\WorkManager\Support\EventType;
@@ -20,8 +20,7 @@ class WorkAllocator
     public function __construct(
         protected OrderTypeRegistry $registry,
         protected StateMachine $stateMachine
-    ) {
-    }
+    ) {}
 
     /**
      * Propose a new work order.
@@ -39,7 +38,7 @@ class WorkAllocator
         // Validate payload against schema
         $errors = Helpers::validateJsonSchema($payload, $orderType->schema());
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
                 response()->json(['errors' => $errors], 422)

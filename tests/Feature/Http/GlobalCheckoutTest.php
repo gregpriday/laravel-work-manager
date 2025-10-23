@@ -1,17 +1,15 @@
 <?php
 
 use GregPriday\WorkManager\Facades\WorkManager;
-use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
-use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('checks out highest priority item across all orders', function () {

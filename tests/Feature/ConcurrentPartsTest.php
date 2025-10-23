@@ -11,13 +11,13 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\PartStatus;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 
 class ConcurrentPartsTest extends TestCase
 {
     use RefreshDatabase;
 
     protected WorkExecutor $executor;
+
     protected LeaseService $leaseService;
 
     protected function setUp(): void
@@ -106,7 +106,7 @@ class ConcurrentPartsTest extends TestCase
             ->and($item->fresh()->parts()->count())->toBe(2);
     }
 
-    public function test_concurrent_submissions_with_updateOrCreate_handles_race_condition()
+    public function test_concurrent_submissions_with_update_or_create_handles_race_condition()
     {
         $order = WorkOrder::create(['type' => 'test.partial', 'state' => \GregPriday\WorkManager\Support\OrderState::QUEUED, 'payload' => []]);
         $item = WorkItem::create([

@@ -79,7 +79,7 @@ class BearerAuthMiddleware
         try {
             // For Sanctum, we need to create a request with the Bearer token
             $authRequest = request();
-            $authRequest->headers->set('Authorization', 'Bearer ' . $token);
+            $authRequest->headers->set('Authorization', 'Bearer '.$token);
 
             // Attempt authentication
             $user = Auth::guard($this->guard)->user();

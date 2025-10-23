@@ -25,7 +25,9 @@ class PartialSubmissionsEventsTest extends TestCase
     use RefreshDatabase;
 
     protected WorkAllocator $allocator;
+
     protected WorkExecutor $executor;
+
     protected LeaseService $leaseService;
 
     protected function setUp(): void
@@ -36,7 +38,7 @@ class PartialSubmissionsEventsTest extends TestCase
         $this->executor = app(WorkExecutor::class);
         $this->leaseService = app(LeaseService::class);
 
-        app('work-manager')->registry()->register(new TestPartialEventsOrderType());
+        app('work-manager')->registry()->register(new TestPartialEventsOrderType);
     }
 
     public function test_submit_part_dispatches_submitted_and_validated_events()
@@ -90,7 +92,7 @@ class PartialSubmissionsEventsTest extends TestCase
         Event::assertDispatched(WorkItemPartRejected::class, function ($event) {
             return $event->part->part_key === 'identity' &&
                    $event->part->status->value === 'rejected' &&
-                   !empty($event->part->errors);
+                   ! empty($event->part->errors);
         });
     }
 

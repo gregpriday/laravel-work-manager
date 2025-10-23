@@ -68,14 +68,12 @@ it('filters orders by type', function () {
 
 it('orders by priority desc then created_at asc', function () {
     // Use a unique type to isolate these test orders
-    $testType = 'test.echo.ordering.' . uniqid();
+    $testType = 'test.echo.ordering.'.uniqid();
 
     // Register a test type for this specific test
     WorkManager::registry()->register(new class($testType) extends \GregPriday\WorkManager\Tests\Fixtures\OrderTypes\EchoOrderType
     {
-        public function __construct(private string $typeOverride)
-        {
-        }
+        public function __construct(private string $typeOverride) {}
 
         public function type(): string
         {

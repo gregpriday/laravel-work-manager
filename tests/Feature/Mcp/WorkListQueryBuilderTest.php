@@ -165,7 +165,7 @@ it('supports operator filter with created_at', function () {
     $tools = app(WorkManagerTools::class);
 
     $result = $tools->list(filter: [
-        'created_at' => '>=' . $cutoffDate->toIso8601String(),
+        'created_at' => '>='.$cutoffDate->toIso8601String(),
     ]);
 
     expect($result['success'])->toBeTrue();

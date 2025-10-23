@@ -31,8 +31,8 @@ it('blocks submit-part without authorization', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -57,8 +57,8 @@ it('blocks list-parts without authorization', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->getJson("/agent/work/items/{$item->id}/parts");
 
@@ -78,8 +78,8 @@ it('blocks finalize without authorization', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
@@ -92,7 +92,7 @@ it('blocks finalize without authorization', function () {
 
 it('allows submit-part with proper authorization', function () {
     // Authenticate as test user (TestUser has permissive policy in TestCase)
-    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser());
+    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser);
 
     // Define permissive policy just for this test
     Gate::define('submit', fn ($user, $order) => true);
@@ -109,8 +109,8 @@ it('allows submit-part with proper authorization', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -126,7 +126,7 @@ it('allows submit-part with proper authorization', function () {
 });
 
 it('allows list-parts with proper authorization', function () {
-    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser());
+    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser);
 
     // Define permissive policy
     Gate::define('view', fn ($user, $order) => true);
@@ -141,8 +141,8 @@ it('allows list-parts with proper authorization', function () {
         'order_id' => $order->id,
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->getJson("/agent/work/items/{$item->id}/parts");
 
@@ -151,7 +151,7 @@ it('allows list-parts with proper authorization', function () {
 });
 
 it('allows finalize with proper authorization', function () {
-    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser());
+    $this->actingAs(new \GregPriday\WorkManager\Tests\Fixtures\TestUser);
 
     // Define permissive policy
     Gate::define('submit', fn ($user, $order) => true);
@@ -169,8 +169,8 @@ it('allows finalize with proper authorization', function () {
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
         'parts_required' => [],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
@@ -198,8 +198,8 @@ it('respects authorization on submit-part even with valid lease', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',

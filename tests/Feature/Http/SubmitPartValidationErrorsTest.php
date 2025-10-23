@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
     config()->set('work-manager.idempotency.enforce_on', []);
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('returns 422 when part_key is missing', function () {
@@ -20,8 +20,8 @@ it('returns 422 when part_key is missing', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'payload' => ['name' => 'John Doe'],
@@ -42,8 +42,8 @@ it('returns 422 when payload is missing', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -64,8 +64,8 @@ it('returns 422 when part_key is not a string', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 123,
@@ -86,8 +86,8 @@ it('returns 422 when payload is not an array', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -108,8 +108,8 @@ it('returns 422 when seq is not an integer', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -131,8 +131,8 @@ it('returns 422 when evidence is not an array', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -154,8 +154,8 @@ it('returns 422 when notes is not a string', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -177,8 +177,8 @@ it('accepts valid submit-part request', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -209,8 +209,8 @@ it('accepts submit-part with optional fields omitted', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',

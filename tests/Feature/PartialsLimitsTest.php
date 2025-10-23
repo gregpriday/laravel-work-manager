@@ -15,6 +15,7 @@ class PartialsLimitsTest extends TestCase
     use RefreshDatabase;
 
     protected WorkExecutor $executor;
+
     protected LeaseService $leaseService;
 
     protected function setUp(): void
@@ -81,7 +82,7 @@ class PartialsLimitsTest extends TestCase
         $item = $item->fresh();
 
         // Create payload close to limit (90% of max)
-        $payloadSize = (int)($maxBytes * 0.9);
+        $payloadSize = (int) ($maxBytes * 0.9);
         $largePayload = [
             'data' => str_repeat('a', $payloadSize),
         ];
@@ -273,7 +274,7 @@ class PartialsLimitsTest extends TestCase
                 $item2,
                 "part_{$i}",
                 null,
-                ['data' => str_repeat("x", 1000)],
+                ['data' => str_repeat('x', 1000)],
                 'agent-2'
             );
         }

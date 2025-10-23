@@ -2,8 +2,6 @@
 
 use GregPriday\WorkManager\Exceptions\IdempotencyConflictException;
 use GregPriday\WorkManager\Models\WorkIdempotencyKey;
-use GregPriday\WorkManager\Models\WorkItem;
-use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\IdempotencyService;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Services\WorkExecutor;
@@ -45,6 +43,7 @@ it('guards callback execution with idempotency', function () {
     $counter = 0;
     $callback = function () use (&$counter) {
         $counter++;
+
         return ['count' => $counter];
     };
 

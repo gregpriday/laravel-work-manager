@@ -10,7 +10,6 @@ use GregPriday\WorkManager\Services\LeaseService;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Services\WorkExecutor;
 use GregPriday\WorkManager\Support\ActorType;
-use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,13 +19,13 @@ use Illuminate\Support\Facades\Auth;
 class WorkOrderApiController extends Controller
 {
     use AuthorizesRequests;
+
     public function __construct(
         protected WorkAllocator $allocator,
         protected WorkExecutor $executor,
         protected LeaseService $leaseService,
         protected IdempotencyService $idempotency
-    ) {
-    }
+    ) {}
 
     /**
      * Propose a new work order.
@@ -45,7 +44,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('propose') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('propose') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -57,7 +56,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'propose:' . $validated['type'],
+                'propose:'.$validated['type'],
                 $idempotencyKey,
                 fn () => $this->createOrder($validated)
             );
@@ -104,7 +103,7 @@ class WorkOrderApiController extends Controller
         $normalized = $request->all();
 
         foreach ($simpleFilters as $key) {
-            if ($request->has($key) && !$request->has("filter.{$key}")) {
+            if ($request->has($key) && ! $request->has("filter.{$key}")) {
                 $normalized['filter'][$key] = $request->input($key);
                 unset($normalized[$key]);
             }
@@ -147,7 +146,7 @@ class WorkOrderApiController extends Controller
         // Get next available item
         $item = $this->leaseService->getNextAvailable($order->id);
 
-        if (!$item) {
+        if (! $item) {
             return response()->json([
                 'error' => [
                     'code' => 'no_items_available',
@@ -194,7 +193,7 @@ class WorkOrderApiController extends Controller
         $agentId = $this->getAgentId($request);
         $item = $this->leaseService->acquireNextAvailable($agentId, $validated);
 
-        if (!$item) {
+        if (! $item) {
             return response()->json([
                 'error' => [
                     'code' => 'no_items_available',
@@ -254,7 +253,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('submit') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('submit') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -266,7 +265,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'submit:item:' . $item->id,
+                'submit:item:'.$item->id,
                 $idempotencyKey,
                 fn () => $this->submitItem($item, $validated, $agentId)
             );
@@ -292,7 +291,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('approve') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('approve') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -304,7 +303,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'approve:order:' . $order->id,
+                'approve:order:'.$order->id,
                 $idempotencyKey,
                 fn () => $this->executor->approve($order, $actorType, $actorId)
             );
@@ -338,7 +337,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('reject') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('reject') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -350,7 +349,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'reject:order:' . $order->id,
+                'reject:order:'.$order->id,
                 $idempotencyKey,
                 fn () => [
                     'order' => $this->executor->reject(
@@ -475,7 +474,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('submit-part') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('submit-part') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -487,7 +486,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'submit-part:item:' . $item->id . ':' . $validated['part_key'] . ':' . ($validated['seq'] ?? 'null'),
+                'submit-part:item:'.$item->id.':'.$validated['part_key'].':'.($validated['seq'] ?? 'null'),
                 $idempotencyKey,
                 fn () => $this->submitPartInternal($item, $validated, $agentId)
             );
@@ -555,7 +554,7 @@ class WorkOrderApiController extends Controller
         $idempotencyKey = $request->header($this->idempotency->getHeaderName());
 
         // Enforce idempotency key if required
-        if ($this->idempotency->isRequired('finalize') && !$idempotencyKey) {
+        if ($this->idempotency->isRequired('finalize') && ! $idempotencyKey) {
             return response()->json([
                 'error' => [
                     'code' => 'idempotency_key_required',
@@ -567,7 +566,7 @@ class WorkOrderApiController extends Controller
 
         if ($idempotencyKey) {
             $result = $this->idempotency->guard(
-                'finalize:item:' . $item->id,
+                'finalize:item:'.$item->id,
                 $idempotencyKey,
                 fn () => $this->finalizeInternal($item, $mode)
             );

@@ -92,7 +92,7 @@ class WorkIdempotencyKeyTest extends TestCase
     public function test_for_key_scope_with_multiple_matching_records_returns_first()
     {
         // This shouldn't happen in practice due to unique constraint, but test the scope behavior
-        $scope = 'test:scope:' . uniqid();
+        $scope = 'test:scope:'.uniqid();
         $keyHash = hash('sha256', 'test-key');
 
         WorkIdempotencyKey::create([

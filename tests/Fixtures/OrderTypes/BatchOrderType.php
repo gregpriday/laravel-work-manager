@@ -68,7 +68,7 @@ class BatchOrderType extends AbstractOrderType
     {
         // Custom approval logic: all batches must have count > 0
         foreach ($order->items as $item) {
-            if (!isset($item->result['count']) || $item->result['count'] <= 0) {
+            if (! isset($item->result['count']) || $item->result['count'] <= 0) {
                 return false;
             }
         }

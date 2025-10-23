@@ -21,7 +21,7 @@ abstract class AbstractAcceptancePolicy implements AcceptancePolicy
         // Run Laravel validation
         $rules = $this->validationRules($item);
 
-        if (!empty($rules)) {
+        if (! empty($rules)) {
             $validator = validator($result, $rules, $this->validationMessages());
 
             if ($validator->fails()) {
@@ -44,7 +44,7 @@ abstract class AbstractAcceptancePolicy implements AcceptancePolicy
             ->whereIn('state', $validStates)
             ->count() === $order->items()->count();
 
-        if (!$allValid) {
+        if (! $allValid) {
             return false;
         }
 

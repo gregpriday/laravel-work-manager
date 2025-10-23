@@ -5,7 +5,7 @@ use GregPriday\WorkManager\Policies\WorkOrderPolicy;
 use Illuminate\Foundation\Auth\User;
 
 beforeEach(function () {
-    $this->policy = new WorkOrderPolicy();
+    $this->policy = new WorkOrderPolicy;
     $this->order = WorkOrder::create([
         'type' => 'test.echo',
         'payload' => ['message' => 'test'],
@@ -15,7 +15,8 @@ beforeEach(function () {
 });
 
 test('propose allows authenticated user without can method', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
     };
 
@@ -29,9 +30,12 @@ test('propose denies null user', function () {
 test('propose checks user can method when available', function () {
     config()->set('work-manager.policies.propose', 'work.propose');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return $abilities === 'work.propose';
         }
     };
@@ -42,9 +46,12 @@ test('propose checks user can method when available', function () {
 test('propose denies when user cannot based on ability', function () {
     config()->set('work-manager.policies.propose', 'work.propose');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return false;
         }
     };
@@ -53,7 +60,8 @@ test('propose denies when user cannot based on ability', function () {
 });
 
 test('view allows requester of the order', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 123;
     };
 
@@ -61,7 +69,8 @@ test('view allows requester of the order', function () {
 });
 
 test('view allows any authenticated user', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 999; // Different from requester
     };
 
@@ -73,7 +82,8 @@ test('view denies null user', function () {
 });
 
 test('checkout allows authenticated user without can method', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
     };
 
@@ -87,9 +97,12 @@ test('checkout denies null user', function () {
 test('checkout checks user can method when available', function () {
     config()->set('work-manager.policies.checkout', 'work.checkout');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return $abilities === 'work.checkout';
         }
     };
@@ -100,9 +113,12 @@ test('checkout checks user can method when available', function () {
 test('checkout denies when user cannot based on ability', function () {
     config()->set('work-manager.policies.checkout', 'work.checkout');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return false;
         }
     };
@@ -111,7 +127,8 @@ test('checkout denies when user cannot based on ability', function () {
 });
 
 test('submit allows authenticated user without can method', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
     };
 
@@ -125,9 +142,12 @@ test('submit denies null user', function () {
 test('submit checks user can method when available', function () {
     config()->set('work-manager.policies.submit', 'work.submit');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return $abilities === 'work.submit';
         }
     };
@@ -138,9 +158,12 @@ test('submit checks user can method when available', function () {
 test('submit denies when user cannot based on ability', function () {
     config()->set('work-manager.policies.submit', 'work.submit');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return false;
         }
     };
@@ -155,9 +178,12 @@ test('approve denies null user', function () {
 test('approve allows when user has can method and returns true', function () {
     config()->set('work-manager.policies.approve', 'work.approve');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return $abilities === 'work.approve';
         }
     };
@@ -168,9 +194,12 @@ test('approve allows when user has can method and returns true', function () {
 test('approve denies when user has can method but returns false', function () {
     config()->set('work-manager.policies.approve', 'work.approve');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return false;
         }
     };
@@ -185,9 +214,12 @@ test('reject denies null user', function () {
 test('reject allows when user has can method and returns true', function () {
     config()->set('work-manager.policies.reject', 'work.reject');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return $abilities === 'work.reject';
         }
     };
@@ -198,9 +230,12 @@ test('reject allows when user has can method and returns true', function () {
 test('reject denies when user has can method but returns false', function () {
     config()->set('work-manager.policies.reject', 'work.reject');
 
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 1;
-        public function can($abilities, $arguments = []) {
+
+        public function can($abilities, $arguments = [])
+        {
             return false;
         }
     };
@@ -210,7 +245,8 @@ test('reject denies when user has can method but returns false', function () {
 
 test('view matches requester ID with string comparison', function () {
     // Test with numeric user ID
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 123; // Integer
     };
 
@@ -219,7 +255,8 @@ test('view matches requester ID with string comparison', function () {
 });
 
 test('view does not match when requester ID different', function () {
-    $user = new class extends User {
+    $user = new class extends User
+    {
         public $id = 456;
     };
 

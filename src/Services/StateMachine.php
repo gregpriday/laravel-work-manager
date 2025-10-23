@@ -26,7 +26,7 @@ class StateMachine
         ?string $message = null,
         ?array $diff = null
     ): WorkOrder {
-        if (!$order->state->canTransitionTo($newState)) {
+        if (! $order->state->canTransitionTo($newState)) {
             throw new IllegalStateTransitionException(
                 $order->state->value,
                 $newState->value,
@@ -75,7 +75,7 @@ class StateMachine
         ?array $payload = null,
         ?string $message = null
     ): WorkItem {
-        if (!$item->state->canTransitionTo($newState)) {
+        if (! $item->state->canTransitionTo($newState)) {
             throw new IllegalStateTransitionException(
                 $item->state->value,
                 $newState->value,

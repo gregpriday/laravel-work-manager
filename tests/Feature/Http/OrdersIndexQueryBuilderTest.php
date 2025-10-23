@@ -188,7 +188,7 @@ it('filters with operator filter priority greater than', function () {
 });
 
 it('filters with operator filter created_at greater than or equal', function () {
-    $uniqueType = 'test.echo.created_at.' . uniqid();
+    $uniqueType = 'test.echo.created_at.'.uniqid();
     $cutoffDate = now()->subDays(5);
 
     WorkOrder::create([
@@ -207,7 +207,7 @@ it('filters with operator filter created_at greater than or equal', function () 
         'created_at' => now()->subDays(2),
     ]);
 
-    $response = $this->getJson("/agent/work/orders?filter[type]={$uniqueType}&filter[created_at]=>=" . $cutoffDate->toIso8601String());
+    $response = $this->getJson("/agent/work/orders?filter[type]={$uniqueType}&filter[created_at]=>=".$cutoffDate->toIso8601String());
 
     $response->assertOk();
     $data = $response->json('data');
@@ -253,14 +253,12 @@ it('filters with JSON meta filter using string notation', function () {
 it('filters with has_available_items callback', function () {
     $allocator = app(\GregPriday\WorkManager\Services\WorkAllocator::class);
     $leaseService = app(\GregPriday\WorkManager\Services\LeaseService::class);
-    $uniqueType = 'test.echo.available.' . uniqid();
+    $uniqueType = 'test.echo.available.'.uniqid();
 
     // Register a test type for this specific test
     WorkManager::registry()->register(new class($uniqueType) extends \GregPriday\WorkManager\Tests\Fixtures\OrderTypes\EchoOrderType
     {
-        public function __construct(private string $typeOverride)
-        {
-        }
+        public function __construct(private string $typeOverride) {}
 
         public function type(): string
         {
@@ -288,14 +286,12 @@ it('filters with has_available_items callback', function () {
 
 it('supports include with itemsCount', function () {
     $allocator = app(\GregPriday\WorkManager\Services\WorkAllocator::class);
-    $uniqueType = 'test.batch.count.' . uniqid();
+    $uniqueType = 'test.batch.count.'.uniqid();
 
     // Register a test type for this specific test
     WorkManager::registry()->register(new class($uniqueType) extends \GregPriday\WorkManager\Tests\Fixtures\OrderTypes\BatchOrderType
     {
-        public function __construct(private string $typeOverride)
-        {
-        }
+        public function __construct(private string $typeOverride) {}
 
         public function type(): string
         {
@@ -381,7 +377,7 @@ it('supports custom sorting by priority ascending', function () {
 });
 
 it('supports custom sorting by created_at descending', function () {
-    $uniqueType = 'test.echo.sort.' . uniqid();
+    $uniqueType = 'test.echo.sort.'.uniqid();
 
     $old = WorkOrder::create([
         'type' => $uniqueType,
@@ -412,14 +408,12 @@ it('supports custom sorting by created_at descending', function () {
 
 it('supports sorting by items_count', function () {
     $allocator = app(\GregPriday\WorkManager\Services\WorkAllocator::class);
-    $uniqueType = 'test.batch.sort.' . uniqid();
+    $uniqueType = 'test.batch.sort.'.uniqid();
 
     // Register a test type for this specific test
     WorkManager::registry()->register(new class($uniqueType) extends \GregPriday\WorkManager\Tests\Fixtures\OrderTypes\BatchOrderType
     {
-        public function __construct(private string $typeOverride)
-        {
-        }
+        public function __construct(private string $typeOverride) {}
 
         public function type(): string
         {

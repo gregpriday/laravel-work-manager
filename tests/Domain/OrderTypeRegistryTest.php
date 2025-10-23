@@ -7,8 +7,8 @@ use GregPriday\WorkManager\Tests\Fixtures\OrderTypes\BatchOrderType;
 use GregPriday\WorkManager\Tests\Fixtures\OrderTypes\EchoOrderType;
 
 it('registers and retrieves order types', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType = new EchoOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType = new EchoOrderType;
 
     $registry->register($echoType);
 
@@ -16,8 +16,8 @@ it('registers and retrieves order types', function () {
 });
 
 it('checks if type is registered', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType = new EchoOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType = new EchoOrderType;
 
     expect($registry->has('test.echo'))->toBeFalse();
 
@@ -27,16 +27,16 @@ it('checks if type is registered', function () {
 });
 
 it('throws when getting non-existent type', function () {
-    $registry = new OrderTypeRegistry();
+    $registry = new OrderTypeRegistry;
 
     expect(fn () => $registry->get('non.existent.type'))
         ->toThrow(OrderTypeNotFoundException::class);
 });
 
 it('returns all registered types', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType = new EchoOrderType();
-    $batchType = new BatchOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType = new EchoOrderType;
+    $batchType = new BatchOrderType;
 
     $registry->register($echoType);
     $registry->register($batchType);
@@ -50,9 +50,9 @@ it('returns all registered types', function () {
 });
 
 it('returns all registered type names', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType = new EchoOrderType();
-    $batchType = new BatchOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType = new EchoOrderType;
+    $batchType = new BatchOrderType;
 
     $registry->register($echoType);
     $registry->register($batchType);
@@ -63,9 +63,9 @@ it('returns all registered type names', function () {
 });
 
 it('allows re-registering type with same name', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType1 = new EchoOrderType();
-    $echoType2 = new EchoOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType1 = new EchoOrderType;
+    $echoType2 = new EchoOrderType;
 
     $registry->register($echoType1);
     expect($registry->get('test.echo'))->toBe($echoType1);
@@ -76,7 +76,7 @@ it('allows re-registering type with same name', function () {
 });
 
 it('returns empty array when no types registered', function () {
-    $registry = new OrderTypeRegistry();
+    $registry = new OrderTypeRegistry;
 
     expect($registry->all())->toBe([]);
     expect($registry->names())->toBe([]);
@@ -94,7 +94,7 @@ it('uses global registry through facade', function () {
 });
 
 it('provides detailed exception message for missing type', function () {
-    $registry = new OrderTypeRegistry();
+    $registry = new OrderTypeRegistry;
 
     try {
         $registry->get('missing.type');
@@ -105,8 +105,8 @@ it('provides detailed exception message for missing type', function () {
 });
 
 it('handles type registration idempotently', function () {
-    $registry = new OrderTypeRegistry();
-    $type = new EchoOrderType();
+    $registry = new OrderTypeRegistry;
+    $type = new EchoOrderType;
 
     // Register multiple times
     $registry->register($type);
@@ -119,8 +119,8 @@ it('handles type registration idempotently', function () {
 });
 
 it('maintains type identity after retrieval', function () {
-    $registry = new OrderTypeRegistry();
-    $echoType = new EchoOrderType();
+    $registry = new OrderTypeRegistry;
+    $echoType = new EchoOrderType;
 
     $registry->register($echoType);
 

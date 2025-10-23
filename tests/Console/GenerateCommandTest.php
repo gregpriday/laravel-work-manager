@@ -4,7 +4,6 @@ use GregPriday\WorkManager\Contracts\AllocatorStrategy;
 use GregPriday\WorkManager\Contracts\PlannerPort;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\ActorType;
-use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -40,7 +39,7 @@ test('generate command processes AllocatorStrategy successfully', function () {
     $strategyClass = get_class($strategy);
 
     // Bind and tag the strategy in the container
-    app()->bind($strategyClass, fn() => $strategy);
+    app()->bind($strategyClass, fn () => $strategy);
     app()->tag($strategyClass, 'work-manager.strategies');
 
     $this->artisan('work-manager:generate')

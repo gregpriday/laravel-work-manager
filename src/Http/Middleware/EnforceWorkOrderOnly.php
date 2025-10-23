@@ -20,7 +20,7 @@ class EnforceWorkOrderOnly
         $orderId = $request->header('X-Work-Order-ID')
             ?? $request->input('_work_order_id');
 
-        if (!$orderId) {
+        if (! $orderId) {
             throw new ForbiddenDirectMutationException(
                 'This action requires a valid work order context. Please create a work order first.'
             );
@@ -29,19 +29,19 @@ class EnforceWorkOrderOnly
         // Verify the work order exists and is in an allowed state
         $order = WorkOrder::find($orderId);
 
-        if (!$order) {
+        if (! $order) {
             throw new ForbiddenDirectMutationException(
                 'The specified work order does not exist.'
             );
         }
 
         // Check state if allowed states are specified
-        if (!empty($allowedStates)) {
+        if (! empty($allowedStates)) {
             $currentState = $order->state->value;
 
-            if (!in_array($currentState, $allowedStates)) {
+            if (! in_array($currentState, $allowedStates)) {
                 throw new ForbiddenDirectMutationException(
-                    "Work order must be in one of these states: " . implode(', ', $allowedStates) .
+                    'Work order must be in one of these states: '.implode(', ', $allowedStates).
                     ". Current state: {$currentState}"
                 );
             }

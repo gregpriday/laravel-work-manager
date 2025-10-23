@@ -13,6 +13,5 @@ abstract class WorkItemPartEvent
     public function __construct(
         public readonly WorkItemPart $part,
         public readonly ?array $payload = null
-    ) {
-    }
+    ) {}
 }

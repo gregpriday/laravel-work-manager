@@ -57,9 +57,6 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
      * Get agent ID from request.
      *
      * Tries headers first, falls back to authenticated user ID.
-     *
-     * @param  Request  $request
-     * @return string|null
      */
     protected function getAgentId(Request $request): ?string
     {
@@ -74,7 +71,6 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
      * Combines multiple request attributes to create a unique identifier
      * for tracking and correlation.
      *
-     * @param  Request  $request
      * @return string SHA-256 hash of request attributes
      */
     protected function generateFingerprint(Request $request): string
@@ -95,7 +91,6 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
      *
      * Check if required agent headers are present and valid.
      *
-     * @param  Request  $request
      * @return array Array of validation errors (empty if valid)
      */
     public function validate(Request $request): array
@@ -118,9 +113,6 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
 
     /**
      * Check if a string is a valid semantic version.
-     *
-     * @param  string  $version
-     * @return bool
      */
     protected function isValidSemver(string $version): bool
     {
@@ -136,9 +128,6 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
      * - "research-agent-1" -> "research"
      * - "fact-checker" -> "fact-checker"
      * - "user-123" -> "user"
-     *
-     * @param  string  $agentId
-     * @return string|null
      */
     public function extractAgentType(string $agentId): ?string
     {

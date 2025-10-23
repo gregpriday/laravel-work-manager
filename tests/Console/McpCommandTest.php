@@ -26,7 +26,7 @@ test('mcp command rejects invalid transport grpc', function () {
 
 test('mcp command stdio shows correct output before attempting to start', function () {
     // This test only verifies the output before the actual mcp:serve call
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 
@@ -48,7 +48,7 @@ test('mcp command stdio shows correct output before attempting to start', functi
 // which could cause conflicts in CI/CD environments and would hang the test suite.
 // The stdio test above verifies the output logic works correctly.
 test('mcp command http shows correct output before attempting to start', function () {
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 
@@ -56,7 +56,7 @@ test('mcp command http shows correct output before attempting to start', functio
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http respects custom host and port in output', function () {
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 
@@ -64,7 +64,7 @@ test('mcp command http respects custom host and port in output', function () {
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows auth disabled by default', function () {
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 
@@ -72,7 +72,7 @@ test('mcp command http shows auth disabled by default', function () {
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows auth enabled when configured', function () {
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 
@@ -80,7 +80,7 @@ test('mcp command http shows auth enabled when configured', function () {
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows static token count when configured', function () {
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('PhpMcp package not installed');
     }
 

@@ -1,8 +1,5 @@
 <?php
 
-use GregPriday\WorkManager\Console\GenerateCommand;
-use GregPriday\WorkManager\Console\MaintainCommand;
-use GregPriday\WorkManager\Console\McpCommand;
 use GregPriday\WorkManager\Mcp\WorkManagerTools;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Policies\WorkOrderPolicy;
@@ -119,7 +116,7 @@ test('WorkOrderPolicy is registered via Gate', function () {
 });
 
 test('commands are registered when running in console', function () {
-    if (!$this->app->runningInConsole()) {
+    if (! $this->app->runningInConsole()) {
         $this->markTestSkipped('This test requires console mode');
     }
 
@@ -150,7 +147,7 @@ test('routes can be registered via registerRoutes method', function () {
 
 test('registerMcpTools can be called when MCP class exists', function () {
     // Skip if MCP is not available
-    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
         $this->markTestSkipped('MCP package not available');
     }
 

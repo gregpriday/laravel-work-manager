@@ -159,7 +159,7 @@ it('validates order state transitions match config', function () {
     // Try transitioning to completed (not in allowed transitions from queued)
     $queuedAllowed = $allowedTransitions[OrderState::QUEUED->value] ?? [];
 
-    if (!in_array(OrderState::COMPLETED->value, $queuedAllowed)) {
+    if (! in_array(OrderState::COMPLETED->value, $queuedAllowed)) {
         expect(fn () => $sm->transitionOrder($order, OrderState::COMPLETED))
             ->toThrow(IllegalStateTransitionException::class);
     }
@@ -187,7 +187,7 @@ it('validates item state transitions match config', function () {
     // Try transitioning to completed (not in allowed transitions from queued)
     $queuedAllowed = $allowedTransitions[ItemState::QUEUED->value] ?? [];
 
-    if (!in_array(ItemState::COMPLETED->value, $queuedAllowed)) {
+    if (! in_array(ItemState::COMPLETED->value, $queuedAllowed)) {
         expect(fn () => $sm->transitionItem($item, ItemState::COMPLETED))
             ->toThrow(IllegalStateTransitionException::class);
     }

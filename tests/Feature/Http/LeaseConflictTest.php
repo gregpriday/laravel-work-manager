@@ -11,7 +11,7 @@ beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('returns 409 when no items available (all items already completed)', function () {

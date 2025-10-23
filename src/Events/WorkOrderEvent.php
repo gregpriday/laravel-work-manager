@@ -13,6 +13,5 @@ abstract class WorkOrderEvent
     public function __construct(
         public readonly WorkOrder $order,
         public readonly ?array $payload = null
-    ) {
-    }
+    ) {}
 }

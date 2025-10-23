@@ -90,7 +90,7 @@ class WorkItem extends Model
      */
     public function isLeaseExpired(): bool
     {
-        if (!$this->lease_expires_at) {
+        if (! $this->lease_expires_at) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class WorkItem extends Model
     {
         return $this->leased_by_agent_id !== null
             && $this->lease_expires_at !== null
-            && !$this->isLeaseExpired();
+            && ! $this->isLeaseExpired();
     }
 
     /**
@@ -162,7 +162,7 @@ class WorkItem extends Model
      */
     public function supportsPartialSubmissions(): bool
     {
-        return !empty($this->parts_required);
+        return ! empty($this->parts_required);
     }
 
     /**

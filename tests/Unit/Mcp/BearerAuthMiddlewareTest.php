@@ -2,8 +2,8 @@
 
 use GregPriday\WorkManager\Mcp\BearerAuthMiddleware;
 use Illuminate\Support\Facades\Auth;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 beforeEach(function () {
     config()->set('work-manager.routes.guard', 'web');

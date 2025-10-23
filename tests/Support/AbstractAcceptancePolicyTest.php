@@ -16,7 +16,9 @@ uses(RefreshDatabase::class);
 class TestAcceptancePolicy extends AbstractAcceptancePolicy
 {
     public bool $customApprovalResult = true;
+
     public $customValidationCallback = null;
+
     public bool $shouldCallFail = false;
 
     protected function validationRules(WorkItem $item): array
@@ -67,7 +69,7 @@ it('validates submission successfully with valid data', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $result = ['status' => 'success', 'count' => 5];
 
     // Should not throw
@@ -80,7 +82,7 @@ it('throws ValidationException when validation rules fail', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $result = ['status' => 'invalid', 'count' => 0]; // Invalid status and count too low
 
     $policy->validateSubmission($item, $result);
@@ -90,7 +92,7 @@ it('throws ValidationException when required field is missing', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $result = ['count' => 5]; // Missing 'status'
 
     $policy->validateSubmission($item, $result);
@@ -100,7 +102,7 @@ it('uses custom validation messages', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $result = []; // Missing required fields
 
     try {
@@ -118,7 +120,7 @@ it('calls customValidation hook', function () {
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
     $called = false;
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $policy->customValidationCallback = function ($passedItem, $passedResult) use ($item, &$called) {
         expect($passedItem->id)->toBe($item->id);
         expect($passedResult)->toHaveKey('status');
@@ -135,7 +137,7 @@ it('allows custom validation to throw exceptions', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $policy->customValidationCallback = function () {
         throw ValidationException::withMessages(['custom' => ['Custom error']]);
     };
@@ -149,7 +151,7 @@ it('skips validation when rules are empty', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new EmptyRulesPolicy();
+    $policy = new EmptyRulesPolicy;
     $result = ['anything' => 'goes'];
 
     // Should not throw
@@ -164,7 +166,7 @@ it('readyForApproval returns true when all items are submitted or accepted', fun
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::ACCEPTED, 'input' => []]);
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
 
     expect($policy->readyForApproval($order))->toBeTrue();
 });
@@ -175,7 +177,7 @@ it('readyForApproval returns false when any item is not in valid state', functio
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::IN_PROGRESS, 'input' => []]); // Invalid state
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::ACCEPTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
 
     expect($policy->readyForApproval($order))->toBeFalse();
 });
@@ -184,7 +186,7 @@ it('readyForApproval returns false when items are in queued state', function () 
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::QUEUED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
 
     expect($policy->readyForApproval($order))->toBeFalse();
 });
@@ -194,7 +196,7 @@ it('readyForApproval respects customApprovalCheck result', function () {
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::ACCEPTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $policy->customApprovalResult = false; // Custom check vetoes approval
 
     expect($policy->readyForApproval($order))->toBeFalse();
@@ -204,7 +206,7 @@ it('readyForApproval returns true when customApprovalCheck allows it', function 
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $policy->customApprovalResult = true;
 
     expect($policy->readyForApproval($order))->toBeTrue();
@@ -214,7 +216,7 @@ it('readyForApproval returns true for order with no items but custom check passe
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     // No items created
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
 
     // With no items, the count check (0 === 0) passes
     expect($policy->readyForApproval($order))->toBeTrue();
@@ -224,7 +226,7 @@ it('fail helper throws ValidationException with structured message', function ()
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
     $policy->shouldCallFail = true; // Trigger fail() inside customValidation
 
     $result = ['status' => 'success', 'count' => 5];
@@ -243,7 +245,7 @@ it('validates with multiple validation rules', function () {
     $order = WorkOrder::create(['type' => 't', 'state' => OrderState::QUEUED, 'payload' => []]);
     $item = WorkItem::create(['order_id' => $order->id, 'type' => 't', 'state' => ItemState::SUBMITTED, 'input' => []]);
 
-    $policy = new TestAcceptancePolicy();
+    $policy = new TestAcceptancePolicy;
 
     // Test multiple invalid fields
     $result = ['status' => 'invalid_status', 'count' => -1]; // Both invalid

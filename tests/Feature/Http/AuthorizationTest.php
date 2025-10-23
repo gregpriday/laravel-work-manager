@@ -100,7 +100,7 @@ it('allows authorized actions when user has permission', function () {
     Gate::before(fn () => true);
 
     // Authenticate as test user
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 
     $response = $this->postJson('/agent/work/propose', [
         'type' => 'test.echo',

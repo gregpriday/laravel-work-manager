@@ -25,7 +25,7 @@ class OrderTypeRegistry
      */
     public function get(string $type): OrderType
     {
-        if (!isset($this->types[$type])) {
+        if (! isset($this->types[$type])) {
             throw new OrderTypeNotFoundException($type);
         }
 

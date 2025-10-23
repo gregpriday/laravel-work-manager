@@ -74,6 +74,7 @@ it('attaches work order to request', function () {
 
     Route::post('/_test/check-attachment', function (\Illuminate\Http\Request $request) {
         $workOrder = $request->input('_work_order');
+
         return response()->json([
             'has_order' => $workOrder !== null,
             'order_id' => $workOrder?->id,
@@ -96,7 +97,7 @@ it('rejects when order not in allowed states', function () {
 
     Route::post('/_test/state-protected', function () {
         return response()->json(['success' => true]);
-    })->middleware(EnforceWorkOrderOnly::class . ':approved,applied');
+    })->middleware(EnforceWorkOrderOnly::class.':approved,applied');
 
     $order = WorkOrder::create([
         'type' => 'test.echo',
@@ -116,7 +117,7 @@ it('rejects when order not in allowed states', function () {
 it('allows when order in allowed states', function () {
     Route::post('/_test/state-allowed', function () {
         return response()->json(['success' => true]);
-    })->middleware(EnforceWorkOrderOnly::class . ':approved,applied');
+    })->middleware(EnforceWorkOrderOnly::class.':approved,applied');
 
     $order = WorkOrder::create([
         'type' => 'test.echo',
@@ -179,7 +180,7 @@ it('prefers header over body when both provided', function () {
 it('validates multiple allowed states correctly', function () {
     Route::post('/_test/multi-state', function () {
         return response()->json(['success' => true]);
-    })->middleware(EnforceWorkOrderOnly::class . ':queued,in_progress,submitted');
+    })->middleware(EnforceWorkOrderOnly::class.':queued,in_progress,submitted');
 
     // Test each allowed state
     $states = [OrderState::QUEUED, OrderState::IN_PROGRESS, OrderState::SUBMITTED];

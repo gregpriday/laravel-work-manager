@@ -9,8 +9,7 @@ class Diff
         public readonly array $after,
         public readonly array $changes,
         public readonly ?string $summary = null
-    ) {
-    }
+    ) {}
 
     public static function fromArrays(array $before, array $after, ?string $summary = null): self
     {
@@ -41,7 +40,7 @@ class Diff
 
     public function hasChanges(): bool
     {
-        return !empty($this->changes);
+        return ! empty($this->changes);
     }
 
     protected static function computeChanges(array $before, array $after): array
@@ -50,7 +49,7 @@ class Diff
 
         // Find additions and modifications
         foreach ($after as $key => $value) {
-            if (!array_key_exists($key, $before)) {
+            if (! array_key_exists($key, $before)) {
                 $changes[$key] = [
                     'type' => 'added',
                     'value' => $value,
@@ -66,7 +65,7 @@ class Diff
 
         // Find deletions
         foreach ($before as $key => $value) {
-            if (!array_key_exists($key, $after)) {
+            if (! array_key_exists($key, $after)) {
                 $changes[$key] = [
                     'type' => 'removed',
                     'value' => $value,

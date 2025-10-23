@@ -16,7 +16,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         // Run migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         // Register test fixtures
         $this->registerTestOrderTypes();
@@ -31,7 +31,7 @@ class TestCase extends Orchestra
     {
         // Define authorization abilities that always return true for tests
         // This runs during application bootstrap before policies are registered
-        $app['events']->listen('Illuminate\Auth\Events\Registered', function () use ($app) {
+        $app['events']->listen('Illuminate\Auth\Events\Registered', function () {
             // Gate callbacks
         });
     }
@@ -66,8 +66,8 @@ class TestCase extends Orchestra
 
     protected function registerTestOrderTypes(): void
     {
-        WorkManager::registry()->register(new EchoOrderType());
-        WorkManager::registry()->register(new BatchOrderType());
-        WorkManager::registry()->register(new TestPartialOrderType());
+        WorkManager::registry()->register(new EchoOrderType);
+        WorkManager::registry()->register(new BatchOrderType);
+        WorkManager::registry()->register(new TestPartialOrderType);
     }
 }

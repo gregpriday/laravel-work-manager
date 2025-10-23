@@ -20,8 +20,6 @@ abstract class AbstractOrderType implements OrderType
      * operations that don't require human review.
      *
      * Default: false (requires manual approval)
-     *
-     * @var bool
      */
     protected bool $autoApprove = false;
 
@@ -36,8 +34,6 @@ abstract class AbstractOrderType implements OrderType
 
     /**
      * Determine if this order type should auto-approve when ready.
-     *
-     * @return bool
      */
     public function shouldAutoApprove(): bool
     {
@@ -50,11 +46,11 @@ abstract class AbstractOrderType implements OrderType
      */
     protected function getDefaultAcceptancePolicy(): AcceptancePolicy
     {
-        return new class($this) implements AcceptancePolicy {
+        return new class($this) implements AcceptancePolicy
+        {
             public function __construct(
                 protected AbstractOrderType $orderType
-            ) {
-            }
+            ) {}
 
             public function validateSubmission(\GregPriday\WorkManager\Models\WorkItem $item, array $result): void
             {
@@ -81,7 +77,7 @@ abstract class AbstractOrderType implements OrderType
                     ->whereIn('state', ['submitted', 'accepted'])
                     ->count() === $order->items()->count();
 
-                if (!$allSubmitted) {
+                if (! $allSubmitted) {
                     return false;
                 }
 
@@ -201,6 +197,7 @@ abstract class AbstractOrderType implements OrderType
         foreach ($latestParts as $part) {
             $result[$part->part_key] = $part->payload;
         }
+
         return $result;
     }
 

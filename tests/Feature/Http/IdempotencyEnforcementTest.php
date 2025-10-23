@@ -1,7 +1,6 @@
 <?php
 
 use GregPriday\WorkManager\Facades\WorkManager;
-use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
@@ -12,7 +11,7 @@ beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('requires idempotency key for propose when enforced', function () {
@@ -142,7 +141,7 @@ it('returns cached response when same idempotency key used for approve', functio
         'result' => ['ok' => true, 'verified' => true, 'echoed_message' => 'test'],
     ], [
         'X-Agent-ID' => 'agent-1',
-        'X-Idempotency-Key' => 'submit-' . uniqid(),
+        'X-Idempotency-Key' => 'submit-'.uniqid(),
     ]);
     $submitResponse->assertStatus(202); // 202 Accepted is correct for async processing
 
@@ -168,7 +167,7 @@ it('returns cached response when same idempotency key used for approve', functio
         $order = $order->fresh();
     }
 
-    $idempotencyKey = 'test-approve-' . uniqid();
+    $idempotencyKey = 'test-approve-'.uniqid();
 
     // First approval
     $response1 = $this->postJson("/agent/work/orders/{$order->id}/approve", [], [

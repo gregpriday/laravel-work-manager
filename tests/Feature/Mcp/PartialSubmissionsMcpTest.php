@@ -5,10 +5,7 @@ namespace GregPriday\WorkManager\Tests\Feature\Mcp;
 use GregPriday\WorkManager\Mcp\WorkManagerTools;
 use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
-use GregPriday\WorkManager\Services\LeaseService;
-use GregPriday\WorkManager\Services\WorkExecutor;
 use GregPriday\WorkManager\Support\AbstractOrderType;
-use GregPriday\WorkManager\Support\ActorType;
 use GregPriday\WorkManager\Support\Diff;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +23,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $this->tools = app(WorkManagerTools::class);
 
         // Register test order type
-        app('work-manager')->registry()->register(new TestPartialMcpOrderType());
+        app('work-manager')->registry()->register(new TestPartialMcpOrderType);
     }
 
     public function test_submit_part_returns_success_structure()
@@ -79,7 +76,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
-        $idempotencyKey = 'mcp-part-key-' . uniqid();
+        $idempotencyKey = 'mcp-part-key-'.uniqid();
 
         // First submission
         $result1 = $this->tools->submitPart(
@@ -195,7 +192,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $this->tools->submitPart($itemId, 'identity', ['name' => 'Acme'], agentId: 'mcp-agent-1');
         $this->tools->submitPart($itemId, 'contacts', ['email' => 'test@acme.com'], agentId: 'mcp-agent-1');
 
-        $idempotencyKey = 'mcp-finalize-key-' . uniqid();
+        $idempotencyKey = 'mcp-finalize-key-'.uniqid();
 
         // First finalization
         $result1 = $this->tools->finalize($itemId, mode: 'strict', idempotencyKey: $idempotencyKey);

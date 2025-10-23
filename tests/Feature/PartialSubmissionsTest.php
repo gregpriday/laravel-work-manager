@@ -18,7 +18,6 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\PartStatus;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 
@@ -27,7 +26,9 @@ class PartialSubmissionsTest extends TestCase
     use RefreshDatabase;
 
     protected WorkAllocator $allocator;
+
     protected WorkExecutor $executor;
+
     protected LeaseService $leaseService;
 
     protected function setUp(): void
@@ -39,7 +40,7 @@ class PartialSubmissionsTest extends TestCase
         $this->leaseService = app(LeaseService::class);
 
         // Register test order type
-        app('work-manager')->registry()->register(new TestPartialOrderType());
+        app('work-manager')->registry()->register(new TestPartialOrderType);
     }
 
     public function test_can_submit_part_for_work_item()

@@ -2,7 +2,6 @@
 
 use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
-use GregPriday\WorkManager\Services\LeaseService;
 use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Foundation\Testing\RefreshDatabase;

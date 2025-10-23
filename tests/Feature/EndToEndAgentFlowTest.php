@@ -2,7 +2,6 @@
 
 use GregPriday\WorkManager\Facades\WorkManager;
 use GregPriday\WorkManager\Models\WorkEvent;
-use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 use Illuminate\Support\Str;
@@ -14,7 +13,7 @@ beforeEach(function () {
 
 it('completes full agent workflow from propose to approve', function () {
     // Authenticate as test user to bypass authorization
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 
     $idempotencyKey = 'test-key-'.Str::random(8);
     $agentId = 'agent-1';
@@ -124,7 +123,7 @@ it('completes full agent workflow from propose to approve', function () {
 
 it('handles checkout when no items available', function () {
     // Authenticate as test user
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 
     // Create order but don't plan it (no items)
     $order = \GregPriday\WorkManager\Models\WorkOrder::create([
@@ -147,7 +146,7 @@ it('handles checkout when no items available', function () {
 
 it('prevents heartbeat from wrong agent', function () {
     // Authenticate as test user
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 
     // Create and lease an item
     $order = \GregPriday\WorkManager\Models\WorkOrder::create([

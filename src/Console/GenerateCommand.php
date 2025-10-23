@@ -38,15 +38,17 @@ class GenerateCommand extends Command
                 $workSpecs = $this->getWorkFromStrategy($strategy);
 
                 if (empty($workSpecs)) {
-                    $this->line("  No work discovered");
+                    $this->line('  No work discovered');
+
                     continue;
                 }
 
-                $this->line("  Discovered " . count($workSpecs) . " work order(s)");
+                $this->line('  Discovered '.count($workSpecs).' work order(s)');
 
                 foreach ($workSpecs as $spec) {
                     if ($dryRun) {
                         $this->line("  [DRY RUN] Would create: {$spec['type']}");
+
                         continue;
                     }
 
@@ -63,7 +65,7 @@ class GenerateCommand extends Command
                     $totalOrders++;
                 }
             } catch (\Exception $e) {
-                $this->error("  Error: " . $e->getMessage());
+                $this->error('  Error: '.$e->getMessage());
             }
         }
 

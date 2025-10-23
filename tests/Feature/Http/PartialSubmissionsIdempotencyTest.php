@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('requires idempotency key for submit-part when enforced', function () {
@@ -22,8 +22,8 @@ it('requires idempotency key for submit-part when enforced', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -51,8 +51,8 @@ it('requires idempotency key for finalize when enforced', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
@@ -79,15 +79,15 @@ it('allows submit-part with idempotency key', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
         'payload' => ['name' => 'John Doe'],
     ], [
         'X-Agent-ID' => 'agent-1',
-        'X-Idempotency-Key' => 'test-submit-part-' . uniqid(),
+        'X-Idempotency-Key' => 'test-submit-part-'.uniqid(),
     ]);
 
     $response->assertStatus(202)
@@ -111,18 +111,18 @@ it('allows finalize with idempotency key', function () {
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
         'parts_required' => [],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     // Lease the item properly
     $leaseService->acquire($item->id, 'agent-1');
-        $item = $item->fresh();
+    $item = $item->fresh();
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
     ], [
         'X-Agent-ID' => 'agent-1',
-        'X-Idempotency-Key' => 'test-finalize-' . uniqid(),
+        'X-Idempotency-Key' => 'test-finalize-'.uniqid(),
     ]);
 
     $response->assertStatus(202)
@@ -145,8 +145,8 @@ it('allows submit-part without idempotency key when not enforced', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/parts", [
         'part_key' => 'identity',
@@ -176,12 +176,12 @@ it('allows finalize without idempotency key when not enforced', function () {
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
         'parts_required' => [],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     // Lease the item properly
     $leaseService->acquire($item->id, 'agent-1');
-        $item = $item->fresh();
+    $item = $item->fresh();
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',

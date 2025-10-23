@@ -12,7 +12,7 @@ beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
 
     // Authenticate as test user for all tests
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('returns events for item and its order', function () {

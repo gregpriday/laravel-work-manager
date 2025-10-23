@@ -25,8 +25,7 @@ class WorkManagerTools
         protected WorkExecutor $executor,
         protected LeaseService $leaseService,
         protected IdempotencyService $idempotency
-    ) {
-    }
+    ) {}
 
     /**
      * Propose a new work order.
@@ -56,7 +55,7 @@ class WorkManagerTools
     ): array {
         // Use idempotency if key provided
         if ($idempotencyKey) {
-            $cached = $this->idempotency->check('propose:' . $type, $idempotencyKey);
+            $cached = $this->idempotency->check('propose:'.$type, $idempotencyKey);
             if ($cached !== null) {
                 return $cached;
             }
@@ -87,7 +86,7 @@ class WorkManagerTools
 
         // Store in idempotency cache if key provided
         if ($idempotencyKey) {
-            $this->idempotency->store('propose:' . $type, $idempotencyKey, $result);
+            $this->idempotency->store('propose:'.$type, $idempotencyKey, $result);
         }
 
         return $result;
@@ -270,7 +269,7 @@ class WorkManagerTools
             $order = WorkOrder::findOrFail($orderId);
             $item = $this->leaseService->getNextAvailable($order->id);
 
-            if (!$item) {
+            if (! $item) {
                 return [
                     'success' => false,
                     'error' => 'No items available for checkout',
@@ -298,7 +297,7 @@ class WorkManagerTools
 
             $item = $this->leaseService->acquireNextAvailable($agentId, $filters);
 
-            if (!$item) {
+            if (! $item) {
                 return [
                     'success' => false,
                     'error' => 'No work items available matching filters',
@@ -391,7 +390,7 @@ class WorkManagerTools
 
         // Use idempotency if key provided
         if ($idempotencyKey) {
-            $cached = $this->idempotency->check('submit:item:' . $itemId, $idempotencyKey);
+            $cached = $this->idempotency->check('submit:item:'.$itemId, $idempotencyKey);
             if ($cached !== null) {
                 return $cached;
             }
@@ -413,7 +412,7 @@ class WorkManagerTools
 
             // Store in idempotency cache if key provided
             if ($idempotencyKey) {
-                $this->idempotency->store('submit:item:' . $itemId, $idempotencyKey, $response);
+                $this->idempotency->store('submit:item:'.$itemId, $idempotencyKey, $response);
             }
 
             return $response;
@@ -452,7 +451,7 @@ class WorkManagerTools
     ): array {
         // Use idempotency if key provided
         if ($idempotencyKey) {
-            $cached = $this->idempotency->check('approve:order:' . $orderId, $idempotencyKey);
+            $cached = $this->idempotency->check('approve:order:'.$orderId, $idempotencyKey);
             if ($cached !== null) {
                 return $cached;
             }
@@ -473,7 +472,7 @@ class WorkManagerTools
 
             // Store in idempotency cache if key provided
             if ($idempotencyKey) {
-                $this->idempotency->store('approve:order:' . $orderId, $idempotencyKey, $response);
+                $this->idempotency->store('approve:order:'.$orderId, $idempotencyKey, $response);
             }
 
             return $response;
@@ -511,7 +510,7 @@ class WorkManagerTools
     ): array {
         // Use idempotency if key provided
         if ($idempotencyKey) {
-            $cached = $this->idempotency->check('reject:order:' . $orderId, $idempotencyKey);
+            $cached = $this->idempotency->check('reject:order:'.$orderId, $idempotencyKey);
             if ($cached !== null) {
                 return $cached;
             }
@@ -531,7 +530,7 @@ class WorkManagerTools
 
             // Store in idempotency cache if key provided
             if ($idempotencyKey) {
-                $this->idempotency->store('reject:order:' . $orderId, $idempotencyKey, $response);
+                $this->idempotency->store('reject:order:'.$orderId, $idempotencyKey, $response);
             }
 
             return $response;
@@ -602,7 +601,7 @@ class WorkManagerTools
         #[Schema(description: 'Maximum number of events to return', minimum: 1, maximum: 100)]
         int $limit = 50
     ): array {
-        if (!$itemId && !$orderId) {
+        if (! $itemId && ! $orderId) {
             return [
                 'success' => false,
                 'error' => 'Either item_id or order_id must be provided',
@@ -689,7 +688,7 @@ class WorkManagerTools
         // Use idempotency if key provided
         if ($idempotencyKey) {
             $cached = $this->idempotency->check(
-                'submit-part:item:' . $itemId . ':' . $partKey . ':' . ($seq ?? 'null'),
+                'submit-part:item:'.$itemId.':'.$partKey.':'.($seq ?? 'null'),
                 $idempotencyKey
             );
             if ($cached !== null) {
@@ -715,7 +714,7 @@ class WorkManagerTools
             // Store in idempotency cache if key provided
             if ($idempotencyKey) {
                 $this->idempotency->store(
-                    'submit-part:item:' . $itemId . ':' . $partKey . ':' . ($seq ?? 'null'),
+                    'submit-part:item:'.$itemId.':'.$partKey.':'.($seq ?? 'null'),
                     $idempotencyKey,
                     $response
                 );
@@ -817,7 +816,7 @@ class WorkManagerTools
     ): array {
         // Use idempotency if key provided
         if ($idempotencyKey) {
-            $cached = $this->idempotency->check('finalize:item:' . $itemId, $idempotencyKey);
+            $cached = $this->idempotency->check('finalize:item:'.$itemId, $idempotencyKey);
             if ($cached !== null) {
                 return $cached;
             }
@@ -839,7 +838,7 @@ class WorkManagerTools
 
             // Store in idempotency cache if key provided
             if ($idempotencyKey) {
-                $this->idempotency->store('finalize:item:' . $itemId, $idempotencyKey, $response);
+                $this->idempotency->store('finalize:item:'.$itemId, $idempotencyKey, $response);
             }
 
             return $response;
@@ -866,6 +865,6 @@ class WorkManagerTools
     {
         return request()->header('X-Agent-ID')
             ?? Auth::id()
-            ?? 'mcp-agent-' . uniqid();
+            ?? 'mcp-agent-'.uniqid();
     }
 }

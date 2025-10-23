@@ -16,6 +16,7 @@ class WorkExecutorFinalizeBestEffortTest extends TestCase
     use RefreshDatabase;
 
     protected WorkExecutor $executor;
+
     protected LeaseService $leaseService;
 
     protected function setUp(): void

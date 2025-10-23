@@ -25,7 +25,7 @@ class MaintainCommand extends Command
         $checkStale = $this->option('check-stale');
 
         // If no options specified, run all tasks
-        if (!$reclaimLeases && !$deadLetter && !$checkStale) {
+        if (! $reclaimLeases && ! $deadLetter && ! $checkStale) {
             $reclaimLeases = true;
             $deadLetter = true;
             $checkStale = true;

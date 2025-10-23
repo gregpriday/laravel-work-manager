@@ -9,7 +9,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
     config()->set('work-manager.idempotency.enforce_on', []);
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('returns 422 for invalid finalize mode parameter', function () {
@@ -20,8 +20,8 @@ it('returns 422 for invalid finalize mode parameter', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'invalid_mode',
@@ -41,8 +41,8 @@ it('returns 422 for non-string finalize mode parameter', function () {
         'state' => ItemState::IN_PROGRESS,
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 123,
@@ -63,8 +63,8 @@ it('accepts strict mode for finalize', function () {
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
         'parts_required' => [],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'strict',
@@ -87,8 +87,8 @@ it('accepts best_effort mode for finalize', function () {
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
         'parts_required' => [],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [
         'mode' => 'best_effort',
@@ -111,8 +111,8 @@ it('defaults to strict mode when mode parameter is omitted', function () {
         'leased_by_agent_id' => 'agent-1',
         'lease_expires_at' => now()->addMinutes(10),
         'parts_required' => ['identity'],
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     // Should fail in strict mode because required part is missing
     $response = $this->postJson("/agent/work/items/{$item->id}/finalize", [], [

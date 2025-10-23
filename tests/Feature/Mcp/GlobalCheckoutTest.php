@@ -3,11 +3,8 @@
 namespace GregPriday\WorkManager\Tests\Feature\Mcp;
 
 use GregPriday\WorkManager\Mcp\WorkManagerTools;
-use GregPriday\WorkManager\Models\WorkItem;
-use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
-use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,6 +13,7 @@ class GlobalCheckoutTest extends TestCase
     use RefreshDatabase;
 
     protected WorkManagerTools $tools;
+
     protected WorkAllocator $allocator;
 
     protected function setUp(): void

@@ -1,7 +1,6 @@
 <?php
 
 use GregPriday\WorkManager\Exceptions\LeaseConflictException;
-use GregPriday\WorkManager\Exceptions\LeaseExpiredException;
 use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Services\LeaseService;

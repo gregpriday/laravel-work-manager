@@ -43,7 +43,7 @@ class Helpers
         // Check required fields
         if (isset($schema['required'])) {
             foreach ($schema['required'] as $field) {
-                if (!array_key_exists($field, $data)) {
+                if (! array_key_exists($field, $data)) {
                     $errors[] = [
                         'field' => $path ? "{$path}.{$field}" : $field,
                         'code' => 'schema.required',
@@ -56,7 +56,7 @@ class Helpers
         // Check property types and constraints
         if (isset($schema['properties'])) {
             foreach ($schema['properties'] as $field => $rules) {
-                if (!array_key_exists($field, $data)) {
+                if (! array_key_exists($field, $data)) {
                     continue;
                 }
 
@@ -64,17 +64,18 @@ class Helpers
                 $fieldPath = $path ? "{$path}.{$field}" : $field;
                 $expectedTypes = (array) ($rules['type'] ?? []);
 
-                if (!empty($expectedTypes) && !self::matchesType($value, $expectedTypes)) {
+                if (! empty($expectedTypes) && ! self::matchesType($value, $expectedTypes)) {
                     $errors[] = [
                         'field' => $fieldPath,
                         'code' => 'schema.type_mismatch',
                         'message' => "Field '{$field}' must be of type: ".implode('|', $expectedTypes),
                     ];
+
                     continue; // Skip further validation if type is wrong
                 }
 
                 // Check enum values
-                if (isset($rules['enum']) && !in_array($value, $rules['enum'], true)) {
+                if (isset($rules['enum']) && ! in_array($value, $rules['enum'], true)) {
                     $errors[] = [
                         'field' => $fieldPath,
                         'code' => 'schema.enum_invalid',
@@ -100,7 +101,7 @@ class Helpers
                         ];
                     }
 
-                    if (isset($rules['pattern']) && !preg_match('/' . $rules['pattern'] . '/', $value)) {
+                    if (isset($rules['pattern']) && ! preg_match('/'.$rules['pattern'].'/', $value)) {
                         $errors[] = [
                             'field' => $fieldPath,
                             'code' => 'schema.pattern',
@@ -147,7 +148,7 @@ class Helpers
                     }
 
                     // Validate array item schemas (tuple validation)
-                    if (isset($rules['items']) && is_array($rules['items']) && !isset($rules['items']['type'])) {
+                    if (isset($rules['items']) && is_array($rules['items']) && ! isset($rules['items']['type'])) {
                         // Tuple validation: items is an array of schemas
                         foreach ($rules['items'] as $index => $itemSchema) {
                             if (isset($value[$index])) {

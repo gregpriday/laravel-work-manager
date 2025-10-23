@@ -17,8 +17,7 @@ class LeaseService
 {
     public function __construct(
         protected StateMachine $stateMachine
-    ) {
-    }
+    ) {}
 
     /**
      * Attempt to acquire a lease on a work item.
@@ -33,11 +32,11 @@ class LeaseService
 
             // Check if already leased and not expired
             if ($item->isLeased()) {
-                throw new LeaseConflictException();
+                throw new LeaseConflictException;
             }
 
             // Check if item is in a leasable state
-            if (!in_array($item->state->value, ['queued', 'in_progress'])) {
+            if (! in_array($item->state->value, ['queued', 'in_progress'])) {
                 throw new LeaseConflictException('Item is not in a leasable state');
             }
 
@@ -86,7 +85,7 @@ class LeaseService
 
             // Check if lease has expired
             if ($item->isLeaseExpired()) {
-                throw new LeaseExpiredException();
+                throw new LeaseExpiredException;
             }
 
             // Extend the lease
@@ -163,7 +162,7 @@ class LeaseService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$item || !$item->isLeaseExpired()) {
+                if (! $item || ! $item->isLeaseExpired()) {
                     return;
                 }
 
@@ -219,14 +218,14 @@ class LeaseService
     /**
      * Acquire the next available work item across all orders (global checkout).
      *
-     * @param string $agentId The agent requesting work
-     * @param array $filters Optional filters: type, min_priority, tenant_id
+     * @param  string  $agentId  The agent requesting work
+     * @param  array  $filters  Optional filters: type, min_priority, tenant_id
      * @return WorkItem|null The acquired item, or null if none available
      */
     public function acquireNextAvailable(string $agentId, array $filters = []): ?WorkItem
     {
         // Check per-agent concurrency limit outside transaction
-        if (!$this->canAgentAcquireMore($agentId)) {
+        if (! $this->canAgentAcquireMore($agentId)) {
             return null;
         }
 
@@ -240,7 +239,7 @@ class LeaseService
             });
 
         // Apply type filter
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('work_orders.type', $filters['type']);
         }
 
@@ -250,7 +249,7 @@ class LeaseService
         }
 
         // Apply tenant filter (JSON contains on payload->tenant_id)
-        if (!empty($filters['tenant_id'])) {
+        if (! empty($filters['tenant_id'])) {
             $query->whereJsonContains('work_orders.payload->tenant_id', $filters['tenant_id']);
         }
 
@@ -261,12 +260,12 @@ class LeaseService
             ->orderBy('work_items.created_at')
             ->first();
 
-        if (!$item) {
+        if (! $item) {
             return null;
         }
 
         // Check per-type concurrency limit
-        if (!$this->canTypeAcquireMore($item->order_type)) {
+        if (! $this->canTypeAcquireMore($item->order_type)) {
             return null;
         }
 
@@ -283,13 +282,13 @@ class LeaseService
     /**
      * Check if an agent can acquire more leases.
      *
-     * @param string $agentId The agent identifier
+     * @param  string  $agentId  The agent identifier
      * @return bool True if the agent can acquire more leases
      */
     protected function canAgentAcquireMore(string $agentId): bool
     {
         $max = config('work-manager.lease.max_leases_per_agent');
-        if (!$max) {
+        if (! $max) {
             return true;
         }
 
@@ -303,13 +302,13 @@ class LeaseService
     /**
      * Check if an order type can have more leases.
      *
-     * @param string $orderType The order type identifier
+     * @param  string  $orderType  The order type identifier
      * @return bool True if the type can have more leases
      */
     protected function canTypeAcquireMore(string $orderType): bool
     {
         $max = config('work-manager.lease.max_leases_per_type');
-        if (!$max) {
+        if (! $max) {
             return true;
         }
 

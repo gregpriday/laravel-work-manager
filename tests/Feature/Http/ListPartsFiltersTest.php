@@ -11,7 +11,7 @@ use GregPriday\WorkManager\Tests\Fixtures\TestUser;
 
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
-    $this->actingAs(new TestUser());
+    $this->actingAs(new TestUser);
 });
 
 it('filters parts by status', function () {
@@ -23,13 +23,13 @@ it('filters parts by status', function () {
         'order_id' => $order->id,
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     // Lease the item
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
-        $item = $item->fresh();
+    $item = $item->fresh();
 
     // Submit validated parts
     $executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -74,12 +74,12 @@ it('filters parts by part_key', function () {
         'order_id' => $order->id,
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
-        $item = $item->fresh();
+    $item = $item->fresh();
 
     // Submit multiple parts
     $executor->submitPart($item, 'identity', null, ['name' => 'John Doe'], $agentId);
@@ -109,12 +109,12 @@ it('combines status and part_key filters', function () {
         'order_id' => $order->id,
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     $agentId = 'agent-1';
     $leaseService->acquire($item->id, $agentId);
-        $item = $item->fresh();
+    $item = $item->fresh();
 
     // Submit validated contact part
     $executor->submitPart($item, 'contact', null, ['email' => 'john@example.com'], $agentId);
@@ -153,8 +153,8 @@ it('returns empty array when no parts match filter', function () {
         'order_id' => $order->id,
         'type' => 'test.partial',
         'state' => ItemState::IN_PROGRESS,
-            'input' => [],
-        ]);
+        'input' => [],
+    ]);
 
     // No parts submitted, filter should return empty
     $response = $this->getJson("/agent/work/items/{$item->id}/parts?status=validated");

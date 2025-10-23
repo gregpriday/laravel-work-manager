@@ -9,8 +9,7 @@ class RouteRegistrar
 {
     public function __construct(
         protected Registrar $router
-    ) {
-    }
+    ) {}
 
     /**
      * Register the work manager routes.

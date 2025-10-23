@@ -1,11 +1,11 @@
 <?php
 
-use GregPriday\WorkManager\Services\Provenance\DefaultProvenanceEnricher;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use GregPriday\WorkManager\Services\Provenance\DefaultProvenanceEnricher;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -25,6 +25,7 @@ function createRequest(string $uri = '/test', string $method = 'GET', array $ser
 {
     $request = Request::create($uri, $method, [], [], [], $server);
     $request->setLaravelSession(app('session.store'));
+
     return $request;
 }
 
@@ -44,7 +45,7 @@ it('enriches from headers and request context', function () {
         'HTTP_X_REQUEST_ID' => 'req-abc',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request, ['extra' => 'ok']);
 
     expect($result['agent_id'])->toBe('agent-123')
@@ -63,7 +64,7 @@ it('enriches from headers and request context', function () {
 it('generates request_id when not provided', function () {
     $request = createRequest('/test', 'GET');
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request);
 
     expect($result['request_id'])->not->toBeNull()
@@ -73,7 +74,7 @@ it('generates request_id when not provided', function () {
 it('merges context data', function () {
     $request = createRequest('/test', 'GET');
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request, [
         'custom_field' => 'custom_value',
         'another' => 123,
@@ -86,7 +87,7 @@ it('merges context data', function () {
 it('includes session id when session is available', function () {
     $request = createRequest('/test', 'GET');
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request);
 
     expect($result)->toHaveKey('session_id');
@@ -100,7 +101,7 @@ it('getAgentId returns header value when present', function () {
         'HTTP_X_AGENT_ID' => 'agent-from-header',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request);
 
     expect($result['agent_id'])->toBe('agent-from-header');
@@ -111,7 +112,7 @@ it('getAgentId supports alternative casing X-Agent-Id', function () {
         'HTTP_X_AGENT_Id' => 'agent-alt-casing',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request);
 
     expect($result['agent_id'])->toBe('agent-alt-casing');
@@ -120,7 +121,7 @@ it('getAgentId supports alternative casing X-Agent-Id', function () {
 it('getAgentId returns null when no header and not authenticated', function () {
     $request = createRequest('/test', 'GET');
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result = $enricher->enrich($request);
 
     expect($result['agent_id'])->toBeNull();
@@ -137,7 +138,7 @@ it('generateFingerprint produces consistent sha256 hash', function () {
         'HTTP_USER_AGENT' => 'TestAgent/1.0',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result1 = $enricher->enrich($request);
     $result2 = $enricher->enrich($request);
 
@@ -158,7 +159,7 @@ it('generateFingerprint includes Accept-Language header', function () {
         'HTTP_USER_AGENT' => 'TestAgent/1.0',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result1 = $enricher->enrich($request1);
     $result2 = $enricher->enrich($request2);
 
@@ -176,7 +177,7 @@ it('generateFingerprint changes with different request attributes', function () 
         'HTTP_USER_AGENT' => 'TestAgent/1.0',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $result1 = $enricher->enrich($request1);
     $result2 = $enricher->enrich($request2);
 
@@ -189,7 +190,7 @@ it('generateFingerprint changes with different request attributes', function () 
 it('validate returns error when X-Agent-ID is missing', function () {
     $request = createRequest('/test', 'GET');
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $errors = $enricher->validate($request);
 
     expect($errors)->toContain('Missing required header: X-Agent-ID');
@@ -200,7 +201,7 @@ it('validate returns empty array when X-Agent-ID is present', function () {
         'HTTP_X_AGENT_ID' => 'agent-123',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $errors = $enricher->validate($request);
 
     expect($errors)->toBeEmpty();
@@ -212,7 +213,7 @@ it('validate returns error for invalid semver', function () {
         'HTTP_X_AGENT_VERSION' => 'not-a-version',
     ]);
 
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $errors = $enricher->validate($request);
 
     expect($errors)->toContain('Invalid semantic version in X-Agent-Version header');
@@ -227,7 +228,7 @@ it('validate accepts valid semver versions', function () {
             'HTTP_X_AGENT_VERSION' => $version,
         ]);
 
-        $enricher = new DefaultProvenanceEnricher();
+        $enricher = new DefaultProvenanceEnricher;
         $errors = $enricher->validate($request);
 
         expect($errors)->toBeEmpty();
@@ -238,7 +239,7 @@ it('validate accepts valid semver versions', function () {
  * extractAgentType() method tests
  */
 it('extractAgentType extracts type from pattern type-instance', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
 
     expect($enricher->extractAgentType('research-agent-1'))->toBe('research-agent')
         ->and($enricher->extractAgentType('fact-checker-123'))->toBe('fact-checker')
@@ -246,14 +247,14 @@ it('extractAgentType extracts type from pattern type-instance', function () {
 });
 
 it('extractAgentType extracts first segment when no instance number', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
 
     expect($enricher->extractAgentType('researcher'))->toBe('researcher')
         ->and($enricher->extractAgentType('fact-checker'))->toBe('fact-checker');
 });
 
 it('extractAgentType returns null for invalid patterns', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
 
     expect($enricher->extractAgentType('123-invalid'))->toBeNull()
         ->and($enricher->extractAgentType(''))->toBeNull();
@@ -263,7 +264,7 @@ it('extractAgentType returns null for invalid patterns', function () {
  * createRecord() method tests
  */
 it('createRecord filters null values', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'agent-123',
         'agent_name' => null,
@@ -287,7 +288,7 @@ it('createRecord filters null values', function () {
 });
 
 it('createRecord extracts agent_type from agent_id', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'research-agent-1',
         'fingerprint' => 'abc123',
@@ -299,7 +300,7 @@ it('createRecord extracts agent_type from agent_id', function () {
 });
 
 it('createRecord uses provided agent_type over extracted one', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'research-agent-1',
         'agent_type' => 'custom-type',
@@ -312,7 +313,7 @@ it('createRecord uses provided agent_type over extracted one', function () {
 });
 
 it('createRecord nests metadata correctly', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'agent-123',
         'fingerprint' => 'abc123',
@@ -329,7 +330,7 @@ it('createRecord nests metadata correctly', function () {
 });
 
 it('createRecord filters null values from metadata', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'agent-123',
         'fingerprint' => 'abc123',
@@ -345,7 +346,7 @@ it('createRecord filters null values from metadata', function () {
 });
 
 it('createRecord creates empty metadata when all values are null', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'agent-123',
         'fingerprint' => 'abc123',
@@ -361,7 +362,7 @@ it('createRecord creates empty metadata when all values are null', function () {
 });
 
 it('createRecord maps fingerprint to request_fingerprint', function () {
-    $enricher = new DefaultProvenanceEnricher();
+    $enricher = new DefaultProvenanceEnricher;
     $record = $enricher->createRecord([
         'agent_id' => 'agent-123',
         'fingerprint' => 'abc123def456',

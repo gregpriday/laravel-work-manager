@@ -31,8 +31,7 @@ class WorkExecutor
     public function __construct(
         protected OrderTypeRegistry $registry,
         protected StateMachine $stateMachine
-    ) {
-    }
+    ) {}
 
     /**
      * Submit a work item result.
@@ -50,7 +49,7 @@ class WorkExecutor
         }
 
         if ($item->isLeaseExpired()) {
-            throw new LeaseExpiredException();
+            throw new LeaseExpiredException;
         }
 
         $orderType = $this->registry->get($item->type);
@@ -111,7 +110,7 @@ class WorkExecutor
         $policy = $orderType->acceptancePolicy();
 
         // Check if ready for approval
-        if (!$policy->readyForApproval($order)) {
+        if (! $policy->readyForApproval($order)) {
             throw new \Exception('Order is not ready for approval');
         }
 
@@ -270,7 +269,7 @@ class WorkExecutor
         }
 
         if ($item->isLeaseExpired()) {
-            throw new LeaseExpiredException();
+            throw new LeaseExpiredException;
         }
 
         $orderType = $this->registry->get($item->type);
@@ -280,7 +279,7 @@ class WorkExecutor
                 // Run validation rules
                 $rules = $orderType->partialRules($item, $partKey, $seq);
 
-                if (!empty($rules)) {
+                if (! empty($rules)) {
                     $validator = validator($payload, $rules);
 
                     if ($validator->fails()) {
@@ -379,9 +378,9 @@ class WorkExecutor
 
                 $missingParts = array_diff($requiredParts, $submittedKeys);
 
-                if (!empty($missingParts)) {
+                if (! empty($missingParts)) {
                     throw ValidationException::withMessages([
-                        'parts' => ['Missing required parts: ' . implode(', ', $missingParts)],
+                        'parts' => ['Missing required parts: '.implode(', ', $missingParts)],
                     ]);
                 }
             }

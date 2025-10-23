@@ -61,7 +61,7 @@ class McpCommand extends Command
                 '--transport' => 'stdio',
             ]);
         } catch (\Exception $e) {
-            $this->error('Failed to start stdio server: ' . $e->getMessage());
+            $this->error('Failed to start stdio server: '.$e->getMessage());
 
             return self::FAILURE;
         }
@@ -88,7 +88,7 @@ class McpCommand extends Command
             $this->line("Auth Guard: {$guard}");
             $staticTokens = config('work-manager.mcp.http.static_tokens', []);
             if (! empty($staticTokens)) {
-                $this->line('Static Tokens: ' . count($staticTokens) . ' configured');
+                $this->line('Static Tokens: '.count($staticTokens).' configured');
             }
         } else {
             $this->comment('Authentication: DISABLED (public access)');
@@ -141,7 +141,7 @@ class McpCommand extends Command
 
             return self::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('Failed to start HTTP server: ' . $e->getMessage());
+            $this->error('Failed to start HTTP server: '.$e->getMessage());
             $this->error($e->getTraceAsString());
 
             return self::FAILURE;
@@ -272,13 +272,13 @@ class McpCommand extends Command
         LoggerInterface $logger,
         string $postEndpoint
     ): ResponseInterface {
-        $clientId = 'client_' . bin2hex(random_bytes(16));
+        $clientId = 'client_'.bin2hex(random_bytes(16));
 
         $logger->info('ReactPHP SSE connection opening', ['client_id' => $clientId]);
 
         $stream = new ThroughStream;
 
-        $postEndpointWithClientId = $postEndpoint . '?clientId=' . urlencode($clientId);
+        $postEndpointWithClientId = $postEndpoint.'?clientId='.urlencode($clientId);
 
         $transportHandler->setClientSseStream($clientId, $stream);
         $transportHandler->handleSseConnection($clientId, $postEndpointWithClientId);

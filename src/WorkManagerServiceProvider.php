@@ -49,15 +49,15 @@ class WorkManagerServiceProvider extends ServiceProvider
 
         // Register core services
         $this->app->singleton(OrderTypeRegistry::class, function () {
-            return new OrderTypeRegistry();
+            return new OrderTypeRegistry;
         });
 
         $this->app->singleton(StateMachine::class, function ($app) {
-            return new StateMachine();
+            return new StateMachine;
         });
 
         $this->app->singleton(IdempotencyService::class, function ($app) {
-            return new IdempotencyService();
+            return new IdempotencyService;
         });
 
         $this->app->singleton(LeaseService::class, function ($app) {

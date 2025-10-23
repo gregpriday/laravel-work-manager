@@ -2,8 +2,8 @@
 
 namespace GregPriday\WorkManager\Models;
 
-use GregPriday\WorkManager\Support\OrderState;
 use GregPriday\WorkManager\Support\ActorType;
+use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
