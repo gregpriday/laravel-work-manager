@@ -90,13 +90,11 @@ it('supports filter with requested_by_type', function () {
 it('supports filter with relation filter items.state', function () {
     $allocator = app(WorkAllocator::class);
 
-    // Order with queued items
+    // Order with queued items (propose already calls plan)
     $order1 = $allocator->propose('test.echo', ['message' => 'test1']);
-    $allocator->plan($order1);
 
     // Order with in-progress items
     $order2 = $allocator->propose('test.echo', ['message' => 'test2']);
-    $allocator->plan($order2);
     $order2->items()->update(['state' => ItemState::IN_PROGRESS]);
 
     $tools = app(WorkManagerTools::class);
@@ -206,13 +204,11 @@ it('supports has_available_items filter', function () {
     $allocator = app(WorkAllocator::class);
     $leaseService = app(LeaseService::class);
 
-    // Order with available items
+    // Order with available items (propose already calls plan)
     $order1 = $allocator->propose('test.echo', ['message' => 'available']);
-    $allocator->plan($order1);
 
     // Order with leased items
     $order2 = $allocator->propose('test.echo', ['message' => 'leased']);
-    $allocator->plan($order2);
     $item = $order2->items()->first();
     $leaseService->acquire($item->id, 'agent-123');
 
@@ -286,7 +282,6 @@ it('supports include parameter with itemsCount', function () {
         ['id' => 'b', 'data' => []],
         ['id' => 'c', 'data' => []],
     ]]);
-    $allocator->plan($order);
 
     $tools = app(WorkManagerTools::class);
 
@@ -508,7 +503,6 @@ it('includes items by default', function () {
     $allocator = app(WorkAllocator::class);
 
     $order = $allocator->propose('test.echo', ['message' => 'test']);
-    $allocator->plan($order);
 
     $tools = app(WorkManagerTools::class);
 

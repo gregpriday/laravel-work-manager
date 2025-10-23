@@ -29,7 +29,7 @@ final class WorkOrderQuery
      */
     public static function make(Request $request): QueryBuilder
     {
-        // Start from Eloquent query and preload items by default
+        // Start from Eloquent query and preload items by default for backward compatibility
         $base = WorkOrder::query()->with(['items']);
 
         return QueryBuilder::for($base, $request)
@@ -71,6 +71,8 @@ final class WorkOrderQuery
                 // Auto-adds counts/exists suffixes via AllowedInclude::relationship
                 AllowedInclude::relationship('items'),
                 AllowedInclude::relationship('events'),
+                AllowedInclude::count('items'),
+                AllowedInclude::count('events'),
             ])
             ->allowedFilters([
                 // Exact filters

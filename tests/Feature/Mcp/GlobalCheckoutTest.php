@@ -67,7 +67,7 @@ class GlobalCheckoutTest extends TestCase
     public function test_global_checkout_filters_by_type()
     {
         $this->tools->propose('test.echo', ['message' => 'echo'], priority: 100);
-        $this->tools->propose('test.batch', ['message' => 'batch'], priority: 50);
+        $this->tools->propose('test.batch', ['batches' => [['id' => 'batch-1', 'data' => []]]], priority: 50);
 
         // Filter by type
         $result = $this->tools->checkout(
@@ -77,7 +77,7 @@ class GlobalCheckoutTest extends TestCase
         );
 
         $this->assertTrue($result['success']);
-        $this->assertEquals('batch', $result['item']['input']['message']);
+        $this->assertEquals('batch-1', $result['item']['input']['id']);
         $this->assertEquals('test.batch', $result['item']['type']);
     }
 
@@ -116,10 +116,10 @@ class GlobalCheckoutTest extends TestCase
 
     public function test_global_checkout_combines_multiple_filters()
     {
-        $this->tools->propose('test.batch', ['tenant_id' => 'acme', 'message' => 'match'], priority: 80);
+        $this->tools->propose('test.batch', ['tenant_id' => 'acme', 'batches' => [['id' => 'match', 'data' => []]]], priority: 80);
         $this->tools->propose('test.echo', ['tenant_id' => 'acme', 'message' => 'wrong-type'], priority: 90);
-        $this->tools->propose('test.batch', ['tenant_id' => 'other', 'message' => 'wrong-tenant'], priority: 85);
-        $this->tools->propose('test.batch', ['tenant_id' => 'acme', 'message' => 'low'], priority: 30);
+        $this->tools->propose('test.batch', ['tenant_id' => 'other', 'batches' => [['id' => 'wrong-tenant', 'data' => []]]], priority: 85);
+        $this->tools->propose('test.batch', ['tenant_id' => 'acme', 'batches' => [['id' => 'low', 'data' => []]]], priority: 30);
 
         // Combine filters: type, min_priority, tenant_id
         $result = $this->tools->checkout(
@@ -131,7 +131,7 @@ class GlobalCheckoutTest extends TestCase
         );
 
         $this->assertTrue($result['success']);
-        $this->assertEquals('match', $result['item']['input']['message']);
+        $this->assertEquals('match', $result['item']['input']['id']);
     }
 
     public function test_global_checkout_returns_error_when_no_items_available()
@@ -224,10 +224,8 @@ class GlobalCheckoutTest extends TestCase
     public function test_global_checkout_skips_already_leased_items()
     {
         $order1 = $this->allocator->propose('test.echo', ['message' => 'leased'], priority: 100);
-        $this->allocator->plan($order1);
 
         $order2 = $this->allocator->propose('test.echo', ['message' => 'available'], priority: 50);
-        $this->allocator->plan($order2);
 
         // Manually lease the high priority item
         $order1->items()->first()->update([
@@ -301,10 +299,10 @@ class GlobalCheckoutTest extends TestCase
 
         $itemId = $checkoutResult['item']['id'];
 
-        // Should be able to submit the item
+        // Should be able to submit the item (test.echo requires 'ok' and 'verified' fields)
         $submitResult = $this->tools->submit(
             itemId: $itemId,
-            result: ['output' => 'completed'],
+            result: ['ok' => true, 'verified' => true, 'echoed_message' => 'test'],
             agentId: 'mcp-agent-1'
         );
 
