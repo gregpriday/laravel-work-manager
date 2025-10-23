@@ -124,7 +124,7 @@ it('checkout returns success with item details', function () {
     $allocator->plan($order);
 
     $tools = app(WorkManagerTools::class);
-    $result = $tools->checkout($order->id, 'agent-1');
+    $result = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
 
     expect($result)->toHaveKeys(['success', 'item']);
     expect($result['success'])->toBeTrue();
@@ -151,7 +151,7 @@ it('checkout returns error when no items available', function () {
     // Don't plan the order - no items available
 
     $tools = app(WorkManagerTools::class);
-    $result = $tools->checkout($order->id, 'agent-1');
+    $result = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
 
     expect($result)->toHaveKeys(['success', 'error', 'code']);
     expect($result['success'])->toBeFalse();
@@ -170,7 +170,7 @@ it('heartbeat returns success with updated lease time', function () {
     $tools = app(WorkManagerTools::class);
 
     // Checkout first
-    $checkoutResult = $tools->checkout($order->id, 'agent-1');
+    $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
     // Send heartbeat
@@ -189,7 +189,7 @@ it('heartbeat returns error when wrong agent', function () {
     $tools = app(WorkManagerTools::class);
 
     // Agent 1 checks out
-    $checkoutResult = $tools->checkout($order->id, 'agent-1');
+    $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
     // Agent 2 tries to heartbeat
@@ -209,7 +209,7 @@ it('submit returns success with item details', function () {
     $tools = app(WorkManagerTools::class);
 
     // Checkout first
-    $checkoutResult = $tools->checkout($order->id, 'agent-1');
+    $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
     // Submit results
@@ -233,7 +233,7 @@ it('submit uses idempotency for duplicate submissions', function () {
     $tools = app(WorkManagerTools::class);
 
     // Checkout first
-    $checkoutResult = $tools->checkout($order->id, 'agent-1');
+    $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
     $key = 'submit-key-' . uniqid();
@@ -286,7 +286,7 @@ it('release returns success when releasing lease', function () {
     $tools = app(WorkManagerTools::class);
 
     // Checkout first
-    $checkoutResult = $tools->checkout($order->id, 'agent-1');
+    $checkoutResult = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
     $itemId = $checkoutResult['item']['id'];
 
     // Release

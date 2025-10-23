@@ -24,6 +24,8 @@ class WorkOrder extends Model
         'applied_at',
         'completed_at',
         'last_transitioned_at',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

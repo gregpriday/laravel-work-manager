@@ -2,10 +2,10 @@
 
 namespace GregPriday\WorkManager\Mcp;
 
+use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use React\Http\Message\Response as HttpResponse;
 
 /**
  * PSR-7 middleware for Bearer token authentication on MCP HTTP transport.

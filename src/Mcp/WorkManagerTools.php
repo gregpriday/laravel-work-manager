@@ -106,7 +106,16 @@ class WorkManagerTools
         description: 'List work orders with Query Builder filters/sorts/includes'
     )]
     public function list(
-        #[Schema(description: 'Filter object (e.g. {"state":"queued","priority":">50"})')]
+        #[Schema(description: 'Filter by order state (e.g. "queued", "completed")')]
+        ?string $state = null,
+
+        #[Schema(description: 'Filter by order type (e.g. "user.data.sync")')]
+        ?string $type = null,
+
+        #[Schema(description: 'Filter by priority (e.g. ">50", ">=10")')]
+        ?string $priority = null,
+
+        #[Schema(description: 'Additional filter object (e.g. {"state":"queued","priority":">50"})')]
         ?array $filter = null,
 
         #[Schema(description: 'Comma-separated sorts, e.g. "-priority,created_at"')]
@@ -121,8 +130,20 @@ class WorkManagerTools
         #[Schema(description: 'Pagination object, e.g. {"size":50,"number":1}')]
         ?array $page = null
     ): array {
+        // Merge direct parameters with filter array
+        $filterData = $filter ?? [];
+        if ($state !== null) {
+            $filterData['state'] = $state;
+        }
+        if ($type !== null) {
+            $filterData['type'] = $type;
+        }
+        if ($priority !== null) {
+            $filterData['priority'] = $priority;
+        }
+
         $payload = [
-            'filter' => $filter ?? [],
+            'filter' => $filterData,
             'sort' => $sort,
             'include' => $include,
             'fields' => $fields,
