@@ -77,7 +77,7 @@ This is a Laravel package with the following namespace: `GregPriday\WorkManager`
 - Supports both STDIO (local AI IDEs) and HTTP (remote agents) transports
 - See `docs/guides/mcp-server-integration.md` for complete MCP documentation
 
-**Query & Filtering** (`src/Support/WorkOrderQuery.php`, `src/Services/FilterParser.php`):
+**Query & Filtering** (`src/Support/WorkOrderQuery.php`):
 - Spatie Query Builder integration for powerful filtering, sorting, and field selection
 - Supports both HTTP API and MCP tool queries with unified interface
 - See `docs/guides/filtering-orders.md` and `docs/examples/orders-filtering.md` for details
@@ -247,7 +247,7 @@ See `docs/guides/mcp-server-integration.md` for integration examples and product
 ## Events
 
 Subscribe to Laravel events for observability:
-- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderCheckedOut`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
+- `WorkOrderProposed`, `WorkOrderPlanned`, `WorkOrderApproved`, `WorkOrderApplied`, `WorkOrderCompleted`, `WorkOrderRejected`
 - `WorkItemLeased`, `WorkItemHeartbeat`, `WorkItemSubmitted`, `WorkItemFailed`, `WorkItemLeaseExpired`, `WorkItemFinalized`
 - `WorkItemPartSubmitted`, `WorkItemPartValidated`, `WorkItemPartRejected`
 

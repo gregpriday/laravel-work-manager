@@ -5,7 +5,6 @@ namespace GregPriday\WorkManager;
 use GregPriday\WorkManager\Console\GenerateCommand;
 use GregPriday\WorkManager\Console\MaintainCommand;
 use GregPriday\WorkManager\Console\McpCommand;
-use GregPriday\WorkManager\Contracts\LeaseBackend;
 use GregPriday\WorkManager\Mcp\WorkManagerTools;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Policies\WorkOrderPolicy;
@@ -178,6 +177,18 @@ class WorkManagerServiceProvider extends ServiceProvider
         \PhpMcp\Laravel\Facades\Mcp::tool([$tools, 'submit'])
             ->name('work.submit')
             ->description('Submit the results of a completed work item');
+
+        \PhpMcp\Laravel\Facades\Mcp::tool([$tools, 'submitPart'])
+            ->name('work.submit_part')
+            ->description('Submit a partial result for a work item');
+
+        \PhpMcp\Laravel\Facades\Mcp::tool([$tools, 'listParts'])
+            ->name('work.list_parts')
+            ->description('List all submitted parts for a work item');
+
+        \PhpMcp\Laravel\Facades\Mcp::tool([$tools, 'finalize'])
+            ->name('work.finalize')
+            ->description('Finalize a work item by assembling all submitted parts');
 
         \PhpMcp\Laravel\Facades\Mcp::tool([$tools, 'approve'])
             ->name('work.approve')

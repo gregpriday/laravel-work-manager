@@ -25,19 +25,10 @@ return [
     | Configure the default lease duration and heartbeat interval for
     | work items. Agents must heartbeat before the lease expires.
     |
-    | Backend Options:
-    | - 'database': Uses work_items table with row-level locks (default)
-    | - 'redis': Uses Redis SET NX EX pattern for better performance
-    |
     */
     'lease' => [
-        'backend' => env('WORK_MANAGER_LEASE_BACKEND', 'database'),
         'ttl_seconds' => 600,        // default 10 minutes
         'heartbeat_every_seconds' => 120,
-
-        // Redis backend configuration (only used if backend = 'redis')
-        'redis_connection' => env('WORK_MANAGER_REDIS_CONNECTION', 'default'),
-        'redis_prefix' => 'work:lease:',
 
         // Concurrency limits (optional)
         'max_leases_per_agent' => env('WORK_MANAGER_MAX_LEASES_PER_AGENT', null),
@@ -138,21 +129,6 @@ return [
         'maintenance_queue' => 'work:maintenance',
         'planning_queue' => 'work:planning',
         'agent_job_queue_prefix' => 'agents:', // e.g. agents:research
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Metrics Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure metrics collection and reporting. Supports multiple
-    | drivers for different monitoring systems.
-    |
-    */
-    'metrics' => [
-        'enabled' => true,
-        'driver' => 'log', // 'prometheus', 'statsd', 'log'
-        'namespace' => 'work_manager',
     ],
 
     /*
