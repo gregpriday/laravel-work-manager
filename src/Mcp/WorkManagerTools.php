@@ -219,57 +219,86 @@ class WorkManagerTools
     /**
      * Checkout the next available work item for processing.
      *
-     * Acquires a lease on the next available work item from the specified order.
-     * The lease must be maintained with heartbeats or it will expire.
+     * Acquires a lease on the next available work item. Can checkout from a specific order
+     * or globally across all orders using filters.
      */
     #[McpTool(
         name: 'work.checkout',
-        description: 'Checkout (lease) the next available work item from an order'
+        description: 'Checkout (lease) the next available work item, optionally filtered by type/priority'
     )]
     public function checkout(
-        #[Schema(description: 'The UUID of the work order')]
-        string $orderId,
+        #[Schema(description: 'Optional: specific order UUID (if omitted, uses global checkout)')]
+        ?string $orderId = null,
+
+        #[Schema(description: 'Optional: filter by order type (global checkout only)')]
+        ?string $type = null,
+
+        #[Schema(description: 'Optional: minimum priority (global checkout only)')]
+        ?int $minPriority = null,
+
+        #[Schema(description: 'Optional: filter by tenant ID (global checkout only)')]
+        ?string $tenantId = null,
 
         #[Schema(description: 'Agent identifier for lease tracking')]
         ?string $agentId = null
     ): array {
         $agentId = $agentId ?? $this->getAgentId();
-        $order = WorkOrder::findOrFail($orderId);
 
-        // Get next available item
-        $item = $this->leaseService->getNextAvailable($order->id);
+        // Scoped checkout: specific order
+        if ($orderId) {
+            $order = WorkOrder::findOrFail($orderId);
+            $item = $this->leaseService->getNextAvailable($order->id);
 
-        if (!$item) {
-            return [
-                'success' => false,
-                'error' => 'No items available for checkout',
-                'code' => 'no_items_available',
-            ];
+            if (!$item) {
+                return [
+                    'success' => false,
+                    'error' => 'No items available for checkout',
+                    'code' => 'no_items_available',
+                ];
+            }
+
+            try {
+                $item = $this->leaseService->acquire($item->id, $agentId);
+            } catch (\Exception $e) {
+                return [
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'code' => 'lease_conflict',
+                ];
+            }
+        }
+        // Global checkout: use filters
+        else {
+            $filters = array_filter([
+                'type' => $type,
+                'min_priority' => $minPriority,
+                'tenant_id' => $tenantId,
+            ], fn ($value) => $value !== null);
+
+            $item = $this->leaseService->acquireNextAvailable($agentId, $filters);
+
+            if (!$item) {
+                return [
+                    'success' => false,
+                    'error' => 'No work items available matching filters',
+                    'code' => 'no_items_available',
+                ];
+            }
         }
 
-        try {
-            $item = $this->leaseService->acquire($item->id, $agentId);
-
-            return [
-                'success' => true,
-                'item' => [
-                    'id' => $item->id,
-                    'order_id' => $item->order_id,
-                    'type' => $item->type,
-                    'input' => $item->input,
-                    'lease_expires_at' => $item->lease_expires_at->toIso8601String(),
-                    'heartbeat_every_seconds' => config('work-manager.lease.heartbeat_every_seconds'),
-                    'max_attempts' => $item->max_attempts,
-                    'current_attempt' => $item->attempts + 1,
-                ],
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'code' => 'lease_conflict',
-            ];
-        }
+        return [
+            'success' => true,
+            'item' => [
+                'id' => $item->id,
+                'order_id' => $item->order_id,
+                'type' => $item->type,
+                'input' => $item->input,
+                'lease_expires_at' => $item->lease_expires_at->toIso8601String(),
+                'heartbeat_every_seconds' => config('work-manager.lease.heartbeat_every_seconds'),
+                'max_attempts' => $item->max_attempts,
+                'current_attempt' => $item->attempts + 1,
+            ],
+        ];
     }
 
     /**

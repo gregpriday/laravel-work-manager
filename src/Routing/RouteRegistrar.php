@@ -32,7 +32,11 @@ class RouteRegistrar
                 $router->get('/orders/{order}', [WorkOrderApiController::class, 'show'])
                     ->name('work-manager.show');
 
-                // Checkout (lease) next work item
+                // Global checkout (lease) - next available item across all orders
+                $router->post('/checkout', [WorkOrderApiController::class, 'checkoutGlobal'])
+                    ->name('work-manager.checkout-global');
+
+                // Checkout (lease) next work item from specific order
                 $router->post('/orders/{order}/checkout', [WorkOrderApiController::class, 'checkout'])
                     ->name('work-manager.checkout');
 

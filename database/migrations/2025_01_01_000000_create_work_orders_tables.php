@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -42,9 +43,24 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
-            $table->index(['priority', 'created_at']);
             $table->index(['state', 'type']);
         });
+
+        // Add optimized composite index for global checkout queries
+        // Priority DESC for highest-priority-first, created_at ASC for FIFO within priority
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority DESC, created_at ASC)');
+        } elseif ($driver === 'pgsql') {
+            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority DESC, created_at ASC)');
+        } elseif ($driver === 'sqlite') {
+            // SQLite doesn't support index direction, but we can still create a composite index
+            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority, created_at)');
+        } else {
+            // Fallback for other drivers
+            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority, created_at)');
+        }
 
         // Work Items table
         Schema::create('work_items', function (Blueprint $table) {
@@ -212,6 +228,12 @@ return new class extends Migration
         Schema::dropIfExists('work_provenances');
         Schema::dropIfExists('work_events');
         Schema::dropIfExists('work_items');
+
+        // Drop the optimized index before dropping the table
+        Schema::table('work_orders', function ($table) {
+            $table->dropIndex('work_orders_priority_created_at_index');
+        });
+
         Schema::dropIfExists('work_orders');
     }
 };

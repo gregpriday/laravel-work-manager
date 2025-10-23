@@ -215,4 +215,109 @@ class LeaseService
             ->orderBy('created_at')
             ->first();
     }
+
+    /**
+     * Acquire the next available work item across all orders (global checkout).
+     *
+     * @param string $agentId The agent requesting work
+     * @param array $filters Optional filters: type, min_priority, tenant_id
+     * @return WorkItem|null The acquired item, or null if none available
+     */
+    public function acquireNextAvailable(string $agentId, array $filters = []): ?WorkItem
+    {
+        // Check per-agent concurrency limit outside transaction
+        if (!$this->canAgentAcquireMore($agentId)) {
+            return null;
+        }
+
+        // Find the best available item
+        $query = WorkItem::query()
+            ->join('work_orders', 'work_items.order_id', '=', 'work_orders.id')
+            ->where('work_items.state', 'queued')
+            ->where(function ($q) {
+                $q->whereNull('work_items.lease_expires_at')
+                    ->orWhere('work_items.lease_expires_at', '<', now());
+            });
+
+        // Apply type filter
+        if (!empty($filters['type'])) {
+            $query->where('work_orders.type', $filters['type']);
+        }
+
+        // Apply minimum priority filter
+        if (isset($filters['min_priority'])) {
+            $query->where('work_orders.priority', '>=', $filters['min_priority']);
+        }
+
+        // Apply tenant filter (JSON contains on payload->tenant_id)
+        if (!empty($filters['tenant_id'])) {
+            $query->whereJsonContains('work_orders.payload->tenant_id', $filters['tenant_id']);
+        }
+
+        // Global scheduling: highest priority first, then FIFO within priority
+        $item = $query
+            ->select('work_items.*', 'work_orders.type as order_type')
+            ->orderByDesc('work_orders.priority')
+            ->orderBy('work_items.created_at')
+            ->first();
+
+        if (!$item) {
+            return null;
+        }
+
+        // Check per-type concurrency limit
+        if (!$this->canTypeAcquireMore($item->order_type)) {
+            return null;
+        }
+
+        // Now use the existing acquire() method to actually lease the item
+        // This ensures we reuse tested logic and maintain consistency
+        try {
+            return $this->acquire($item->id, $agentId);
+        } catch (\Exception $e) {
+            // If acquisition fails (e.g., race condition), return null
+            return null;
+        }
+    }
+
+    /**
+     * Check if an agent can acquire more leases.
+     *
+     * @param string $agentId The agent identifier
+     * @return bool True if the agent can acquire more leases
+     */
+    protected function canAgentAcquireMore(string $agentId): bool
+    {
+        $max = config('work-manager.lease.max_leases_per_agent');
+        if (!$max) {
+            return true;
+        }
+
+        $current = WorkItem::where('leased_by_agent_id', $agentId)
+            ->where('lease_expires_at', '>', now())
+            ->count();
+
+        return $current < $max;
+    }
+
+    /**
+     * Check if an order type can have more leases.
+     *
+     * @param string $orderType The order type identifier
+     * @return bool True if the type can have more leases
+     */
+    protected function canTypeAcquireMore(string $orderType): bool
+    {
+        $max = config('work-manager.lease.max_leases_per_type');
+        if (!$max) {
+            return true;
+        }
+
+        $current = WorkItem::join('work_orders', 'work_items.order_id', '=', 'work_orders.id')
+            ->where('work_orders.type', $orderType)
+            ->where('work_items.lease_expires_at', '>', now())
+            ->count();
+
+        return $current < $max;
+    }
 }

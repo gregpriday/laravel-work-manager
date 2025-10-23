@@ -145,6 +145,42 @@ class WorkOrderApiController extends Controller
     }
 
     /**
+     * Global checkout - acquire the next available work item across all orders.
+     */
+    public function checkoutGlobal(Request $request): JsonResponse
+    {
+        $this->authorize('checkout', WorkOrder::class);
+
+        $validated = $request->validate([
+            'type' => 'nullable|string|max:120',
+            'min_priority' => 'nullable|integer',
+            'tenant_id' => 'nullable|string',
+        ]);
+
+        $agentId = $this->getAgentId($request);
+        $item = $this->leaseService->acquireNextAvailable($agentId, $validated);
+
+        if (!$item) {
+            return response()->json([
+                'error' => [
+                    'code' => 'no_items_available',
+                    'message' => 'No work items available matching filters',
+                ],
+            ], 409);
+        }
+
+        return response()->json([
+            'item' => [
+                'id' => $item->id,
+                'type' => $item->type,
+                'input' => $item->input,
+                'lease_expires_at' => $item->lease_expires_at->toIso8601String(),
+                'heartbeat_every_seconds' => config('work-manager.lease.heartbeat_every_seconds'),
+            ],
+        ]);
+    }
+
+    /**
      * Extend the lease on a work item (heartbeat).
      */
     public function heartbeat(WorkItem $item, Request $request): JsonResponse
