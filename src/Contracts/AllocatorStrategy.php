@@ -2,6 +2,13 @@
 
 namespace GregPriday\WorkManager\Contracts;
 
+/**
+ * Contract for discovering work to propose (used by GenerateCommand).
+ *
+ * @api
+ *
+ * @see docs/concepts/architecture-overview.md
+ */
 interface AllocatorStrategy
 {
     /**

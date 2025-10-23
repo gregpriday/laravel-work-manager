@@ -2,6 +2,11 @@
 
 namespace GregPriday\WorkManager\Support;
 
+/**
+ * Event types for audit trail (lifecycle transitions and actions).
+ *
+ * @see docs/reference/events-reference.md
+ */
 enum EventType: string
 {
     case PROPOSED = 'proposed';

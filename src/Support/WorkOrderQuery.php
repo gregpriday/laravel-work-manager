@@ -11,10 +11,20 @@ use Spatie\QueryBuilder\Enums\FilterOperator;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
- * Centralized query builder configuration for WorkOrder filtering.
+ * Unified Spatie Query Builder config for HTTP/MCP filtering (sort/include/fields).
  *
- * This class provides a single source of truth for both HTTP API and MCP
- * tool filtering, ensuring consistent behavior across all interfaces.
+ * Example queries (URL parameters):
+ *   ?filter[state]=approved&filter[type]=user.sync
+ *   ?filter[created_at][gte]=2024-01-01&filter[priority][gte]=5
+ *   ?filter[meta]=batch_id:123  (JSON contains key:value)
+ *   ?filter[has_available_items]=true  (has queued items without active lease)
+ *   ?sort=-priority,created_at  (descending priority, then ascending created_at)
+ *   ?include=items,events,itemsCount,eventsCount
+ *   ?fields[work_orders]=id,type,state&fields[items]=id,state,result
+ *
+ * @internal Single source of truth for both HTTP API and MCP tools.
+ *
+ * @see docs/guides/filtering-orders.md
  */
 final class WorkOrderQuery
 {

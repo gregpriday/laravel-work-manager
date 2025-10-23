@@ -9,6 +9,13 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Console\Command;
 
+/**
+ * Reclaims expired leases, dead-letters stuck items, alerts on stale orders.
+ *
+ * @internal Runs via scheduler; idempotent.
+ *
+ * @see docs/reference/commands-reference.md
+ */
 class MaintainCommand extends Command
 {
     protected $signature = 'work-manager:maintain

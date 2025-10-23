@@ -2,6 +2,17 @@
 
 namespace GregPriday\WorkManager\Support;
 
+/**
+ * Domain diff (before/after/changes/summary) produced by apply().
+ *
+ * @immutable
+ *
+ * @property-read array $before
+ * @property-read array $after
+ * @property-read array $changes
+ *
+ * @see docs/concepts/lifecycle-and-flow.md
+ */
 class Diff
 {
     public function __construct(

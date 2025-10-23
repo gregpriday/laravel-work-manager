@@ -8,8 +8,11 @@ use GregPriday\WorkManager\Models\WorkOrder;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Abstract base class for acceptance policies.
- * Extend this class to create custom validation logic.
+ * Base for separate validation policies (submission rules + approval checks).
+ *
+ * @api Combine Laravel rules with custom business logic; throw ValidationException on failure.
+ *
+ * @see docs/guides/validation-and-acceptance-policies.md
  */
 abstract class AbstractAcceptancePolicy implements AcceptancePolicy
 {

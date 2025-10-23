@@ -33,7 +33,7 @@ Laravel Work Manager provides exactly that.
 * **Scheduled commands**: generator & maintenance. (`work-manager:generate`, `work-manager:maintain`)
 * **"Work-order-only" enforcement**: middleware to block direct mutations. (`Http\Middleware\EnforceWorkOrderOnly`)
 * **Auditability**: `WorkEvent`, `WorkProvenance`, and structured `Diff`.
-* **Examples & docs**: full examples for DB inserts and user data sync; architecture + lifecycle docs. (`examples/`, `ARCHITECTURE.md`)
+* **Examples & docs**: full examples for DB inserts and user data sync; architecture + lifecycle docs. (See [Documentation](#documentation) section)
 
 ---
 
@@ -239,7 +239,7 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 
 **AbstractAcceptancePolicy** for teams that prefer validation separate from the type class.
 
-See `examples/LIFECYCLE.md` for complete hook documentation.
+See [Lifecycle & Flow](docs/concepts/lifecycle-and-flow.md) for complete hook documentation.
 
 ### State machine
 
@@ -483,10 +483,10 @@ public function apply(WorkOrder $order): Diff
 
 ## Examples
 
-* **Database inserts**: `examples/DatabaseRecordInsertType.php` — batch inserts + verification + idempotent apply
-* **User data sync**: `examples/UserDataSyncType.php` — external API sync with per-batch items
+* **Database inserts**: [Database Record Insert Example](docs/examples/database-record-insert.md) — batch inserts + verification + idempotent apply
+* **User data sync**: [User Data Sync Example](docs/examples/user-data-sync.md) — external API sync with per-batch items
 * **Quick start**: [Quickstart Guide](docs/getting-started/quickstart.md) — 5-minute getting started guide
-* **Lifecycle walk-through**: `examples/LIFECYCLE.md` — every hook and event documented
+* **Lifecycle walk-through**: [Lifecycle & Flow](docs/concepts/lifecycle-and-flow.md) — every hook and event documented
 * **Architecture**: [Architecture Overview](docs/concepts/architecture-overview.md) — system design and data flows
 
 ---
@@ -593,7 +593,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](docs/meta/contributing.md
 - Coding standards
 - Pull request process
 
-**Key components** (see `ARCHITECTURE.md` for system design):
+**Key components** (see [Architecture Overview](docs/concepts/architecture-overview.md) for system design):
 * `src/Http/Controllers/WorkOrderApiController.php` — API endpoints
 * `src/Services/{WorkAllocator,WorkExecutor,LeaseService,IdempotencyService,StateMachine}` — core services
 * `src/Support/{AbstractOrderType,AbstractAcceptancePolicy,Enums,Diff,Helpers}` — primitives & base classes

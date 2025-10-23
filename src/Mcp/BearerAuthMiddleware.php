@@ -8,10 +8,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * PSR-7 middleware for Bearer token authentication on MCP HTTP transport.
+ * PSR-7 middleware for Bearer token auth on MCP HTTP transport (static or Sanctum).
  *
- * Validates the Authorization header and integrates with Laravel's
- * authentication system to verify tokens.
+ * @internal Validates Authorization header; integrates with Laravel guards.
+ *
+ * @see docs/guides/mcp-server-integration.md
  */
 class BearerAuthMiddleware
 {

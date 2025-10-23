@@ -8,6 +8,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Unit of work with exclusive TTL lease and partial submission support.
+ *
+ * @extends \Illuminate\Database\Eloquent\Model<self>
+ *
+ * @property string $id
+ * @property ItemState $state
+ * @property array<string,mixed> $input
+ * @property array<string,mixed>|null $result
+ * @property array<string,mixed>|null $assembled_result
+ * @property array<string>|null $parts_required
+ * @property array<string,mixed>|null $parts_state
+ * @property \Illuminate\Support\Carbon|null $lease_expires_at
+ * @property string|null $leased_by_agent_id
+ * @property-read WorkOrder $order
+ * @property-read \Illuminate\Database\Eloquent\Collection<int,WorkItemPart> $parts
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|static inState(ItemState|string $state)
+ * @method static \Illuminate\Database\Eloquent\Builder|static withExpiredLease()
+ * @method static \Illuminate\Database\Eloquent\Builder|static availableForLease()
+ * @method static \Illuminate\Database\Eloquent\Builder|static leasedBy(string $agentId)
+ *
+ * @see docs/reference/database-schema.md
+ */
 class WorkItem extends Model
 {
     use HasUuids;

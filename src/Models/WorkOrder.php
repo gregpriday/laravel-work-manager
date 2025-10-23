@@ -8,6 +8,24 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Work order aggregate (type, payload, lifecycle state).
+ *
+ * @extends \Illuminate\Database\Eloquent\Model<self>
+ *
+ * @property string $id
+ * @property string $type
+ * @property OrderState $state
+ * @property array<string,mixed> $payload
+ * @property array<string,mixed> $meta
+ * @property-read \Illuminate\Database\Eloquent\Collection<int,WorkItem> $items
+ * @property-read \Illuminate\Database\Eloquent\Collection<int,WorkEvent> $events
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|static inState(OrderState|string $state)
+ * @method static \Illuminate\Database\Eloquent\Builder|static ofType(string $type)
+ *
+ * @see docs/reference/database-schema.md
+ */
 class WorkOrder extends Model
 {
     use HasUuids;

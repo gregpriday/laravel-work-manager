@@ -6,6 +6,13 @@ use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Contract for submission validation and approval readiness checks.
+ *
+ * @api
+ *
+ * @see docs/guides/validation-and-acceptance-policies.md
+ */
 interface AcceptancePolicy
 {
     /**

@@ -4,6 +4,11 @@ namespace GregPriday\WorkManager\Support;
 
 use Ramsey\Uuid\Uuid;
 
+/**
+ * Static helpers: UUID generation, key hashing, backoff, JSON schema validation.
+ *
+ * @internal
+ */
 class Helpers
 {
     /**

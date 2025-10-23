@@ -15,6 +15,14 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Orchestrates work order proposal and planning into work items.
+ * Invariants: validates payload against schema; transitions are transactional.
+ *
+ * @internal Service layer
+ *
+ * @see docs/concepts/architecture-overview.md
+ */
 class WorkAllocator
 {
     public function __construct(
@@ -23,7 +31,12 @@ class WorkAllocator
     ) {}
 
     /**
-     * Propose a new work order.
+     * Validate payload against schema, create QUEUED order, record PROPOSED event, plan items.
+     *
+     * @param  array<string,mixed>  $payload  Must match type's schema
+     * @return WorkOrder Fresh order with items preloaded
+     *
+     * @throws \Illuminate\Validation\ValidationException When payload invalid
      */
     public function propose(
         string $type,
@@ -79,7 +92,7 @@ class WorkAllocator
     }
 
     /**
-     * Plan a work order into discrete work items.
+     * Call type's plan() to create QUEUED items, record PLANNED event; atomic.
      */
     public function plan(WorkOrder $order, ?OrderType $orderType = null): void
     {

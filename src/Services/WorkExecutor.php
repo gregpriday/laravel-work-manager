@@ -26,6 +26,14 @@ use GregPriday\WorkManager\Support\PartStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Handles item submissions, approval, and idempotent apply() execution.
+ * Invariants: verifies lease ownership; transitions/events are atomic; apply() is idempotent.
+ *
+ * @internal Service layer
+ *
+ * @see docs/concepts/architecture-overview.md
+ */
 class WorkExecutor
 {
     public function __construct(
@@ -34,7 +42,13 @@ class WorkExecutor
     ) {}
 
     /**
-     * Submit a work item result.
+     * Validate result via policy, transition to SUBMITTED, record events; checks lease ownership.
+     *
+     * @param  array<string,mixed>  $result  Agent-submitted result
+     *
+     * @throws \Exception When agent doesn't own lease
+     * @throws LeaseExpiredException When lease expired
+     * @throws ValidationException When result invalid
      */
     public function submit(
         WorkItem $item,
@@ -99,7 +113,11 @@ class WorkExecutor
     }
 
     /**
-     * Approve a work order and apply it.
+     * Check readiness, transition to APPROVED, call apply(), record APPLIED, return order+diff.
+     *
+     * @return array{order:WorkOrder,diff:array<string,mixed>}
+     *
+     * @throws \Exception When not ready for approval
      */
     public function approve(
         WorkOrder $order,
@@ -136,7 +154,9 @@ class WorkExecutor
     }
 
     /**
-     * Apply an approved work order (idempotent).
+     * Call type's idempotent apply(), transition to APPLIED, record diff, complete items; atomic.
+     *
+     * @return Diff Changes made by apply
      */
     public function apply(WorkOrder $order, ?OrderType $orderType = null): Diff
     {
@@ -200,7 +220,9 @@ class WorkExecutor
     }
 
     /**
-     * Reject a work order.
+     * Transition to REJECTED (or QUEUED if allowRework), record errors, emit event.
+     *
+     * @param  array<array{code:string,message:string,field?:string}>  $errors  Structured errors
      */
     public function reject(
         WorkOrder $order,
@@ -228,7 +250,9 @@ class WorkExecutor
     }
 
     /**
-     * Mark a work item as failed.
+     * Transition to FAILED, store error, record event; atomic.
+     *
+     * @param  array{code:string,message:string}  $error  Structured error
      */
     public function fail(WorkItem $item, array $error): WorkItem
     {
@@ -252,7 +276,13 @@ class WorkExecutor
     }
 
     /**
-     * Submit a work item part.
+     * Validate part via type's partialRules(), persist as VALIDATED, update parts_state; checks lease.
+     *
+     * @param  array<string,mixed>  $payload  Part payload
+     *
+     * @throws \Exception When agent doesn't own lease
+     * @throws LeaseExpiredException When lease expired
+     * @throws ValidationException When part invalid
      */
     public function submitPart(
         WorkItem $item,
@@ -358,7 +388,11 @@ class WorkExecutor
     }
 
     /**
-     * Finalize a work item by assembling all parts.
+     * Assemble latest parts via type's assemble(), validate, transition to SUBMITTED; "strict" requires all parts.
+     *
+     * @param  string  $mode  "strict"|"best_effort"
+     *
+     * @throws ValidationException When missing required parts (strict) or assembled invalid
      */
     public function finalizeItem(
         WorkItem $item,

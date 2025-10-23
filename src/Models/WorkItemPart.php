@@ -7,6 +7,26 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Partial submission record with validation state and checksum.
+ *
+ * @extends \Illuminate\Database\Eloquent\Model<self>
+ *
+ * @property string $id
+ * @property string $part_key
+ * @property int $seq
+ * @property PartStatus $status
+ * @property array<string,mixed> $payload
+ * @property array<string,mixed>|null $evidence
+ * @property array<string,mixed>|null $errors
+ * @property string $checksum
+ * @property-read WorkItem $workItem
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|static validated()
+ * @method static \Illuminate\Database\Eloquent\Builder|static forKey(string $key)
+ *
+ * @see docs/guides/partial-submissions.md
+ */
 class WorkItemPart extends Model
 {
     use HasUuids;

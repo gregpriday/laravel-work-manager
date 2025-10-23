@@ -7,8 +7,11 @@ use GregPriday\WorkManager\Contracts\OrderType;
 use GregPriday\WorkManager\Models\WorkOrder;
 
 /**
- * Abstract base class for order types.
- * Extend this class and implement the required methods.
+ * Base for domain order types: schema/plan/validation hooks + idempotent apply().
+ *
+ * @api Implementors MUST keep apply() idempotent; supports auto-approval via $autoApprove.
+ *
+ * @see docs/concepts/what-it-does.md
  */
 abstract class AbstractOrderType implements OrderType
 {
@@ -88,15 +91,9 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Define validation rules for submission.
-     * Return Laravel validation rules array.
+     * Laravel validation rules for item result; override for type-specific constraints.
      *
-     * Example:
-     * return [
-     *     'success' => 'required|boolean',
-     *     'data' => 'required|array',
-     *     'data.field' => 'required|string',
-     * ];
+     * @return array<string,string|array<string>> Laravel validation rules
      */
     public function submissionValidationRules(\GregPriday\WorkManager\Models\WorkItem $item): array
     {
@@ -104,9 +101,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook called after validation passes but before saving submission.
-     * Use this for custom business logic validation.
-     * Throw ValidationException if validation fails.
+     * Custom validation after Laravel rules pass; throw ValidationException to reject.
      */
     public function afterValidateSubmission(\GregPriday\WorkManager\Models\WorkItem $item, array $result): void
     {
@@ -114,9 +109,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook to determine if an order can be approved.
-     * Called after checking all items are submitted.
-     * Override for custom approval logic.
+     * Cross-item approval gate called after all items submitted; override for custom logic.
      */
     public function canApprove(WorkOrder $order): bool
     {
@@ -124,8 +117,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook called before apply() is executed.
-     * Use this to perform pre-execution checks or setup.
+     * Pre-execution hook called before apply(); use for setup/preflight checks.
      */
     public function beforeApply(WorkOrder $order): void
     {
@@ -133,8 +125,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook called after apply() is executed successfully.
-     * Use this for cleanup or post-processing.
+     * Post-execution hook after apply() succeeds; use for cleanup (jobs, cache flush).
      */
     public function afterApply(WorkOrder $order, Diff $diff): void
     {
@@ -142,15 +133,9 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Define validation rules for a partial submission.
-     * Return Laravel validation rules array for the specific part.
+     * Laravel validation rules per part_key; override for per-part constraints.
      *
-     * Example:
-     * return match ($partKey) {
-     *     'identity' => ['name' => 'required|string', 'domain' => 'nullable|url'],
-     *     'contacts' => ['contacts' => 'array', 'contacts.*.email' => 'email'],
-     *     default => ['payload' => 'array'],
-     * };
+     * @return array<string,string|array<string>> Laravel validation rules
      */
     public function partialRules(\GregPriday\WorkManager\Models\WorkItem $item, string $partKey, ?int $seq): array
     {
@@ -158,9 +143,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook called after per-part validation passes but before saving.
-     * Use this for custom business logic validation on a single part.
-     * Throw ValidationException if validation fails.
+     * Custom per-part validation after Laravel rules pass; throw ValidationException to reject.
      */
     public function afterValidatePart(\GregPriday\WorkManager\Models\WorkItem $item, string $partKey, array $payload, ?int $seq): void
     {
@@ -168,11 +151,9 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Define which parts are required for this work item to be finalized.
-     * Return array of part_key strings.
+     * Part keys required for finalize("strict"); override to enforce multi-part structure.
      *
-     * Example:
-     * return ['identity', 'firmographics', 'contacts'];
+     * @return string[] Part keys
      */
     public function requiredParts(\GregPriday\WorkManager\Models\WorkItem $item): array
     {
@@ -180,15 +161,10 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Assemble all latest parts into a single result array.
-     * This is called during finalization to merge all parts into assembled_result.
+     * Merge latest validated parts into final result; called by finalize(); default merges by key.
      *
-     * Example:
-     * return [
-     *     'identity' => $parts->firstWhere('part_key', 'identity')->payload ?? [],
-     *     'firmographics' => $parts->firstWhere('part_key', 'firmographics')->payload ?? [],
-     *     'contacts' => Arr::wrap($parts->firstWhere('part_key', 'contacts')->payload['contacts'] ?? []),
-     * ];
+     * @param  \Illuminate\Support\Collection<int,\GregPriday\WorkManager\Models\WorkItemPart>  $latestParts
+     * @return array<string,mixed> Assembled result
      */
     public function assemble(\GregPriday\WorkManager\Models\WorkItem $item, \Illuminate\Support\Collection $latestParts): array
     {
@@ -202,9 +178,7 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Hook called after assembly, before finalizing the item.
-     * Perform whole-dataset validation across all parts.
-     * Throw ValidationException if validation fails.
+     * Validate whole assembled result after merge; throw ValidationException if invalid.
      */
     public function validateAssembled(\GregPriday\WorkManager\Models\WorkItem $item, array $assembled): void
     {
@@ -212,8 +186,9 @@ abstract class AbstractOrderType implements OrderType
     }
 
     /**
-     * Default plan implementation - creates a single item.
-     * Override this to create multiple items or custom planning logic.
+     * Break order into work items; default creates single item; override for batching/sharding.
+     *
+     * @return array<array{type:string,input:array<string,mixed>,max_attempts?:int}> Item configs
      */
     public function plan(WorkOrder $order): array
     {

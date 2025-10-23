@@ -5,6 +5,13 @@ namespace GregPriday\WorkManager\Contracts;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\Diff;
 
+/**
+ * Contract for domain order types: schema, plan, validation, idempotent apply.
+ *
+ * @api
+ *
+ * @see docs/guides/creating-order-types.md
+ */
 interface OrderType
 {
     /**

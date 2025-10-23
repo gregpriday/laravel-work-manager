@@ -18,6 +18,11 @@ use GregPriday\WorkManager\Services\WorkExecutor;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Package service provider: registers services, commands, migrations, policies.
+ *
+ * @internal
+ */
 class WorkManagerServiceProvider extends ServiceProvider
 {
     /**

@@ -5,6 +5,22 @@ namespace GregPriday\WorkManager\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Agent metadata and request fingerprints for auditability.
+ *
+ * @extends \Illuminate\Database\Eloquent\Model<self>
+ *
+ * @property string $agent_name
+ * @property string|null $agent_version
+ * @property string|null $request_fingerprint
+ * @property array<string,mixed>|null $extra
+ * @property-read WorkOrder|null $order
+ * @property-read WorkItem|null $item
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|static byAgent(string $agentName)
+ *
+ * @see docs/concepts/lifecycle-and-flow.md
+ */
 class WorkProvenance extends Model
 {
     const UPDATED_AT = null; // Only created_at timestamp

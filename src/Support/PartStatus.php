@@ -2,6 +2,11 @@
 
 namespace GregPriday\WorkManager\Support;
 
+/**
+ * Partial submission states (draft, validated, rejected).
+ *
+ * @see docs/guides/partial-submissions.md
+ */
 enum PartStatus: string
 {
     case DRAFT = 'draft';

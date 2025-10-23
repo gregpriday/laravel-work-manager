@@ -2,6 +2,11 @@
 
 namespace GregPriday\WorkManager\Support;
 
+/**
+ * Work order lifecycle states (see configured transitions).
+ *
+ * @see docs/concepts/state-management.md
+ */
 enum OrderState: string
 {
     case QUEUED = 'queued';

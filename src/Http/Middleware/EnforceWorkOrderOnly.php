@@ -7,6 +7,13 @@ use GregPriday\WorkManager\Exceptions\ForbiddenDirectMutationException;
 use GregPriday\WorkManager\Models\WorkOrder;
 use Illuminate\Http\Request;
 
+/**
+ * Blocks direct writes; requires X-Work-Order-ID header set during apply().
+ *
+ * @internal
+ *
+ * @see docs/concepts/security-and-permissions.md
+ */
 class EnforceWorkOrderOnly
 {
     /**

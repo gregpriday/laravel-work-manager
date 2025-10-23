@@ -7,6 +7,14 @@ use GregPriday\WorkManager\Models\WorkIdempotencyKey;
 use GregPriday\WorkManager\Support\Helpers;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Guards operations with scope+key deduplication; caches responses for safe retries.
+ * Invariants: keys are hashed; responses cached on first success.
+ *
+ * @internal Service layer
+ *
+ * @see docs/concepts/architecture-overview.md
+ */
 class IdempotencyService
 {
     /**
@@ -52,8 +60,10 @@ class IdempotencyService
     }
 
     /**
-     * Guard a callback with idempotency checking.
-     * If key exists, return cached response. Otherwise, execute callback and cache result.
+     * Return cached response if key seen; else execute callback, store response, return result; atomic.
+     *
+     * @param  callable():array<string,mixed>  $callback  Must return serializable response array
+     * @return array<string,mixed> Cached or fresh response
      */
     public function guard(string $scope, string $key, callable $callback): array
     {

@@ -15,8 +15,11 @@ use PhpMcp\Server\Attributes\McpTool;
 use PhpMcp\Server\Attributes\Schema;
 
 /**
- * MCP Tools for Laravel Work Manager.
- * Provides AI agents with access to the work order control plane.
+ * Exposes 13 MCP tools for AI agent integration (propose/checkout/submit/approve/etc).
+ *
+ * @internal Supports both STDIO and HTTP transports via php-mcp.
+ *
+ * @see docs/guides/mcp-server-integration.md
  */
 class WorkManagerTools
 {

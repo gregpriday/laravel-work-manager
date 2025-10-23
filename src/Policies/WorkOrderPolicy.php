@@ -5,6 +5,13 @@ namespace GregPriday\WorkManager\Policies;
 use GregPriday\WorkManager\Models\WorkOrder;
 use Illuminate\Foundation\Auth\User;
 
+/**
+ * Authorization policy for work orders (propose/view/approve/reject).
+ *
+ * @internal Integrates with Laravel Gate system.
+ *
+ * @see docs/concepts/security-and-permissions.md
+ */
 class WorkOrderPolicy
 {
     /**

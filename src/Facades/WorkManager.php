@@ -9,10 +9,14 @@ use GregPriday\WorkManager\Services\WorkExecutor;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Facade for package API: routes(), registry(), allocator(), executor().
+ *
  * @method static void routes(string $basePath = 'agent/work', array $middleware = ['api'])
  * @method static OrderTypeRegistry registry()
  * @method static WorkAllocator allocator()
  * @method static WorkExecutor executor()
+ *
+ * @api
  *
  * @see \GregPriday\WorkManager\WorkManagerServiceProvider
  */

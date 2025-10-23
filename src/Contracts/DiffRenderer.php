@@ -4,6 +4,13 @@ namespace GregPriday\WorkManager\Contracts;
 
 use GregPriday\WorkManager\Support\Diff;
 
+/**
+ * Contract for rendering Diff objects to storage/display format.
+ *
+ * @api
+ *
+ * @see docs/concepts/lifecycle-and-flow.md
+ */
 interface DiffRenderer
 {
     /**

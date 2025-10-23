@@ -7,6 +7,23 @@ use GregPriday\WorkManager\Support\EventType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Append-only audit trail for lifecycle transitions and actions.
+ *
+ * @extends \Illuminate\Database\Eloquent\Model<self>
+ *
+ * @property EventType $event
+ * @property ActorType $actor_type
+ * @property array<string,mixed>|null $payload
+ * @property array<string,mixed>|null $diff
+ * @property-read WorkOrder|null $order
+ * @property-read WorkItem|null $item
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|static ofType(EventType|string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder|static byActor(ActorType|string $type, ?string $id = null)
+ *
+ * @see docs/reference/events-reference.md
+ */
 class WorkEvent extends Model
 {
     const UPDATED_AT = null; // Only created_at timestamp

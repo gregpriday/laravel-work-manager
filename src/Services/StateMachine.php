@@ -12,10 +12,20 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Enforces state transitions and records lifecycle events atomically.
+ * Invariants: validates transitions via config; state+event writes are transactional.
+ *
+ * @internal Service layer
+ *
+ * @see docs/concepts/state-management.md
+ */
 class StateMachine
 {
     /**
-     * Transition an order to a new state.
+     * Validate transition via config, update state+timestamps, record event; atomic.
+     *
+     * @throws IllegalStateTransitionException When transition not allowed
      */
     public function transitionOrder(
         WorkOrder $order,
@@ -65,7 +75,9 @@ class StateMachine
     }
 
     /**
-     * Transition an item to a new state.
+     * Validate transition via config, update state+timestamps, record event, check order completion; atomic.
+     *
+     * @throws IllegalStateTransitionException When transition not allowed
      */
     public function transitionItem(
         WorkItem $item,
@@ -111,7 +123,7 @@ class StateMachine
     }
 
     /**
-     * Record an event for an order.
+     * Create WorkEvent with order context (actor, payload, diff); append-only audit trail.
      */
     public function recordOrderEvent(
         WorkOrder $order,
@@ -135,7 +147,7 @@ class StateMachine
     }
 
     /**
-     * Record an event for an item.
+     * Create WorkEvent with item context (actor, payload); append-only audit trail.
      */
     public function recordItemEvent(
         WorkItem $item,

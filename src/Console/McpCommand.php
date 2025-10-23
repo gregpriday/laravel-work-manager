@@ -16,6 +16,13 @@ use React\Promise\Promise;
 use React\Socket\SocketServer;
 use React\Stream\ThroughStream;
 
+/**
+ * Starts MCP server in STDIO (local AI IDEs) or HTTP (remote agents) mode.
+ *
+ * @internal Exposes WorkManagerTools via php-mcp.
+ *
+ * @see docs/guides/mcp-server-integration.md
+ */
 class McpCommand extends Command
 {
     protected $signature = 'work-manager:mcp

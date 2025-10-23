@@ -16,6 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * HTTP endpoints for work orders (propose/checkout/submit/approve/reject/release).
+ *
+ * @internal Maps requests to services; auth/idempotency via middleware.
+ *
+ * @see docs/guides/http-api.md
+ */
 class WorkOrderApiController extends Controller
 {
     use AuthorizesRequests;

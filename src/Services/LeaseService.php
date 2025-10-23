@@ -13,6 +13,14 @@ use GregPriday\WorkManager\Support\EventType;
 use GregPriday\WorkManager\Support\ItemState;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Manages exclusive TTL leases with heartbeat extensions and reclaim logic.
+ * Invariants: one agent per item; uses row-level locks to prevent races.
+ *
+ * @internal Service layer
+ *
+ * @see docs/concepts/architecture-overview.md
+ */
 class LeaseService
 {
     public function __construct(
@@ -20,7 +28,9 @@ class LeaseService
     ) {}
 
     /**
-     * Attempt to acquire a lease on a work item.
+     * Lock item FOR UPDATE, check leasable state, set TTL lease, transition to LEASED, record event.
+     *
+     * @throws LeaseConflictException When already leased or not in leasable state
      */
     public function acquire(string $itemId, string $agentId): WorkItem
     {
@@ -69,7 +79,10 @@ class LeaseService
     }
 
     /**
-     * Extend an existing lease (heartbeat).
+     * Verify ownership, update TTL and last_heartbeat_at, record HEARTBEAT event.
+     *
+     * @throws LeaseConflictException When agent doesn't own lease
+     * @throws LeaseExpiredException When lease already expired
      */
     public function extend(string $itemId, string $agentId): WorkItem
     {
@@ -110,7 +123,9 @@ class LeaseService
     }
 
     /**
-     * Release a lease explicitly.
+     * Verify ownership, clear lease fields, transition LEASED→QUEUED, record RELEASED event.
+     *
+     * @throws LeaseConflictException When agent doesn't own lease
      */
     public function release(string $itemId, string $agentId): WorkItem
     {
@@ -149,7 +164,9 @@ class LeaseService
     }
 
     /**
-     * Reclaim expired leases (called by maintenance).
+     * Find expired leases, increment attempts, reset to QUEUED (or FAILED if max attempts); record events.
+     *
+     * @return int Number of items reclaimed/failed
      */
     public function reclaimExpired(): int
     {
@@ -219,7 +236,7 @@ class LeaseService
      * Acquire the next available work item across all orders (global checkout).
      *
      * @param  string  $agentId  The agent requesting work
-     * @param  array  $filters  Optional filters: type, min_priority, tenant_id
+     * @param  array{type?:string,min_priority?:int,tenant_id?:string}  $filters  Optional filters
      * @return WorkItem|null The acquired item, or null if none available
      */
     public function acquireNextAvailable(string $agentId, array $filters = []): ?WorkItem

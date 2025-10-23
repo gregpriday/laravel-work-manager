@@ -5,6 +5,13 @@ namespace GregPriday\WorkManager\Routing;
 use GregPriday\WorkManager\Http\Controllers\WorkOrderApiController;
 use Illuminate\Contracts\Routing\Registrar;
 
+/**
+ * Registers all work manager HTTP routes (propose/checkout/submit/etc).
+ *
+ * @internal Called via WorkManager::routes() facade.
+ *
+ * @see docs/reference/routes-reference.md
+ */
 class RouteRegistrar
 {
     public function __construct(

@@ -5,6 +5,13 @@ namespace GregPriday\WorkManager\Events;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\Diff;
 
+/**
+ * Emitted when a work order is applied (idempotent execution complete).
+ *
+ * @property-read Diff $diff
+ *
+ * @see docs/reference/events-reference.md
+ */
 class WorkOrderApplied extends WorkOrderEvent
 {
     public function __construct(

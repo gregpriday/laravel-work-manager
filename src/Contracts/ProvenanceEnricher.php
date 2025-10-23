@@ -4,6 +4,13 @@ namespace GregPriday\WorkManager\Contracts;
 
 use Illuminate\Http\Request;
 
+/**
+ * Contract for extracting agent metadata from request context.
+ *
+ * @api
+ *
+ * @see docs/concepts/lifecycle-and-flow.md
+ */
 interface ProvenanceEnricher
 {
     /**

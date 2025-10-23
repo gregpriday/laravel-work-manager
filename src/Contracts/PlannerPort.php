@@ -3,8 +3,11 @@
 namespace GregPriday\WorkManager\Contracts;
 
 /**
- * Alternative interface for planner/generator implementations.
- * Similar to AllocatorStrategy but with a different semantic focus.
+ * Alternative to AllocatorStrategy for generating work orders.
+ *
+ * @api
+ *
+ * @see docs/concepts/architecture-overview.md
  */
 interface PlannerPort
 {

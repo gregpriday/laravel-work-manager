@@ -7,24 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 /**
- * Default provenance enricher implementation.
+ * Captures agent metadata and request fingerprints from HTTP headers.
  *
- * Captures agent metadata, request fingerprints, and runtime information
- * from HTTP headers and request context.
+ * @internal Standard headers: X-Agent-ID/Name/Version, X-Model-Name, X-Runtime, X-Request-ID
  *
- * Standard Headers (agents should send these):
- * - X-Agent-ID: Unique agent identifier
- * - X-Agent-Name: Human-readable agent name
- * - X-Agent-Version: Agent version (semver)
- * - X-Model-Name: AI model used (e.g., "claude-3-opus", "gpt-4")
- * - X-Runtime: Agent runtime/framework (e.g., "python-3.11", "node-18")
- * - X-Request-ID: Request correlation ID
- *
- * Additional captured data:
- * - IP address
- * - User agent string
- * - Timestamp
- * - Request fingerprint (hash of identifying data)
+ * @see docs/concepts/lifecycle-and-flow.md
  */
 class DefaultProvenanceEnricher implements ProvenanceEnricher
 {

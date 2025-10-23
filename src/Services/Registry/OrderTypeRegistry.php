@@ -5,6 +5,13 @@ namespace GregPriday\WorkManager\Services\Registry;
 use GregPriday\WorkManager\Contracts\OrderType;
 use GregPriday\WorkManager\Exceptions\OrderTypeNotFoundException;
 
+/**
+ * Central registry for order type implementations (keyed by type string).
+ *
+ * @internal Service layer
+ *
+ * @see docs/guides/creating-order-types.md
+ */
 class OrderTypeRegistry
 {
     /**

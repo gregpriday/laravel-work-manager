@@ -8,6 +8,13 @@ use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ActorType;
 use Illuminate\Console\Command;
 
+/**
+ * Discovers and proposes work orders via AllocatorStrategy implementations.
+ *
+ * @internal Runs via scheduler; idempotent.
+ *
+ * @see docs/reference/commands-reference.md
+ */
 class GenerateCommand extends Command
 {
     protected $signature = 'work-manager:generate
