@@ -75,7 +75,12 @@ This is a Laravel package with the following namespace: `GregPriday\WorkManager`
 **MCP Integration** (`src/Mcp/`, `src/Console/McpCommand.php`):
 - `WorkManagerTools` - Exposes 13 MCP tools for AI agent integration (including partial submission support)
 - Supports both STDIO (local AI IDEs) and HTTP (remote agents) transports
-- See `docs/MCP_SERVER.md` for complete MCP documentation
+- See `docs/guides/mcp-server-integration.md` for complete MCP documentation
+
+**Query & Filtering** (`src/Support/WorkOrderQuery.php`, `src/Services/FilterParser.php`):
+- Spatie Query Builder integration for powerful filtering, sorting, and field selection
+- Supports both HTTP API and MCP tool queries with unified interface
+- See `docs/guides/filtering-orders.md` and `docs/examples/orders-filtering.md` for details
 
 ## State Machine
 
@@ -97,18 +102,23 @@ Order types define the complete lifecycle of a work category. When creating or m
    - `schema()` - Returns JSON schema array for payload validation
    - `apply(WorkOrder $order): Diff` - Idempotent execution that performs actual changes
 
-3. **Validation hooks** (for agent submissions):
+3. **Auto-Approval** (optional):
+   - Set `protected bool $autoApprove = true` to enable automatic approval when ready
+   - Default is `false` (requires manual approval)
+   - Useful for deterministic, safe operations that don't require human review
+
+4. **Validation hooks** (for agent submissions):
    - `submissionValidationRules(WorkItem $item): array` - Laravel validation rules
    - `afterValidateSubmission(WorkItem $item, array $result): void` - Custom business logic checks
    - `canApprove(WorkOrder $order): bool` - Cross-item validation before approval
 
-4. **Lifecycle hooks**:
+5. **Lifecycle hooks**:
    - `beforeApply(WorkOrder $order): void` - Pre-execution setup
    - `afterApply(WorkOrder $order, Diff $diff): void` - Post-execution cleanup (e.g., dispatch jobs, clear caches)
 
-5. **Planning**: Override `plan(WorkOrder $order): array` to customize how orders are broken into work items
+6. **Planning**: Override `plan(WorkOrder $order): array` to customize how orders are broken into work items
 
-6. **Registration**: Register in `AppServiceProvider::boot()` via `WorkManager::registry()->register(new YourType())`
+7. **Registration**: Register in `AppServiceProvider::boot()` via `WorkManager::registry()->register(new YourType())`
 
 **Important**: The `apply()` method MUST be idempotent. It may be called multiple times for the same order. Always use database transactions and check for existing state.
 
@@ -187,6 +197,10 @@ Key configuration in `config/work-manager.php`:
 - `queues.*` - Queue connections for background jobs
 - `metrics.*` - Driver ('log', 'prometheus', 'statsd'), namespace
 - `maintenance.*` - Dead-letter thresholds, alerts
+- `query.*` - Pagination defaults and limits for HTTP/MCP queries
+- `mcp.*` - MCP server HTTP authentication and CORS settings
+
+See `docs/guides/configuration.md` and `docs/reference/config-reference.md` for complete configuration documentation.
 
 ## Scheduled Commands
 
@@ -262,12 +276,27 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 }
 ```
 
-## Examples Directory
+## Examples & Practical Guides
 
-- `examples/DatabaseRecordInsertType.php` - Batch inserts with verification
-- `examples/UserDataSyncType.php` - External API sync with per-batch items
-- `docs/getting-started/quickstart.md` - 5-minute getting started
-- `examples/LIFECYCLE.md` - Complete hook documentation
+**Quick Start**:
+- `docs/getting-started/introduction.md` - What the package does and why it exists
+- `docs/getting-started/quickstart.md` - Build your first order type in 5 minutes
+- `docs/getting-started/installation.md` - Installation and setup
+
+**Example Implementations** (all in `docs/examples/`):
+- `docs/examples/overview.md` - Overview of all examples with common patterns
+- `docs/examples/basic-usage.md` - Minimal viable order type
+- `docs/examples/database-record-insert.md` - Batch database operations with verification
+- `docs/examples/user-data-sync.md` - External API sync with per-batch items
+- `docs/examples/customer-research-partial.md` - Advanced partial submissions workflow
+- `docs/examples/content-fact-check.md` - Content verification with evidence tracking
+- `docs/examples/city-tier-generation.md` - Multi-dimensional data classification
+- `docs/examples/orders-filtering.md` - Query Builder filtering examples
+
+**Lifecycle & Hooks**:
+- `docs/concepts/lifecycle-and-flow.md` - Complete lifecycle documentation with all hooks and phases
+- `docs/guides/creating-order-types.md` - Comprehensive guide to building custom order types
+- `docs/guides/validation-and-acceptance-policies.md` - Validation patterns and custom policies
 
 ## Key Design Principles
 
@@ -278,11 +307,36 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 5. **Lease-Based Concurrency**: Prevent race conditions via TTL leases with heartbeats
 6. **Type Safety**: JSON schemas for payloads, Laravel validation for submissions
 
-## Documentation
+## Documentation Structure
 
-- `README.md` - Complete package documentation
+**Documentation Index**: `docs/index.md` - Complete navigation to all documentation
+
+**Core Concepts**:
+- `docs/concepts/what-it-does.md` - Problem overview and solution approach
 - `docs/concepts/architecture-overview.md` - System design, data flows, integration points
-- `docs/guides/mcp-server-integration.md` - MCP server setup and usage
-- `examples/LIFECYCLE.md` - All lifecycle hooks documented
-- `docs/getting-started/quickstart.md` - Quick start guide
+- `docs/concepts/lifecycle-and-flow.md` - Complete lifecycle with all hooks and events
+- `docs/concepts/state-management.md` - State machine and transition rules
+- `docs/concepts/security-and-permissions.md` - Authorization and security model
+
+**Essential Guides**:
+- `docs/guides/http-api.md` - Complete HTTP API reference with all endpoints
+- `docs/guides/mcp-server-integration.md` - MCP server setup and AI agent integration
+- `docs/guides/creating-order-types.md` - Building custom order types
+- `docs/guides/filtering-orders.md` - Query Builder filtering system
+- `docs/guides/partial-submissions.md` - Incremental submission workflows
+- `docs/guides/testing.md` - Testing patterns for order types
+- `docs/guides/deployment-and-production.md` - Production deployment guide
+
+**Reference**:
+- `docs/reference/config-reference.md` - All configuration options explained
+- `docs/reference/routes-reference.md` - All HTTP routes and parameters
+- `docs/reference/events-reference.md` - All lifecycle events
+- `docs/reference/commands-reference.md` - All artisan commands
+- `docs/reference/database-schema.md` - Database tables and columns
+- `docs/reference/api-surface.md` - Complete API index
+
+**Other Resources**:
+- `README.md` - Package overview and quick start
 - `LICENSE.md` - MIT license details
+- `docs/troubleshooting/faq.md` - Frequently asked questions
+- `docs/troubleshooting/common-errors.md` - Common errors and solutions
