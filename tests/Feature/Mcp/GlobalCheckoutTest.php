@@ -7,6 +7,7 @@ use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 class GlobalCheckoutTest extends TestCase
 {
@@ -44,14 +45,15 @@ class GlobalCheckoutTest extends TestCase
     public function test_global_checkout_uses_fifo_within_same_priority()
     {
         // Create three orders with same priority
+        Carbon::setTestNow(now());
         $first = $this->allocator->propose('test.echo', ['message' => 'first'], priority: 50);
         $this->allocator->plan($first);
-        sleep(1);
 
+        Carbon::setTestNow(now()->addSecond());
         $second = $this->allocator->propose('test.echo', ['message' => 'second'], priority: 50);
         $this->allocator->plan($second);
-        sleep(1);
 
+        Carbon::setTestNow(now()->addSecond());
         $third = $this->allocator->propose('test.echo', ['message' => 'third'], priority: 50);
         $this->allocator->plan($third);
 
@@ -60,6 +62,8 @@ class GlobalCheckoutTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('first', $result['item']['input']['message']);
+
+        Carbon::setTestNow(); // Reset
     }
 
     public function test_global_checkout_filters_by_type()

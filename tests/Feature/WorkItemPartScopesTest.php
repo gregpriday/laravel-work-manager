@@ -9,6 +9,7 @@ use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\PartStatus;
 use GregPriday\WorkManager\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 class WorkItemPartScopesTest extends TestCase
 {
@@ -135,6 +136,7 @@ class WorkItemPartScopesTest extends TestCase
         ]);
 
         // Create multiple versions of the same part key
+        Carbon::setTestNow(now());
         $contact1 = WorkItemPart::create([
             'work_item_id' => $item->id,
             'part_key' => 'contact',
@@ -144,7 +146,7 @@ class WorkItemPartScopesTest extends TestCase
             'submitted_by_agent_id' => 'agent-1',
         ]);
 
-        sleep(1); // Ensure different timestamps
+        Carbon::setTestNow(now()->addSecond()); // Ensure different timestamps
 
         $contact2 = WorkItemPart::create([
             'work_item_id' => $item->id,
@@ -175,6 +177,8 @@ class WorkItemPartScopesTest extends TestCase
         expect($latestPartIds)->toContain($contact2->id)
             ->and($latestPartIds)->toContain($identity->id)
             ->and($latestPartIds)->not->toContain($contact1->id);
+
+        Carbon::setTestNow(); // Reset
     }
 
     public function test_scopes_can_be_chained()

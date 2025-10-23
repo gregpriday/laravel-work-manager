@@ -8,6 +8,7 @@ use GregPriday\WorkManager\Services\LeaseService;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Support\OrderState;
+use Illuminate\Support\Carbon;
 
 it('throws LeaseExpiredException when extending expired lease', function () {
     $leaseService = app(LeaseService::class);
@@ -256,11 +257,12 @@ it('extends lease with correct TTL', function () {
     $item = $order->items()->first();
 
     // Acquire lease
+    Carbon::setTestNow(now());
     $leased = $leaseService->acquire($item->id, 'agent-1');
     $firstExpiry = $leased->lease_expires_at;
 
-    // Wait a bit
-    sleep(1);
+    // Advance time
+    Carbon::setTestNow(now()->addSecond());
 
     // Extend lease
     $extended = $leaseService->extend($item->id, 'agent-1');
@@ -273,6 +275,8 @@ it('extends lease with correct TTL', function () {
     $expectedExpiry = now()->addSeconds($ttl);
 
     expect($extended->lease_expires_at->diffInSeconds($expectedExpiry, false))->toBeLessThan(5);
+
+    Carbon::setTestNow(); // Reset
 });
 
 it('updates last_heartbeat_at when extending lease', function () {
@@ -285,12 +289,13 @@ it('updates last_heartbeat_at when extending lease', function () {
     $item = $order->items()->first();
 
     // Acquire lease
+    Carbon::setTestNow(now());
     $leaseService->acquire($item->id, 'agent-1');
 
     $firstHeartbeat = $item->fresh()->last_heartbeat_at;
 
-    // Wait a bit
-    sleep(1);
+    // Advance time
+    Carbon::setTestNow(now()->addSecond());
 
     // Extend lease (heartbeat)
     $leaseService->extend($item->id, 'agent-1');
@@ -301,4 +306,6 @@ it('updates last_heartbeat_at when extending lease', function () {
     if ($firstHeartbeat !== null) {
         expect($secondHeartbeat->gt($firstHeartbeat))->toBeTrue();
     }
+
+    Carbon::setTestNow(); // Reset
 });

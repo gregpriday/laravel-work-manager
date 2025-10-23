@@ -4,6 +4,7 @@ use GregPriday\WorkManager\Facades\WorkManager;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
 use GregPriday\WorkManager\Tests\Fixtures\TestUser;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);
@@ -37,10 +38,13 @@ it('uses FIFO ordering within same priority', function () {
     $allocator = app(WorkAllocator::class);
 
     // Create three orders with same priority but different timestamps
+    Carbon::setTestNow(now());
     $first = $allocator->propose('test.echo', ['message' => 'first'], priority: 50);
-    sleep(1);
+
+    Carbon::setTestNow(now()->addSecond());
     $second = $allocator->propose('test.echo', ['message' => 'second'], priority: 50);
-    sleep(1);
+
+    Carbon::setTestNow(now()->addSecond());
     $third = $allocator->propose('test.echo', ['message' => 'third'], priority: 50);
 
     $allocator->plan($first);
@@ -54,6 +58,8 @@ it('uses FIFO ordering within same priority', function () {
 
     $response->assertStatus(200);
     expect($response->json('item.input.message'))->toBe('first');
+
+    Carbon::setTestNow(); // Reset
 });
 
 it('filters by order type', function () {

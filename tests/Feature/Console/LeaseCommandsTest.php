@@ -3,6 +3,7 @@
 use GregPriday\WorkManager\Services\LeaseService;
 use GregPriday\WorkManager\Services\WorkAllocator;
 use GregPriday\WorkManager\Support\ItemState;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     // Create a test order with items
@@ -63,13 +64,16 @@ test('lease:extend can extend lease TTL', function () {
     $item = $this->order->items->first();
     $leases = app(LeaseService::class);
 
+    Carbon::setTestNow(now());
     $leases->acquire($item->id, 'test-agent');
     $originalExpiry = $item->fresh()->lease_expires_at;
 
-    sleep(1);
+    Carbon::setTestNow(now()->addSecond());
 
     $this->artisan('work-manager:lease:extend', ['--agent' => 'test-agent'])
         ->assertExitCode(0);
 
     expect($item->fresh()->lease_expires_at)->toBeGreaterThan($originalExpiry);
+
+    Carbon::setTestNow(); // Reset
 });
