@@ -6,43 +6,59 @@ Quick setup guide for Laravel Work Manager development on **Ubuntu/Debian-based 
 
 - Ubuntu/Debian Linux with apt package manager
 - Root or sudo access
+- Project cloned to local directory
 
-## Installation (One Command)
+## Three-Step Installation
 
-Install all required dependencies:
+**Step 1:** Install PHP, Composer, and extensions:
 
 ```bash
-apt-get update && apt-get install -y \
-  php php-cli php-mbstring php-xml php-curl php-zip \
-  php-mysql php-sqlite3 php-intl php8.3-xdebug \
-  composer unzip
+apt-get update && apt-get install -y php php-cli php-mbstring php-xml php-curl php-zip php-mysql php-sqlite3 php-intl php8.3-xdebug composer unzip
 ```
 
-Configure Xdebug for code coverage:
+**Step 2:** Configure Xdebug for code coverage:
 
 ```bash
 echo "xdebug.mode=develop,coverage" >> /etc/php/8.3/mods-available/xdebug.ini
 ```
 
-Install project dependencies:
+**Step 3:** Install project dependencies (run from project root):
 
 ```bash
-cd /home/user/laravel-work-manager
 composer install
 ```
 
 ## Verification
 
-Verify installation:
+Run all verification commands:
 
 ```bash
-php --version           # Should show PHP 8.3.x
-composer --version      # Should show Composer 2.7.x
-php -m | grep xdebug    # Should show xdebug
-composer test           # Should run 300+ tests successfully
+php --version && composer --version && php -m | grep xdebug
 ```
 
-If all tests pass, your environment is ready!
+**Expected output:**
+```
+PHP 8.3.6 (cli) ...
+    with Xdebug v3.2.0 ...
+---
+Composer version 2.7.1 ...
+---
+xdebug
+```
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+**Expected output:**
+```
+Tests: 521 passed (1452 assertions)
+Duration: ~40s
+```
+
+✅ If you see **520+ tests passing**, your environment is ready!
 
 ## What Gets Installed
 
@@ -62,16 +78,66 @@ vendor/bin/pest tests/Feature/                    # Run feature tests only
 
 ## Troubleshooting
 
-**PHP/Composer not found**: Verify installation with `dpkg -l | grep -E "(php|composer)"`
+**apt-get fails with 403 Forbidden error:**
+```bash
+# Remove problematic PPA files and retry
+rm /etc/apt/sources.list.d/*deadsnakes* 2>/dev/null || true
+apt-get update
+# Then re-run installation command
+```
 
-**Xdebug not working**: Check with `php -i | grep "xdebug.mode"` (should show `develop,coverage`)
+**PHP/Composer not found after install:**
+```bash
+dpkg -l | grep -E "(php|composer)"  # Verify packages installed
+which php composer                   # Check if in PATH
+```
 
-**Tests fail**: Ensure `phpunit.xml` exists in project root
+**Xdebug not configured:**
+```bash
+php -i | grep "xdebug.mode"
+# Should show: xdebug.mode => develop,coverage => develop,coverage
+# If not, re-run: echo "xdebug.mode=develop,coverage" >> /etc/php/8.3/mods-available/xdebug.ini
+```
+
+**Composer install fails:**
+```bash
+composer install --no-cache  # Clear cache and retry
+composer diagnose            # Check for issues
+```
+
+**Tests fail with missing dependencies:**
+- Ensure you ran `composer install` successfully
+- Check that `vendor/` directory exists and is populated
+- Verify `phpunit.xml` exists in project root
+
+## Quick Reference
+
+**Full setup (copy-paste friendly):**
+```bash
+# Install dependencies
+apt-get update && apt-get install -y php php-cli php-mbstring php-xml php-curl php-zip php-mysql php-sqlite3 php-intl php8.3-xdebug composer unzip
+
+# Configure Xdebug
+echo "xdebug.mode=develop,coverage" >> /etc/php/8.3/mods-available/xdebug.ini
+
+# Install project packages (from project root)
+composer install
+
+# Verify
+php --version && composer --version && php -m | grep xdebug && composer test
+```
+
+**Success criteria:**
+- ✅ PHP 8.3.6+ installed
+- ✅ Composer 2.7.1+ installed
+- ✅ Xdebug 3.2.0+ with coverage mode
+- ✅ 520+ tests passing (~40 seconds)
+
+**Estimated time:** 5-10 minutes (depending on network speed)
 
 ## Notes for AI Agents
 
-- Run commands with sudo/root privileges
-- Verify each step with the verification commands above
-- Setup takes ~5-10 minutes depending on network
-- After setup, run `composer test` to verify environment
-- Review `CLAUDE.md` for project-specific guidance
+- Run with sudo/root privileges
+- Execute from project root directory
+- If any step fails, check Troubleshooting section above
+- After successful setup, review `CLAUDE.md` for project-specific guidance
