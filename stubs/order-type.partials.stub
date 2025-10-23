@@ -1,0 +1,222 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use GregPriday\WorkManager\Models\WorkItem;
+use GregPriday\WorkManager\Models\WorkOrder;
+use GregPriday\WorkManager\Support\AbstractOrderType;
+use GregPriday\WorkManager\Support\Diff;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Order type: {{ type }}
+ *
+ * {{ description }}
+ *
+ * Supports partial submissions for incremental work (e.g., multi-step research, large data collection).
+ * Agents submit parts via submit-part, then finalize when complete. The executor calls your hooks to
+ * validate each part and assemble the final result.
+ */
+class {{ class }} extends AbstractOrderType
+{
+    /**
+     * Whether to auto-approve orders when ready (no manual review required).
+     * When true, orders transition automatically from submitted → approved once
+     * the acceptance policy says they're ready (e.g., all items submitted/validated).
+     */
+    protected bool $autoApprove = false;
+
+    /**
+     * Return the unique type identifier.
+     */
+    public function type(): string
+    {
+        return '{{ type }}';
+    }
+
+    /**
+     * Return JSON schema for payload validation.
+     */
+    public function schema(): array
+    {
+        return [
+            'type' => 'object',
+            'required' => ['example_field'],
+            'properties' => [
+                'example_field' => [
+                    'type' => 'string',
+                    'description' => 'Example field description',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Break order into work items.
+     *
+     * @return array<int, array{type:string,input:array,max_attempts?:int}>
+     */
+    public function plan(WorkOrder $order): array
+    {
+        return [[
+            'type' => $this->type(),
+            'input' => [
+                'example_field' => $order->payload['example_field'],
+            ],
+            'max_attempts' => 3,
+        ]];
+    }
+
+    /**
+     * Define which part keys are required for finalize (optional).
+     * Return part keys that must be present. Empty array = no enforcement.
+     *
+     * @return string[]
+     */
+    public function requiredParts(WorkItem $item): array
+    {
+        // Example: require specific part keys
+        // return ['research_summary', 'sources', 'conclusion'];
+        return [];
+    }
+
+    /**
+     * Validation rules for a single part submission.
+     * Called when agent submits a part via POST /items/{item}/submit-part.
+     *
+     * @param  WorkItem  $item  The work item
+     * @param  string  $partKey  The part identifier (e.g., 'summary', 'sources')
+     * @param  int|null  $seq  Optional sequence number for ordered parts
+     * @return array<string,string|array<string>> Laravel validation rules
+     */
+    public function partialRules(WorkItem $item, string $partKey, ?int $seq): array
+    {
+        // Example: different rules per part key
+        return match ($partKey) {
+            'research_summary' => [
+                'text' => 'required|string|min:100',
+                'confidence' => 'required|numeric|min:0|max:1',
+            ],
+            'sources' => [
+                'urls' => 'required|array',
+                'urls.*' => 'url',
+            ],
+            default => [
+                'data' => 'required|array',
+            ],
+        };
+    }
+
+    /**
+     * Additional validation after Laravel rules pass (optional).
+     * Throw ValidationException to reject the part.
+     *
+     * @param  WorkItem  $item  The work item
+     * @param  string  $partKey  The part identifier
+     * @param  array  $payload  The part payload (already validated by partialRules)
+     * @param  int|null  $seq  Optional sequence number
+     */
+    public function afterValidatePart(WorkItem $item, string $partKey, array $payload, ?int $seq): void
+    {
+        // Example: custom business logic validation
+        // if ($partKey === 'sources' && count($payload['urls']) < 3) {
+        //     throw ValidationException::withMessages([
+        //         'urls' => 'At least 3 sources required'
+        //     ]);
+        // }
+    }
+
+    /**
+     * Merge validated parts into final result.
+     * Called by executor during finalize. All parts have passed validation.
+     *
+     * @param  WorkItem  $item  The work item
+     * @param  Collection<int,\GregPriday\WorkManager\Models\WorkItemPart>  $latestParts  Validated parts
+     * @return array<string,mixed> Assembled result
+     */
+    public function assemble(WorkItem $item, Collection $latestParts): array
+    {
+        // Example: assemble parts into structured result
+        $assembled = [];
+
+        foreach ($latestParts as $part) {
+            $assembled[$part->part_key] = $part->payload;
+        }
+
+        // Add metadata about the assembly
+        $assembled['_meta'] = [
+            'parts_count' => $latestParts->count(),
+            'assembled_at' => now()->toIso8601String(),
+        ];
+
+        return $assembled;
+    }
+
+    /**
+     * Validate the assembled result before submission (optional).
+     * Throw ValidationException if the assembled result is invalid.
+     *
+     * @param  WorkItem  $item  The work item
+     * @param  array  $assembled  The assembled result from assemble()
+     */
+    public function validateAssembled(WorkItem $item, array $assembled): void
+    {
+        // Example: cross-part validation
+        // if (!isset($assembled['research_summary']) || !isset($assembled['sources'])) {
+        //     throw ValidationException::withMessages([
+        //         'result' => 'Must include both summary and sources'
+        //     ]);
+        // }
+    }
+
+    /**
+     * Validation rules for final item submission (after parts assembled).
+     * This validates the fully assembled result.
+     */
+    protected function submissionValidationRules(WorkItem $item): array
+    {
+        return [
+            'research_summary' => 'required|array',
+            'sources' => 'required|array',
+        ];
+    }
+
+    /**
+     * Idempotent execution that performs actual changes.
+     * The $item->result contains the assembled data from all parts.
+     */
+    public function apply(WorkOrder $order): Diff
+    {
+        return DB::transaction(function () use ($order) {
+            $before = [];
+            $after = [];
+
+            // TODO: Implement your idempotent changes here
+            foreach ($order->items as $item) {
+                // Use $item->result which contains assembled data from parts
+                // Example: Update database records
+            }
+
+            return $this->makeDiff($before, $after, 'Applied {{ type }} changes');
+        });
+    }
+
+    /**
+     * Hook: before apply execution.
+     */
+    protected function beforeApply(WorkOrder $order): void
+    {
+        // Setup, pre-flight checks, etc.
+    }
+
+    /**
+     * Hook: after apply execution.
+     */
+    protected function afterApply(WorkOrder $order, Diff $diff): void
+    {
+        // Cleanup, dispatch jobs, clear caches, etc.
+    }
+}

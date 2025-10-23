@@ -1,6 +1,6 @@
 <?php
 
-namespace GregPriday\WorkManager\Console;
+namespace GregPriday\WorkManager\Console\Ops;
 
 use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;

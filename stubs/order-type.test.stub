@@ -1,0 +1,97 @@
+<?php
+
+use GregPriday\WorkManager\Models\WorkOrder;
+use GregPriday\WorkManager\Services\WorkAllocator;
+use GregPriday\WorkManager\Services\WorkExecutor;
+use {{ orderTypeNamespace }}\{{ orderTypeClass }};
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // Register the order type
+    app(\GregPriday\WorkManager\Services\Registry\OrderTypeRegistry::class)
+        ->register(new {{ orderTypeClass }}());
+});
+
+test('can propose {{ type }} order', function () {
+    $allocator = app(WorkAllocator::class);
+
+    $order = $allocator->propose(
+        type: '{{ type }}',
+        payload: [
+            'example_field' => 'test value',
+        ],
+        requestedByType: null,
+        requestedById: null
+    );
+
+    expect($order)->toBeInstanceOf(WorkOrder::class);
+    expect($order->type)->toBe('{{ type }}');
+    expect($order->state->value)->toBe('queued');
+});
+
+test('can plan {{ type }} order', function () {
+    $allocator = app(WorkAllocator::class);
+
+    $order = $allocator->propose(
+        type: '{{ type }}',
+        payload: [
+            'example_field' => 'test value',
+        ]
+    );
+
+    $allocator->plan($order);
+
+    expect($order->items)->toHaveCount(1);
+    expect($order->items[0]->state->value)->toBe('queued');
+});
+
+test('validates submission for {{ type }} items', function () {
+    $allocator = app(WorkAllocator::class);
+    $executor = app(WorkExecutor::class);
+
+    // Create and plan order
+    $order = $allocator->propose('{{ type }}', ['example_field' => 'test']);
+    $allocator->plan($order);
+
+    $item = $order->items->first();
+
+    // Acquire lease
+    $leases = app(\GregPriday\WorkManager\Services\LeaseService::class);
+    $item = $leases->acquire($item->id, 'test-agent');
+
+    // Submit valid result
+    $result = [
+        'result' => [
+            'success' => true,
+        ],
+    ];
+
+    $executor->submit($item, $result, 'test-agent');
+
+    expect($item->fresh()->state->value)->toBe('submitted');
+});
+
+test('can approve and apply {{ type }} order', function () {
+    $allocator = app(WorkAllocator::class);
+    $executor = app(WorkExecutor::class);
+    $leases = app(\GregPriday\WorkManager\Services\LeaseService::class);
+
+    // Create, plan, and complete order
+    $order = $allocator->propose('{{ type }}', ['example_field' => 'test']);
+    $allocator->plan($order);
+
+    $item = $order->items->first();
+    $item = $leases->acquire($item->id, 'test-agent');
+
+    $executor->submit($item, [
+        'result' => ['success' => true],
+    ], 'test-agent');
+
+    // Approve and apply
+    $result = $executor->approve($order);
+
+    expect($result['order']->state->value)->toBe('applied');
+    expect($result['diff'])->toBeArray();
+});

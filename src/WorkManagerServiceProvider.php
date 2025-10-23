@@ -2,9 +2,27 @@
 
 namespace GregPriday\WorkManager;
 
+use GregPriday\WorkManager\Console\Dev\ResetCommand as DevResetCommand;
+use GregPriday\WorkManager\Console\Dev\SeedCommand as DevSeedCommand;
 use GregPriday\WorkManager\Console\GenerateCommand;
-use GregPriday\WorkManager\Console\MaintainCommand;
+use GregPriday\WorkManager\Console\Lease\ExtendLeasesCommand;
+use GregPriday\WorkManager\Console\Lease\ReclaimLeasesCommand;
+use GregPriday\WorkManager\Console\Lease\ReleaseLeasesCommand;
+use GregPriday\WorkManager\Console\Make\AllocatorCommand as MakeAllocatorCommand;
+use GregPriday\WorkManager\Console\Make\OrderTypeCommand as MakeOrderTypeCommand;
+use GregPriday\WorkManager\Console\Make\WorkspaceCommand as MakeWorkspaceCommand;
 use GregPriday\WorkManager\Console\McpCommand;
+use GregPriday\WorkManager\Console\Ops\CheckCommand as OpsCheckCommand;
+use GregPriday\WorkManager\Console\Ops\MaintainCommand;
+use GregPriday\WorkManager\Console\Ops\PruneCommand as OpsPruneCommand;
+use GregPriday\WorkManager\Console\Ops\PurgeKeysCommand as OpsPurgeKeysCommand;
+use GregPriday\WorkManager\Console\Ops\TailCommand as OpsTailCommand;
+use GregPriday\WorkManager\Console\Orders\CloneDeadLetteredOrderCommand;
+use GregPriday\WorkManager\Console\Orders\ListItemsCommand;
+use GregPriday\WorkManager\Console\Orders\ListOrdersCommand;
+use GregPriday\WorkManager\Console\Orders\RequeueOrdersCommand;
+use GregPriday\WorkManager\Console\Orders\RetryItemsCommand;
+use GregPriday\WorkManager\Console\Orders\ReviewOrderCommand;
 use GregPriday\WorkManager\Mcp\WorkManagerTools;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Policies\WorkOrderPolicy;
@@ -118,9 +136,38 @@ class WorkManagerServiceProvider extends ServiceProvider
 
             // Register commands
             $this->commands([
+                // Core commands
                 GenerateCommand::class,
-                MaintainCommand::class,
                 McpCommand::class,
+
+                // Orders namespace (work-manager:orders:*)
+                ListOrdersCommand::class,
+                ListItemsCommand::class,
+                RequeueOrdersCommand::class,
+                RetryItemsCommand::class,
+                ReviewOrderCommand::class,              // Replaces approve/reject
+                CloneDeadLetteredOrderCommand::class,
+
+                // Lease namespace (work-manager:lease:*)
+                ReleaseLeasesCommand::class,
+                ReclaimLeasesCommand::class,
+                ExtendLeasesCommand::class,
+
+                // Ops namespace (work-manager:ops:*)
+                MaintainCommand::class,
+                OpsCheckCommand::class,
+                OpsTailCommand::class,
+                OpsPruneCommand::class,
+                OpsPurgeKeysCommand::class,
+
+                // Dev namespace (work-manager:dev:*)
+                DevResetCommand::class,
+                DevSeedCommand::class,
+
+                // Make namespace (work-manager:make:*)
+                MakeOrderTypeCommand::class,
+                MakeAllocatorCommand::class,
+                MakeWorkspaceCommand::class,
             ]);
         }
 

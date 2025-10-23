@@ -1,0 +1,133 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use GregPriday\WorkManager\Models\WorkItem;
+use GregPriday\WorkManager\Models\WorkOrder;
+use GregPriday\WorkManager\Support\AbstractOrderType;
+use GregPriday\WorkManager\Support\Diff;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Order type: {{ type }}
+ *
+ * {{ description }}
+ */
+class {{ class }} extends AbstractOrderType
+{
+    /**
+     * Whether to auto-approve orders when ready (no manual review required).
+     * When true, orders transition automatically from submitted → approved once
+     * the acceptance policy says they're ready (e.g., all items submitted/validated).
+     */
+    protected bool $autoApprove = false;
+
+    /**
+     * Return the unique type identifier.
+     */
+    public function type(): string
+    {
+        return '{{ type }}';
+    }
+
+    /**
+     * Return JSON schema for payload validation.
+     */
+    public function schema(): array
+    {
+        return [
+            'type' => 'object',
+            'required' => ['example_field'],
+            'properties' => [
+                'example_field' => [
+                    'type' => 'string',
+                    'description' => 'Example field description',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Break order into work items.
+     *
+     * @return array<int, array{type:string,input:array,max_attempts?:int}>
+     */
+    public function plan(WorkOrder $order): array
+    {
+        // Example: create one item per batch
+        return [[
+            'type' => $this->type(),
+            'input' => [
+                'example_field' => $order->payload['example_field'],
+            ],
+            'max_attempts' => 3,
+        ]];
+    }
+
+    /**
+     * Validation rules for item submission.
+     */
+    protected function submissionValidationRules(WorkItem $item): array
+    {
+        return [
+            'result' => 'required|array',
+            'result.success' => 'required|boolean',
+        ];
+    }
+
+    /**
+     * Additional validation after Laravel validation passes.
+     */
+    protected function afterValidateSubmission(WorkItem $item, array $result): void
+    {
+        // Custom business logic validation
+        // throw ValidationException if invalid
+    }
+
+    /**
+     * Check if order is ready for approval (all items submitted).
+     */
+    public function canApprove(WorkOrder $order): bool
+    {
+        // Default checks all items are submitted/accepted
+        return parent::canApprove($order);
+    }
+
+    /**
+     * Idempotent execution that performs actual changes.
+     */
+    public function apply(WorkOrder $order): Diff
+    {
+        return DB::transaction(function () use ($order) {
+            $before = [];
+            $after = [];
+
+            // TODO: Implement your idempotent changes here
+            foreach ($order->items as $item) {
+                // Example: Update database records
+                // $model = Model::updateOrCreate(...);
+                // Track changes for diff
+            }
+
+            return $this->makeDiff($before, $after, 'Applied {{ type }} changes');
+        });
+    }
+
+    /**
+     * Hook: before apply execution.
+     */
+    protected function beforeApply(WorkOrder $order): void
+    {
+        // Setup, pre-flight checks, etc.
+    }
+
+    /**
+     * Hook: after apply execution.
+     */
+    protected function afterApply(WorkOrder $order, Diff $diff): void
+    {
+        // Cleanup, dispatch jobs, clear caches, etc.
+    }
+}

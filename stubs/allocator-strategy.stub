@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use GregPriday\WorkManager\Contracts\AllocatorStrategy;
+
+/**
+ * Allocator strategy: {{ name }}
+ *
+ * {{ description }}
+ *
+ * Note: This will be called by work-manager:generate (typically scheduled).
+ * Keep discoverWork() cheap and idempotent—it should not mutate state.
+ */
+class {{ class }} implements AllocatorStrategy
+{
+    /**
+     * Discover work that needs to be done.
+     *
+     * @return array<int, array{type:string,payload:array,priority?:int,meta?:array}>
+     */
+    public function discoverWork(): array
+    {
+        $workOrders = [];
+
+        // TODO: Implement your discovery logic here
+        // Example: Query database for pending work
+        // Example: Check external API for new tasks
+        // Example: Generate periodic maintenance tasks
+
+        // Example work order:
+        // $workOrders[] = [
+        //     'type' => '{{ type }}',
+        //     'payload' => [
+        //         'example_field' => 'value',
+        //     ],
+        //     'priority' => 5,
+        //     'meta' => [
+        //         'source' => 'allocator',
+        //     ],
+        // ];
+
+        return $workOrders;
+    }
+}
