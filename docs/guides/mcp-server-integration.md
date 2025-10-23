@@ -69,6 +69,136 @@ The server exposes 13 tools for complete work order management:
 
 ---
 
+## Listing Work with Filters
+
+The `work.list` tool supports the same powerful filtering capabilities as the HTTP `GET /orders` endpoint, allowing agents to precisely discover work they can process.
+
+### Quick Examples
+
+**Find high-priority work**:
+```json
+{
+  "name": "work.list",
+  "arguments": {
+    "filter": {
+      "state": "queued",
+      "priority": ">50"
+    },
+    "sort": "-priority"
+  }
+}
+```
+
+**Orders with available items**:
+```json
+{
+  "name": "work.list",
+  "arguments": {
+    "filter": {
+      "has_available_items": true,
+      "state": "queued"
+    },
+    "include": "itemsCount"
+  }
+}
+```
+
+**Minimal payload for efficiency**:
+```json
+{
+  "name": "work.list",
+  "arguments": {
+    "fields": {
+      "work_orders": "id,type,state,priority"
+    },
+    "page": {
+      "size": 20
+    }
+  }
+}
+```
+
+### Available Filters
+
+- **Exact**: `state`, `type`, `requested_by_type`, `id`
+- **Operator**: `priority` (`>50`, `>=25`), dates with ISO 8601
+- **Relation**: `items.state` (orders with items in specific state)
+- **JSON**: `meta` (e.g., `batch_id:42`)
+- **Custom**: `has_available_items` (true/false)
+
+### Includes & Aggregates
+
+- `items` - Full items collection (included by default)
+- `events` - Recent events
+- `itemsCount` - Efficient count
+- `itemsExists` - Boolean check
+
+### Field Selection
+
+Select only needed fields to reduce payload:
+```json
+{
+  "fields": {
+    "work_orders": "id,type,state,priority",
+    "items": "id,state"
+  },
+  "include": "items"
+}
+```
+
+### Sorting & Pagination
+
+**Sort**: Use `sort` parameter:
+- Single: `"sort": "created_at"` or `"sort": "-created_at"`
+- Multi: `"sort": "-priority,created_at"`
+- Default: `-priority,created_at`
+
+**Pagination**:
+```json
+{
+  "page": {
+    "size": 25,
+    "number": 2
+  }
+}
+```
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "orders": [
+    {
+      "id": "019a...",
+      "type": "user.data.sync",
+      "state": "queued",
+      "priority": 90,
+      "items_count": 5,
+      "created_at": "2025-01-15T08:30:00Z",
+      "last_transitioned_at": "2025-01-15T08:30:00Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 20,
+    "total": 8,
+    "last_page": 1
+  }
+}
+```
+
+### Complete Documentation
+
+For comprehensive filtering documentation with all parameters and examples:
+
+- **[Filtering Orders Guide](filtering-orders.md)** - Complete guide
+- **[Query Parameters Reference](../reference/query-parameters.md)** - Parameter specification
+- **[Orders Filtering Examples](../examples/orders-filtering.md)** - Copy-paste scenarios
+
+---
+
 ## Cursor IDE Integration
 
 ### Step 1: Create MCP Config
@@ -189,6 +319,59 @@ php artisan work-manager:mcp \
 - `GET http://localhost:8090/mcp/sse` - Server-sent events
 - `POST http://localhost:8090/mcp/message` - Message endpoint
 
+### HTTP Mode with Authentication
+
+To enable Bearer token authentication for the HTTP transport, configure the following in your `.env`:
+
+```env
+# Enable MCP HTTP authentication
+WORK_MANAGER_MCP_HTTP_AUTH=true
+
+# Choose auth guard (default: sanctum)
+WORK_MANAGER_MCP_AUTH_GUARD=sanctum
+
+# Optional: Static tokens for simple setup (comma-separated)
+# Useful for development or when not using Sanctum
+WORK_MANAGER_MCP_STATIC_TOKENS=your-secret-token-1,your-secret-token-2
+```
+
+**Using Sanctum Tokens** (recommended for production):
+
+```bash
+# Clients must include Authorization header with valid Sanctum token
+curl -H "Authorization: Bearer 1|abc123..." \
+  http://localhost:8090/mcp/sse
+```
+
+**Using Static Tokens** (for development):
+
+```bash
+# Clients use configured static tokens
+curl -H "Authorization: Bearer your-secret-token-1" \
+  http://localhost:8090/mcp/sse
+```
+
+When auth is enabled, the server will:
+- Validate all incoming requests with Bearer token
+- Return 401 Unauthorized if token is missing or invalid
+- Integrate with Laravel's authentication system
+- Support both Sanctum and static token authentication
+
+**CORS Configuration**:
+
+The HTTP server includes CORS support for browser-based clients:
+
+```env
+# Enable CORS (default: true)
+WORK_MANAGER_MCP_CORS=true
+
+# Allowed origins (default: *)
+WORK_MANAGER_MCP_CORS_ORIGINS=https://yourdomain.com
+
+# Or allow all origins (development only)
+WORK_MANAGER_MCP_CORS_ORIGINS=*
+```
+
 ### Production with Supervisor
 
 Create `/etc/supervisor/conf.d/work-manager-mcp.conf`:
@@ -299,16 +482,37 @@ server {
 - DDoS attacks
 
 **Recommendations**:
-- Bind to `127.0.0.1` for local-only
+- **ALWAYS enable authentication in production** via `WORK_MANAGER_MCP_HTTP_AUTH=true`
+- Use Sanctum tokens for production, static tokens only for development
+- Bind to `127.0.0.1` for local-only access
 - Use SSL/TLS (via Nginx proxy)
-- Implement rate limiting
+- Implement rate limiting at proxy level
 - Use firewall rules to restrict access
-- Enable Laravel authentication
-- Monitor for unusual activity
+- Monitor for unusual activity and failed auth attempts
+- Rotate static tokens regularly if used
 
 ### Authentication
 
-MCP server uses Laravel's auth system:
+**MCP HTTP Server Authentication** (ReactPHP transport):
+
+The MCP HTTP server supports optional Bearer token authentication:
+
+```env
+# Enable auth
+WORK_MANAGER_MCP_HTTP_AUTH=true
+
+# Use Sanctum (recommended)
+WORK_MANAGER_MCP_AUTH_GUARD=sanctum
+
+# Or use static tokens (development only)
+WORK_MANAGER_MCP_STATIC_TOKENS=token1,token2
+```
+
+When enabled, clients must include `Authorization: Bearer <token>` header on all requests (both SSE and POST endpoints).
+
+**REST API Authentication** (Laravel routes):
+
+The HTTP REST API uses Laravel's standard auth:
 
 ```php
 // In routes/api.php or config
@@ -318,7 +522,17 @@ WorkManager::routes(
 );
 ```
 
-Ensure agents provide valid tokens.
+**Authentication Comparison**:
+
+| Feature | MCP HTTP Server | REST API |
+|---------|-----------------|----------|
+| Transport | ReactPHP (dedicated server) | Laravel HTTP (web server) |
+| Port | 8090 (configurable) | 80/443 (web server) |
+| Auth Type | Bearer token (PSR-7 middleware) | Laravel middleware |
+| Guards | Sanctum or static tokens | Any Laravel guard |
+| Use Case | AI agents via MCP protocol | General HTTP clients |
+
+**Important**: These are separate auth systems. MCP server auth protects the MCP endpoints (`/mcp/sse` and `/mcp/message`), while REST API auth protects the standard HTTP endpoints (`/agent/work/*`).
 
 ---
 

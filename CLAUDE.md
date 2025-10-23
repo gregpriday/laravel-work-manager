@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Laravel Work Manager is a Laravel package providing an AI-agent oriented work order control plane. It enables AI agents to propose work, lease work items with TTL-based concurrency control, submit results with validation, and apply changes idempotently.
 
+**Work In Progres**: This project is still a work in progress. We can make changes without worrying about backwards compatibility or legacy support. Make sure to remove this note before shipping the final release.
+
 **Key Architecture**: This is a stateful work order system with strict state machine transitions, two-phase verification (submission validation + approval readiness), and comprehensive auditability through events/provenance/diffs.
 
 ## Testing Commands
@@ -194,9 +196,20 @@ php artisan work-manager:mcp --transport=stdio
 php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 ```
 
+**HTTP Mode Authentication** (optional, recommended for production):
+
+Enable Bearer token authentication:
+```env
+WORK_MANAGER_MCP_HTTP_AUTH=true
+WORK_MANAGER_MCP_AUTH_GUARD=sanctum  # Or any Laravel guard
+WORK_MANAGER_MCP_STATIC_TOKENS=token1,token2  # For dev/testing
+```
+
+Clients must send `Authorization: Bearer <token>` header when auth is enabled.
+
 **Available MCP tools**: work.propose, work.list, work.get, work.checkout, work.heartbeat, work.submit, work.submit_part, work.list_parts, work.finalize, work.approve, work.reject, work.release, work.logs
 
-See `docs/MCP_SERVER.md` for integration examples and production deployment.
+See `docs/guides/mcp-server-integration.md` for integration examples and production deployment.
 
 ## Events
 

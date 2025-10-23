@@ -476,6 +476,68 @@ Press Ctrl+C to stop the server
 | GET | `/mcp/sse` | Server-Sent Events stream for real-time updates |
 | POST | `/mcp/message` | Send MCP protocol messages |
 
+### HTTP Authentication
+
+The HTTP transport supports optional Bearer token authentication for production deployments.
+
+**Configuration:**
+
+Add to your `.env` file:
+
+```env
+# Enable authentication (default: false)
+WORK_MANAGER_MCP_HTTP_AUTH=true
+
+# Auth guard to use (default: sanctum)
+WORK_MANAGER_MCP_AUTH_GUARD=sanctum
+
+# Optional: Static tokens for development/testing (comma-separated)
+WORK_MANAGER_MCP_STATIC_TOKENS=token1,token2,token3
+
+# CORS settings (default: enabled with wildcard)
+WORK_MANAGER_MCP_CORS=true
+WORK_MANAGER_MCP_CORS_ORIGINS=*
+```
+
+**When authentication is enabled:**
+
+1. All HTTP requests must include `Authorization: Bearer <token>` header
+2. For production, use Laravel Sanctum tokens (recommended)
+3. For development/testing, you can use static tokens
+4. Both SSE and POST endpoints require authentication
+
+**Example with authentication:**
+
+```bash
+# Start server with auth enabled
+WORK_MANAGER_MCP_HTTP_AUTH=true \
+php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
+
+# Output will show auth status:
+Authentication: ENABLED (Bearer token required)
+Auth Guard: sanctum
+```
+
+**Client usage:**
+
+```bash
+# Connect with Bearer token
+curl -H "Authorization: Bearer your-token-here" \
+  http://localhost:8090/mcp/sse
+```
+
+**Security Recommendations:**
+
+- Always enable authentication in production (`WORK_MANAGER_MCP_HTTP_AUTH=true`)
+- Use Sanctum tokens for production deployments
+- Only use static tokens for development/testing
+- Rotate static tokens regularly if used
+- Use SSL/TLS via reverse proxy (nginx, traefik)
+- Bind to `127.0.0.1` for local-only access
+- Use firewall rules to restrict access by IP
+
+See [MCP Server Integration Guide](../guides/mcp-server-integration.md) for complete authentication setup and security best practices.
+
 ### Available MCP Tools
 
 The MCP server exposes 13 tools for AI agents:

@@ -75,26 +75,14 @@ class WorkOrderApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = WorkOrder::query();
+        // Build from request using centralized query builder (supports query string OR JSON body)
+        $qb = \GregPriday\WorkManager\Support\WorkOrderQuery::make($request);
 
-        if ($request->has('state')) {
-            $query->inState($request->input('state'));
-        }
+        // Pagination via page[size] and page[number]
+        $size = max(1, min((int) ($request->input('page.size') ?? config('work-manager.query.default_page_size_http', 50)), config('work-manager.query.max_page_size', 100)));
+        $pageNumber = max(1, (int) ($request->input('page.number') ?? 1));
 
-        if ($request->has('type')) {
-            $query->ofType($request->input('type'));
-        }
-
-        if ($request->has('requested_by_type')) {
-            $query->requestedBy($request->input('requested_by_type'));
-        }
-
-        $limit = min($request->input('limit', 50), 100);
-
-        $orders = $query->with(['items'])
-            ->orderBy('priority', 'desc')
-            ->orderBy('created_at', 'asc')
-            ->paginate($limit);
+        $orders = $qb->paginate($size, ['*'], 'page', $pageNumber)->appends($request->query());
 
         return response()->json($orders);
     }

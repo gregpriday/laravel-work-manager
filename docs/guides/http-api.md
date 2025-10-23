@@ -274,6 +274,101 @@ To disable for specific endpoints:
 
 ---
 
+## Filtering Orders
+
+The `GET {basePath}/orders` endpoint supports powerful filtering, sorting, and field selection using Spatie Laravel Query Builder.
+
+### Quick Examples
+
+**Find high-priority queued orders**:
+```bash
+curl -X GET "/api/agent/work/orders? \
+  filter[state]=queued& \
+  filter[priority]=>50& \
+  sort=-priority& \
+  page[size]=20" \
+  -H "Authorization: Bearer {token}"
+```
+
+**Minimal payload for dashboards**:
+```bash
+curl -X GET "/api/agent/work/orders? \
+  filter[state]=submitted& \
+  include=itemsCount& \
+  fields[work_orders]=id,type,state,created_at& \
+  sort=-created_at" \
+  -H "Authorization: Bearer {token}"
+```
+
+**Orders with available work items**:
+```bash
+curl -X GET "/api/agent/work/orders? \
+  filter[has_available_items]=true& \
+  filter[priority]=>25& \
+  include=itemsCount" \
+  -H "Authorization: Bearer {token}"
+```
+
+### Available Filters
+
+| Filter | Type | Example | Description |
+|--------|------|---------|-------------|
+| `filter[state]` | exact | `queued` | Order state |
+| `filter[type]` | exact | `user.data.sync` | Order type |
+| `filter[priority]` | operator | `>50`, `>=25` | Priority comparison |
+| `filter[created_at]` | operator | `>=2025-01-01` | Date comparison |
+| `filter[items.state]` | relation | `queued` | Orders with items in state |
+| `filter[meta]` | JSON | `batch_id:42` | Meta field contains |
+| `filter[has_available_items]` | custom | `true` | Orders with available items |
+
+### Includes & Counts
+
+- `include=items` - Full items collection (included by default)
+- `include=events` - Recent events
+- `include=itemsCount` - Items count (efficient)
+- `include=itemsExists` - Boolean check
+
+### Field Selection
+
+Reduce payload size by selecting specific fields:
+
+```bash
+curl -X GET "/api/agent/work/orders? \
+  fields[work_orders]=id,type,state,priority& \
+  fields[items]=id,state& \
+  include=items" \
+  -H "Authorization: Bearer {token}"
+```
+
+### Sorting
+
+- Single: `sort=created_at` (ascending) or `sort=-created_at` (descending)
+- Multi: `sort=-priority,created_at`
+- By count: `sort=-items_count` (requires `include=itemsCount`)
+
+**Default**: `-priority,created_at` (highest priority first, oldest first)
+
+### Pagination
+
+Use JSON:API style:
+```bash
+?page[size]=25&page[number]=2
+```
+
+**Defaults**: Page size 50, page number 1
+
+**Maximum page size**: 100
+
+### Complete Documentation
+
+For comprehensive filtering documentation including all available parameters, operators, and examples, see:
+
+- **[Filtering Orders Guide](filtering-orders.md)** - Complete guide with examples
+- **[Query Parameters Reference](../reference/query-parameters.md)** - Parameter specification
+- **[Orders Filtering Examples](../examples/orders-filtering.md)** - Copy-paste scenarios
+
+---
+
 ## Endpoints Reference
 
 ### POST /propose

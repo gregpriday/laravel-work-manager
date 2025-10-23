@@ -338,6 +338,16 @@ php artisan work-manager:mcp --transport=stdio
 php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 ```
 
+**HTTP mode with authentication (recommended for production):**
+```env
+# .env
+WORK_MANAGER_MCP_HTTP_AUTH=true
+WORK_MANAGER_MCP_AUTH_GUARD=sanctum  # or any Laravel guard
+WORK_MANAGER_MCP_STATIC_TOKENS=token1,token2  # optional: static tokens for dev/testing
+```
+
+When auth is enabled, clients must include `Authorization: Bearer <token>` header on all requests. Use Sanctum tokens for production, static tokens for development/testing.
+
 ### Available MCP Tools
 
 The server exposes 13 tools that map 1:1 to Work Manager operations:
@@ -386,7 +396,7 @@ The server exposes 13 tools that map 1:1 to Work Manager operations:
 }
 ```
 
-See [MCP_SERVER.md](docs/MCP_SERVER.md) for complete documentation including production deployment, security, and troubleshooting.
+See [MCP Server Integration Guide](docs/guides/mcp-server-integration.md) for complete documentation including production deployment, authentication setup, security, and troubleshooting.
 
 ---
 
@@ -404,6 +414,7 @@ Publish and edit `config/work-manager.php`. Key sections:
 - **Metrics**: driver (log, prometheus, statsd) and namespace
 - **Policies**: map abilities to gates/permissions
 - **Maintenance**: thresholds for dead-lettering and alerts
+- **MCP**: HTTP authentication (enabled, guard, static tokens), CORS settings
 
 ---
 

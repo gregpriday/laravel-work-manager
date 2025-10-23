@@ -98,48 +98,67 @@ class WorkManagerTools
      *
      * Returns a list of work orders that match the filter criteria.
      * Useful for discovering available work or checking order status.
+     *
+     * Supports Query Builder-style filtering, sorting, includes, and field selection.
      */
     #[McpTool(
         name: 'work.list',
-        description: 'List work orders with optional filtering by state, type, or other criteria'
+        description: 'List work orders with Query Builder filters/sorts/includes'
     )]
     public function list(
-        #[Schema(description: 'Filter by order state', enum: ['queued', 'checked_out', 'in_progress', 'submitted', 'approved', 'applied', 'completed', 'rejected', 'failed'])]
-        ?string $state = null,
+        #[Schema(description: 'Filter object (e.g. {"state":"queued","priority":">50"})')]
+        ?array $filter = null,
 
-        #[Schema(description: 'Filter by order type')]
-        ?string $type = null,
+        #[Schema(description: 'Comma-separated sorts, e.g. "-priority,created_at"')]
+        ?string $sort = null,
 
-        #[Schema(description: 'Maximum number of results', minimum: 1, maximum: 100)]
-        int $limit = 20
+        #[Schema(description: 'Comma-separated includes, e.g. "events,itemsCount"')]
+        ?string $include = null,
+
+        #[Schema(description: 'Sparse fieldsets, e.g. {"work_orders":"id,type","items":"id,state"}')]
+        ?array $fields = null,
+
+        #[Schema(description: 'Pagination object, e.g. {"size":50,"number":1}')]
+        ?array $page = null
     ): array {
-        $query = WorkOrder::query()->with(['items']);
+        $payload = [
+            'filter' => $filter ?? [],
+            'sort' => $sort,
+            'include' => $include,
+            'fields' => $fields,
+            'page' => $page,
+        ];
 
-        if ($state) {
-            $query->inState($state);
-        }
+        // Build a synthetic HTTP Request so QueryBuilder reads from body (supported by Spatie)
+        $request = new \Illuminate\Http\Request($payload);
 
-        if ($type) {
-            $query->ofType($type);
-        }
+        $qb = \GregPriday\WorkManager\Support\WorkOrderQuery::make($request);
 
-        $orders = $query->orderBy('priority', 'desc')
-            ->orderBy('created_at', 'asc')
-            ->limit($limit)
-            ->get();
+        $size = max(1, min((int) ($page['size'] ?? config('work-manager.query.default_page_size_mcp', 20)), config('work-manager.query.max_page_size', 100)));
+        $pageNumber = max(1, (int) ($page['number'] ?? 1));
+        $paginator = $qb->paginate($size, ['*'], 'page', $pageNumber);
 
         return [
             'success' => true,
-            'count' => $orders->count(),
-            'orders' => $orders->map(fn ($order) => [
+            'count' => $paginator->count(),
+            'orders' => $paginator->getCollection()->map(fn ($order) => [
                 'id' => $order->id,
                 'type' => $order->type,
                 'state' => $order->state->value,
                 'priority' => $order->priority,
-                'items_count' => $order->items->count(),
+                'payload' => $order->payload,
+                'meta' => $order->meta,
+                'items_count' => $order->items_count
+                    ?? ($order->relationLoaded('items') ? $order->items->count() : $order->items()->count()),
                 'created_at' => $order->created_at->toIso8601String(),
                 'last_transitioned_at' => $order->last_transitioned_at?->toIso8601String(),
-            ])->toArray(),
+            ])->values()->all(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
         ];
     }
 

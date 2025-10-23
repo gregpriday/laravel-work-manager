@@ -13,6 +13,7 @@ This guide covers the most common errors you may encounter when using Laravel Wo
 - [Authentication & Authorization Errors](#authentication--authorization-errors)
 - [MCP Server Errors](#mcp-server-errors)
 - [Configuration Errors](#configuration-errors)
+- [Filtering & Query Errors](#filtering--query-errors)
 
 ---
 
@@ -661,6 +662,165 @@ SELECT * FROM work_items WHERE state = 'leased' AND lease_expires_at < NOW();
 -- Check events
 SELECT event, actor, created_at, message FROM work_events WHERE order_id = 'uuid' ORDER BY created_at DESC;
 ```
+
+---
+
+## Filtering & Query Errors
+
+### Error: "The filter 'field_name' is not allowed"
+
+**Cause**: Using an undefined or disallowed filter parameter in `GET /orders` or `work.list`.
+
+**HTTP Example**:
+```bash
+GET /orders?filter[invalid_field]=value
+```
+
+**Response (400)**:
+```json
+{
+  "message": "The filter 'invalid_field' is not allowed."
+}
+```
+
+**Solution**: Use only allowed filters. See [Query Parameters Reference](../reference/query-parameters.md) for complete list.
+
+**Allowed filters**: `id`, `state`, `type`, `priority`, `created_at`, `requested_by_type`, `requested_by_id`, `items.state`, `meta`, `has_available_items`, etc.
+
+### Error: "The sort 'field_name' is not allowed"
+
+**Cause**: Attempting to sort by an unsupported field.
+
+**Request**:
+```bash
+GET /orders?sort=invalid_field
+```
+
+**Solution**: Use allowed sort fields:
+- `priority`
+- `created_at`
+- `last_transitioned_at`
+- `applied_at`
+- `completed_at`
+- `items_count` (requires `include=itemsCount`)
+
+**Example**:
+```bash
+GET /orders?sort=-priority,created_at
+```
+
+### Error: "The include 'relation_name' is not allowed"
+
+**Cause**: Requesting an undefined relationship.
+
+**Request**:
+```bash
+GET /orders?include=invalid_relation
+```
+
+**Solution**: Use allowed includes:
+- `items` (included by default)
+- `events`
+- `itemsCount`
+- `itemsExists`
+
+**Example**:
+```bash
+GET /orders?include=events,itemsCount
+```
+
+### Error: "Requested field(s) 'field_name' are not allowed"
+
+**Cause**: Selecting fields that aren't in the allowed list.
+
+**Request**:
+```bash
+GET /orders?fields[work_orders]=id,type,invalid_field
+```
+
+**Solution**: Only select allowed fields for each model. See [Query Parameters Reference](../reference/query-parameters.md#fields).
+
+**Example**:
+```bash
+GET /orders?fields[work_orders]=id,type,state,priority,created_at
+```
+
+### Error: Invalid operator syntax in filter
+
+**Cause**: Incorrect operator syntax for operator filters.
+
+**Wrong**:
+```bash
+GET /orders?filter[priority]=greater than 50
+```
+
+**Correct**:
+```bash
+GET /orders?filter[priority]=>50
+# Or URL-encoded:
+GET /orders?filter[priority]=%3E50
+```
+
+**Supported operators**: `=`, `!=`, `>`, `>=`, `<`, `<=`
+
+### Error: Invalid date format
+
+**Cause**: Using incorrect date format for date comparisons.
+
+**Wrong**:
+```bash
+GET /orders?filter[created_at]=>01/15/2025
+```
+
+**Correct**:
+```bash
+GET /orders?filter[created_at]>=2025-01-15T00:00:00Z
+# Or simplified:
+GET /orders?filter[created_at]>=2025-01-15
+```
+
+**Format**: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`) or simplified (`YYYY-MM-DD`)
+
+### MCP Tool Filtering Errors
+
+When using `work.list` MCP tool:
+
+**Error**: Tool returns `success: false` with invalid filter error
+
+**Cause**: Same as HTTP - using disallowed filter/sort/include/field.
+
+**Example**:
+```json
+{
+  "success": false,
+  "error": "The filter 'unknown_field' is not allowed.",
+  "code": "invalid_filter"
+}
+```
+
+**Solution**: Check [Query Parameters Reference](../reference/query-parameters.md) and use allowed parameters.
+
+**Correct MCP call**:
+```json
+{
+  "name": "work.list",
+  "arguments": {
+    "filter": {
+      "state": "queued",
+      "priority": ">50"
+    },
+    "include": "itemsCount",
+    "sort": "-priority"
+  }
+}
+```
+
+### See Also
+
+- [Filtering Orders Guide](../guides/filtering-orders.md) - Complete filtering documentation
+- [Query Parameters Reference](../reference/query-parameters.md) - All allowed parameters
+- [HTTP API Guide](../guides/http-api.md#filtering-orders) - HTTP examples
+- [MCP Server Integration](../guides/mcp-server-integration.md#listing-work-with-filters) - MCP examples
 
 ---
 

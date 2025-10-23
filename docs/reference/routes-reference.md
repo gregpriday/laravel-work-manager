@@ -134,7 +134,7 @@ Authorization: Bearer {token}
 **Route Name:** `work-manager.index`
 **Authorization:** None (implement custom auth if needed)
 
-List and filter work orders.
+List and filter work orders with comprehensive query capabilities.
 
 **Request Headers:**
 ```
@@ -143,13 +143,45 @@ Authorization: Bearer {token}
 
 **Query Parameters:**
 
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `state` | string | Filter by order state | `?state=submitted` |
-| `type` | string | Filter by order type | `?type=user.data.sync` |
-| `requested_by_type` | string | Filter by actor type | `?requested_by_type=agent` |
-| `limit` | integer | Results per page (max 100) | `?limit=50` |
-| `page` | integer | Page number | `?page=2` |
+> **Complete Reference**: See [Query Parameters Reference](query-parameters.md) for full specification of all available parameters.
+
+**Quick Reference:**
+
+| Category | Parameters | Example |
+|----------|------------|---------|
+| **Filters** | `filter[field]=value` | `filter[state]=queued` |
+| **Operators** | `filter[field]=operator value` | `filter[priority]=>50` |
+| **Relations** | `filter[relation.field]=value` | `filter[items.state]=queued` |
+| **Includes** | `include=relation1,relation2` | `include=events,itemsCount` |
+| **Fields** | `fields[model]=field1,field2` | `fields[work_orders]=id,type` |
+| **Sorting** | `sort=-field1,field2` | `sort=-priority,created_at` |
+| **Pagination** | `page[size]=N&page[number]=M` | `page[size]=25&page[number]=2` |
+
+**Default Behavior:**
+- `items` relationship preloaded
+- Sort: `-priority,created_at` (highest priority first, oldest first within same priority)
+- Page size: 50 (max 100)
+
+**Key Filters:**
+- `filter[state]` - Order state (exact)
+- `filter[type]` - Order type (exact)
+- `filter[priority]` - Priority with operators (`>50`, `>=25`, etc.)
+- `filter[created_at]` - Date comparison with operators
+- `filter[has_available_items]` - Boolean, orders with available work items
+- `filter[meta]` - JSON contains (e.g., `batch_id:42`)
+
+**Examples:**
+
+```bash
+# High-priority queued orders
+GET /orders?filter[state]=queued&filter[priority]=>50&sort=-priority
+
+# Orders with available work, minimal payload
+GET /orders?filter[has_available_items]=true&fields[work_orders]=id,type,state&include=itemsCount
+
+# Recent submitted orders with events
+GET /orders?filter[state]=submitted&filter[created_at]>=2025-01-15&include=events&sort=-created_at
+```
 
 **Success Response (200 OK):**
 ```json

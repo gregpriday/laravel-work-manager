@@ -186,4 +186,53 @@ return [
         'stale_order_threshold_hours' => 24,
         'enable_alerts' => true,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Query & Filtering Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure default pagination and filtering settings for listing orders.
+    | These apply to both HTTP API and MCP tool queries.
+    |
+    */
+    'query' => [
+        'default_page_size_http' => 50,
+        'default_page_size_mcp' => 20,
+        'max_page_size' => 100,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MCP Server Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure the MCP (Model Context Protocol) server settings.
+    | The MCP server exposes work manager tools to AI agents.
+    |
+    */
+    'mcp' => [
+        // HTTP transport authentication
+        'http' => [
+            // Enable Bearer token authentication for HTTP transport
+            'auth_enabled' => env('WORK_MANAGER_MCP_HTTP_AUTH', false),
+
+            // Laravel auth guard to use for token validation
+            'auth_guard' => env('WORK_MANAGER_MCP_AUTH_GUARD', 'sanctum'),
+
+            // Optional: Static tokens for simple authentication (comma-separated in env)
+            // Use this for development or simple setups without Sanctum
+            'static_tokens' => array_filter(
+                explode(',', env('WORK_MANAGER_MCP_STATIC_TOKENS', ''))
+            ),
+
+            // CORS settings for HTTP transport
+            'cors' => [
+                'enabled' => env('WORK_MANAGER_MCP_CORS', true),
+                'allowed_origins' => env('WORK_MANAGER_MCP_CORS_ORIGINS', '*'),
+                'allowed_methods' => 'GET,POST,OPTIONS',
+                'allowed_headers' => 'Content-Type,Authorization,Mcp-Session-Id',
+            ],
+        ],
+    ],
 ];

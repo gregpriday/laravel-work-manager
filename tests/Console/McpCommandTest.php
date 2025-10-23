@@ -51,7 +51,7 @@ test('mcp command http shows correct output before attempting to start', functio
 
     $this->artisan('work-manager:mcp', ['--transport' => 'http'])
         ->expectsOutput('Starting Work Manager MCP Server...')
-        ->expectsOutput('Transport: HTTP (Dedicated Server)')
+        ->expectsOutput('Transport: HTTP (ReactPHP Dedicated Server)')
         ->expectsOutput('Host: 127.0.0.1')
         ->expectsOutput('Port: 8090')
         ->expectsOutput('Server Name: Laravel Work Manager')
@@ -76,4 +76,40 @@ test('mcp command http respects custom host and port in output', function () {
         ->expectsOutput('Host: 0.0.0.0')
         ->expectsOutput('Port: 9000')
         ->expectsOutputToContain('http://0.0.0.0:9000');
+})->skip('Cannot fully test without mocking Artisan which is final in Orchestra Testbench');
+
+test('mcp command http shows auth disabled by default', function () {
+    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+        $this->markTestSkipped('PhpMcp package not installed');
+    }
+
+    config()->set('work-manager.mcp.http.auth_enabled', false);
+
+    $this->artisan('work-manager:mcp', ['--transport' => 'http'])
+        ->expectsOutputToContain('Authentication: DISABLED (public access)');
+})->skip('Cannot fully test without mocking Artisan which is final in Orchestra Testbench');
+
+test('mcp command http shows auth enabled when configured', function () {
+    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+        $this->markTestSkipped('PhpMcp package not installed');
+    }
+
+    config()->set('work-manager.mcp.http.auth_enabled', true);
+    config()->set('work-manager.mcp.http.auth_guard', 'sanctum');
+
+    $this->artisan('work-manager:mcp', ['--transport' => 'http'])
+        ->expectsOutputToContain('Authentication: ENABLED (Bearer token required)')
+        ->expectsOutputToContain('Auth Guard: sanctum');
+})->skip('Cannot fully test without mocking Artisan which is final in Orchestra Testbench');
+
+test('mcp command http shows static token count when configured', function () {
+    if (!class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
+        $this->markTestSkipped('PhpMcp package not installed');
+    }
+
+    config()->set('work-manager.mcp.http.auth_enabled', true);
+    config()->set('work-manager.mcp.http.static_tokens', ['token1', 'token2', 'token3']);
+
+    $this->artisan('work-manager:mcp', ['--transport' => 'http'])
+        ->expectsOutputToContain('Static Tokens: 3 configured');
 })->skip('Cannot fully test without mocking Artisan which is final in Orchestra Testbench');

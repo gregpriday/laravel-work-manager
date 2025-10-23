@@ -567,6 +567,37 @@ Static utility functions.
 | `uuid()` | `string` | Generate a UUID v4 |
 | `validateJsonSchema(array $data, array $schema)` | `array` | Validate data against JSON schema, return errors |
 
+### `GregPriday\WorkManager\Support\WorkOrderQuery`
+
+Centralized query builder configuration for work order filtering, shared by HTTP and MCP interfaces.
+
+**Static Methods:**
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `make(Request $request)` | `QueryBuilder` | Create configured query builder with allowed filters/sorts/includes/fields |
+
+**Behavior:**
+- Defines allowed filters (exact, operator, relation, custom)
+- Configures allowed includes (relationships, counts, exists)
+- Sets allowed field selection (sparse fieldsets)
+- Defines allowed sorts and default sort order
+- Enforces validation (400 errors for invalid parameters)
+
+**Allowed Filters:**
+- Exact: `id`, `state`, `type`, `requested_by_type`, `requested_by_id`
+- Operator: `priority`, `created_at`, `last_transitioned_at`, `applied_at`, `completed_at`
+- Relation: `items.state`
+- Custom: `meta` (JSON contains), `has_available_items` (discoverability)
+
+**Default Behavior:**
+- Preloads `items` relationship
+- Default sort: `-priority,created_at`
+
+**See Also:**
+- [Query Parameters Reference](query-parameters.md) - Complete parameter specification
+- [Filtering Orders Guide](../guides/filtering-orders.md) - Usage guide
+
 ---
 
 ## HTTP Controllers
