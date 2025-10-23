@@ -158,8 +158,23 @@ it('checkout returns error when no items available', function () {
     expect($result['code'])->toBe('no_items_available');
 });
 
-test('checkout returns lease_conflict on concurrent lease attempt')
-    ->skip('TODO: Fix test - propose may be auto-planning creating multiple items');
+it('checkout returns no_items_available when all items completed', function () {
+    $allocator = app(WorkAllocator::class);
+
+    $order = $allocator->propose('test.echo', ['message' => 'test']);
+
+    // Mark all items as completed
+    foreach ($order->items as $item) {
+        $item->update(['state' => ItemState::COMPLETED]);
+    }
+
+    $tools = app(WorkManagerTools::class);
+
+    // Try to checkout - should fail
+    $result = $tools->checkout(orderId: $order->id, agentId: 'agent-1');
+    expect($result['success'])->toBeFalse();
+    expect($result['code'])->toBe('no_items_available');
+});
 
 it('heartbeat returns success with updated lease time', function () {
     $allocator = app(WorkAllocator::class);

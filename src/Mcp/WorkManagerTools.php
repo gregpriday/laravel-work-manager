@@ -627,6 +627,7 @@ class WorkManagerTools
         }
 
         $events = $query->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc') // Tie-breaker for events with same timestamp
             ->limit($limit)
             ->get();
 

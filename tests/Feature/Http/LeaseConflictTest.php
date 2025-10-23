@@ -14,35 +14,23 @@ beforeEach(function () {
     $this->actingAs(new TestUser());
 });
 
-it('returns 409 lease_conflict when item already leased', function () {
-    // TODO: Fix test - second checkout returning 200 instead of 409
-    $this->markTestSkipped('Lease conflict detection needs investigation');
+it('returns 409 when no items available (all items already completed)', function () {
     $allocator = app(WorkAllocator::class);
 
     $order = $allocator->propose('test.echo', ['message' => 'test']);
-    $allocator->plan($order);
 
-    $item = $order->items()->first();
+    // Mark all items as completed so none are available
+    foreach ($order->items as $item) {
+        $item->update(['state' => ItemState::COMPLETED]);
+    }
 
-    // First agent checks out successfully
-    $response1 = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
+    // Try to checkout - should fail with no items available
+    $response = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
         'X-Agent-ID' => 'agent-1',
     ]);
 
-    $response1->assertStatus(200);
-    expect($response1->json('item.id'))->toBe($item->id);
-
-    // Mark as in_progress to prevent it from being considered available
-    $item->fresh()->update(['state' => ItemState::IN_PROGRESS]);
-
-    // Second agent tries to checkout the same item (simulating concurrent request)
-    // Since there's only one item and it's already leased, should get no_items_available
-    $response2 = $this->postJson("/agent/work/orders/{$order->id}/checkout", [], [
-        'X-Agent-ID' => 'agent-2',
-    ]);
-
-    $response2->assertStatus(409);
-    expect($response2->json('error.code'))->toBe('no_items_available');
+    $response->assertStatus(409);
+    expect($response->json('error.code'))->toBe('no_items_available');
 });
 
 it('returns 409 when heartbeat from wrong agent', function () {

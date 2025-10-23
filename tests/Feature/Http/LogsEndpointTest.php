@@ -56,8 +56,6 @@ it('returns events for item and its order', function () {
 });
 
 it('orders events by created_at desc (newest first)', function () {
-    // TODO: Fix test - event ordering not matching expected sequence
-    $this->markTestSkipped('Event ordering test needs investigation');
     $allocator = app(WorkAllocator::class);
 
     $order = $allocator->propose('test.echo', ['message' => 'test']);
@@ -65,26 +63,30 @@ it('orders events by created_at desc (newest first)', function () {
 
     $item = $order->items()->first();
 
-    // Create multiple events with slight delays using valid EventType values
-    WorkEvent::create([
+    // Create multiple events with explicit timestamps to ensure ordering
+    $time1 = now()->subMinutes(3);
+    $time2 = now()->subMinutes(2);
+    $time3 = now()->subMinute();
+
+    $event1 = WorkEvent::create([
         'order_id' => $order->id,
         'item_id' => $item->id,
         'event' => EventType::FAILED,
-        'created_at' => now()->subMinutes(3),
+        'created_at' => $time1,
     ]);
 
-    WorkEvent::create([
+    $event2 = WorkEvent::create([
         'order_id' => $order->id,
         'item_id' => $item->id,
         'event' => EventType::RELEASED,
-        'created_at' => now()->subMinutes(2),
+        'created_at' => $time2,
     ]);
 
-    WorkEvent::create([
+    $event3 = WorkEvent::create([
         'order_id' => $order->id,
         'item_id' => $item->id,
         'event' => EventType::COMPLETED,
-        'created_at' => now()->subMinute(),
+        'created_at' => $time3,
     ]);
 
     $response = $this->getJson("/agent/work/items/{$item->id}/logs");
@@ -93,17 +95,21 @@ it('orders events by created_at desc (newest first)', function () {
     $events = $response->json('events');
 
     // Should be ordered newest first
-    $eventTypes = collect($events)->pluck('event')->map(fn($e) => is_array($e) ? $e['value'] : $e)->toArray();
+    $eventIds = collect($events)->pluck('id')->toArray();
 
-    // The newest custom events should appear first (before the older proposed/planned events)
-    $testEventIndices = [
-        array_search('completed', $eventTypes),
-        array_search('released', $eventTypes),
-        array_search('failed', $eventTypes),
-    ];
+    // Find the positions of our test events
+    $pos1 = array_search($event1->id, $eventIds);
+    $pos2 = array_search($event2->id, $eventIds);
+    $pos3 = array_search($event3->id, $eventIds);
 
-    expect($testEventIndices[0])->toBeLessThan($testEventIndices[1]);
-    expect($testEventIndices[1])->toBeLessThan($testEventIndices[2]);
+    // Verify they're all present
+    expect($pos1)->not->toBeFalse();
+    expect($pos2)->not->toBeFalse();
+    expect($pos3)->not->toBeFalse();
+
+    // Verify correct order (newest first means lower index)
+    expect($pos3)->toBeLessThan($pos2); // completed (newest) before released
+    expect($pos2)->toBeLessThan($pos1); // released before failed (oldest)
 });
 
 it('limits results to 100 events', function () {

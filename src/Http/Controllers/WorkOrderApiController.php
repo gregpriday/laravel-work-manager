@@ -409,6 +409,7 @@ class WorkOrderApiController extends Controller
                     ->whereNull('item_id');
             })
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc') // Tie-breaker for events with same timestamp
             ->limit(100)
             ->get();
 
