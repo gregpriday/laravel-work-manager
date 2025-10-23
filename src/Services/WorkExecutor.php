@@ -386,17 +386,28 @@ class WorkExecutor
                 }
             }
 
-            // Get latest validated parts per key
-            $latestParts = $item->parts()
+            // Get latest validated parts per key (by sequence number)
+            // For each part_key, get the part with MAX(seq), using id as tiebreaker
+            $latestParts = collect();
+            $partKeys = $item->parts()
                 ->where('status', PartStatus::VALIDATED->value)
-                ->whereIn('id', function ($query) use ($item) {
-                    $query->selectRaw('MAX(id)')
-                        ->from('work_item_parts')
-                        ->where('work_item_id', $item->id)
-                        ->where('status', PartStatus::VALIDATED->value)
-                        ->groupBy('part_key');
-                })
-                ->get();
+                ->distinct()
+                ->pluck('part_key');
+
+            foreach ($partKeys as $partKey) {
+                $latestPart = $item->parts()
+                    ->where('status', PartStatus::VALIDATED->value)
+                    ->where('part_key', $partKey)
+                    ->orderByDesc('seq')
+                    ->orderByDesc('id')
+                    ->first();
+
+                if ($latestPart) {
+                    $latestParts->push($latestPart);
+                }
+            }
+
+            $latestParts = $latestParts->sortBy('seq');
 
             // Assemble parts
             $assembled = $orderType->assemble($item, $latestParts);

@@ -151,7 +151,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('order_id')->nullable();
             $table->uuid('item_id')->nullable();
-            $table->string('idempotency_key', 120)->nullable()->unique();
+            $table->char('idempotency_key_hash', 64)->nullable()->unique();
 
             // Agent metadata
             $table->string('agent_version')->nullable();

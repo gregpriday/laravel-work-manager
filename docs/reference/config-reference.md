@@ -661,9 +661,9 @@ WORK_MANAGER_QUEUE_CONNECTION=database
    'enforce_on' => ['submit', 'propose', 'approve', 'reject', 'submit-part', 'finalize'],
    ```
 
-5. **Metrics:** Use Prometheus or StatsD for production monitoring
+5. **Metrics:** Use database or log driver for production monitoring
    ```php
-   'driver' => 'prometheus',
+   'driver' => 'database',  // or 'log' for file-based metrics
    ```
 
 ### Development Recommendations

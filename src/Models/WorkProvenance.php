@@ -12,7 +12,7 @@ class WorkProvenance extends Model
     protected $fillable = [
         'order_id',
         'item_id',
-        'idempotency_key',
+        'idempotency_key_hash',
         'agent_version',
         'agent_name',
         'request_fingerprint',

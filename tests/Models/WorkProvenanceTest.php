@@ -27,10 +27,12 @@ test('WorkProvenance can be created with all attributes', function () {
         'max_attempts' => 3,
     ]);
 
+    $idempotencyKeyHash = hash('sha256', 'test-key-123');
+
     $provenance = WorkProvenance::create([
         'order_id' => $order->id,
         'item_id' => $item->id,
-        'idempotency_key' => 'test-key-123',
+        'idempotency_key_hash' => $idempotencyKeyHash,
         'agent_version' => '1.0.0',
         'agent_name' => 'claude-agent',
         'request_fingerprint' => hash('sha256', 'request-data'),
@@ -40,7 +42,7 @@ test('WorkProvenance can be created with all attributes', function () {
     expect($provenance)->toBeInstanceOf(WorkProvenance::class);
     expect($provenance->order_id)->toBe($order->id);
     expect($provenance->item_id)->toBe($item->id);
-    expect($provenance->idempotency_key)->toBe('test-key-123');
+    expect($provenance->idempotency_key_hash)->toBe($idempotencyKeyHash);
     expect($provenance->agent_version)->toBe('1.0.0');
     expect($provenance->agent_name)->toBe('claude-agent');
     expect($provenance->extra)->toBe(['custom' => 'data']);

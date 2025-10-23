@@ -626,12 +626,12 @@ Records metrics to Laravel log.
 
 ---
 
-**Prometheus (Not Available)**:
+**Database**:
 ```php
-'driver' => 'prometheus',  // Not yet implemented
+'driver' => 'database',
 ```
 
-Use `'log'` or `'statsd'` instead.
+Records metrics to database tables for easy querying and analysis. This is the recommended driver for production use.
 
 ---
 

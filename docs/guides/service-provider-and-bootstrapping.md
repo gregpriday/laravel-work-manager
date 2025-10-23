@@ -187,17 +187,19 @@ public function register()
 
 ```php
 use GregPriday\WorkManager\Contracts\MetricsDriver;
-use App\Services\PrometheusMetricsDriver;
+use App\Services\CustomMetricsDriver;
 
 public function register()
 {
     $this->app->singleton(MetricsDriver::class, function ($app) {
-        return new PrometheusMetricsDriver(
+        return new CustomMetricsDriver(
             config('work-manager.metrics.namespace')
         );
     });
 }
 ```
+
+The built-in drivers are `'database'` (default) and `'log'`. You can implement custom drivers by implementing the `MetricsDriver` contract.
 
 ---
 
@@ -269,9 +271,12 @@ public function boot()
 public function boot()
 {
     if ($this->app->environment('production')) {
-        // Register production-specific metrics driver
+        // Use database metrics driver in production
+        config(['work-manager.metrics.driver' => 'database']);
+
+        // Or register a custom metrics driver
         $this->app->singleton(MetricsDriver::class, function () {
-            return new PrometheusMetricsDriver();
+            return new CustomMetricsDriver();
         });
     }
 }

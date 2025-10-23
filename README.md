@@ -529,7 +529,7 @@ vendor/bin/pest --coverage
 * ✅ **MCP server** with stdio and HTTP transports
 * ✅ **Partial submissions** for incremental work item results
 * ✅ **Optional Redis lease backend** (see config: `'lease.backend' => 'redis'`)
-* 🔜 Prometheus metrics driver (log and null drivers available)
+* ✅ **Database metrics tracking** for monitoring work orders and items
 * 🔜 OpenAPI docs generator for mounted routes
 
 ---

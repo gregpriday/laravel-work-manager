@@ -124,59 +124,7 @@ Or implement custom agent-level limits in your middleware.
 
 ---
 
-### 6. Partial Submissions Not Ordered
-
-**Limitation**: Partial submissions (via `submit-part`) are not guaranteed to be processed in submission order.
-
-**Impact**: When finalizing, parts are assembled by `id` order, not submission time.
-
-**Workaround**: Include sequence numbers in your partial data:
-
-```json
-{
-  "part_data": {
-    "sequence": 1,
-    "content": "..."
-  }
-}
-```
-
-Then sort in your finalization logic.
-
-**Future**: Add optional `sequence` field to WorkItemPart model (v1.2).
-
----
-
-### 7. No Built-in Prometheus Metrics Driver
-
-**Limitation**: The Prometheus metrics driver is configured but not yet implemented. Only `log` driver currently works.
-
-**Impact**: Cannot push metrics directly to Prometheus.
-
-**Workaround**: Use the `log` driver and parse logs with Promtail/Fluentd, or implement custom metrics:
-
-```php
-// In your EventServiceProvider
-use GregPriday\WorkManager\Events\WorkOrderApplied;
-use Prometheus\CollectorRegistry;
-
-Event::listen(WorkOrderApplied::class, function ($event) {
-    $registry = app(CollectorRegistry::class);
-    $counter = $registry->getOrRegisterCounter(
-        'work_manager',
-        'orders_applied_total',
-        'Total orders applied',
-        ['type']
-    );
-    $counter->inc(['type' => $event->order->type]);
-});
-```
-
-**Future**: Complete Prometheus driver implementation (v1.1).
-
----
-
-### 8. Apply Hook Cannot Be Async
+### 6. Apply Hook Cannot Be Async
 
 **Limitation**: The `apply()` method runs synchronously. Long-running operations block the approval request.
 
@@ -205,7 +153,7 @@ public function apply(WorkOrder $order): Diff
 
 ---
 
-### 9. No Built-in Workflow Orchestration
+### 7. No Built-in Workflow Orchestration
 
 **Limitation**: No built-in support for complex workflows (conditional branches, loops, parallel execution, etc.).
 
@@ -233,7 +181,7 @@ protected function afterApply(WorkOrder $order, Diff $diff): void
 
 ---
 
-### 10. Limited Multi-Tenancy Support
+### 8. Limited Multi-Tenancy Support
 
 **Limitation**: No first-class multi-tenancy. No automatic tenant isolation or per-tenant quotas.
 
@@ -455,7 +403,7 @@ See [ARCHITECTURE.md](../concepts/architecture-overview.md) "Recommended Improve
 5. Event outbox pattern
 6. Multi-tenancy support
 7. Evidence & provenance standards
-8. Observability & metrics (Prometheus)
+8. Enhanced observability dashboards
 9. Safety & compliance guardrails
 10. Enhanced failure handling
 

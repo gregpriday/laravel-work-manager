@@ -25,8 +25,6 @@ The setup guide (`docs/dev/setup.md`) provides step-by-step instructions to inst
 
 Laravel Work Manager is a Laravel package providing an AI-agent oriented work order control plane. It enables AI agents to propose work, lease work items with TTL-based concurrency control, submit results with validation, and apply changes idempotently.
 
-**Work In Progres**: This project is still a work in progress. We can make changes without worrying about backwards compatibility or legacy support. Make sure to remove this note before shipping the final release.
-
 **Key Architecture**: This is a stateful work order system with strict state machine transitions, two-phase verification (submission validation + approval readiness), and comprehensive auditability through events/provenance/diffs.
 
 ## Testing Commands

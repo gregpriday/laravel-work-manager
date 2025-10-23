@@ -62,7 +62,7 @@ it('work_provenances table has all required columns', function () {
     $columns = Schema::getColumnListing('work_provenances');
 
     $required = [
-        'id', 'order_id', 'item_id', 'idempotency_key',
+        'id', 'order_id', 'item_id', 'idempotency_key_hash',
         'agent_version', 'agent_name', 'request_fingerprint',
         'extra', 'created_at',
     ];

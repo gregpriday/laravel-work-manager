@@ -351,7 +351,7 @@ Stores agent metadata and request fingerprints for auditability.
 | `id` | bigint unsigned | No | auto | Primary key (auto-increment) |
 | `order_id` | uuid | Yes | `NULL` | Foreign key to `work_orders.id` |
 | `item_id` | uuid | Yes | `NULL` | Foreign key to `work_items.id` |
-| `idempotency_key` | varchar(120) | Yes | `NULL` | Idempotency key used |
+| `idempotency_key_hash` | char(64) | Yes | `NULL` | SHA-256 hash of idempotency key |
 | `agent_version` | varchar(255) | Yes | `NULL` | Agent software version |
 | `agent_name` | varchar(255) | Yes | `NULL` | Agent name/identifier |
 | `request_fingerprint` | varchar(64) | Yes | `NULL` | Request fingerprint hash |
@@ -365,7 +365,7 @@ Stores agent metadata and request fingerprints for auditability.
 | `PRIMARY` | `id` | Primary | Primary key lookup |
 | `work_provenances_order_id_foreign` | `order_id` | Foreign Key | Links to work_orders |
 | `work_provenances_item_id_foreign` | `item_id` | Foreign Key | Links to work_items |
-| `work_provenances_idempotency_key_unique` | `idempotency_key` | Unique | Prevent duplicate keys |
+| `work_provenances_idempotency_key_hash_unique` | `idempotency_key_hash` | Unique | Prevent duplicate keys |
 
 ### Foreign Keys
 
@@ -381,7 +381,7 @@ Stores agent metadata and request fingerprints for auditability.
   "id": 6789,
   "order_id": "01234567-89ab-cdef-0123-456789abcdef",
   "item_id": null,
-  "idempotency_key": "abc123-unique-key",
+  "idempotency_key_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
   "agent_version": "1.2.3",
   "agent_name": "research-bot",
   "request_fingerprint": "sha256-hash-of-request",

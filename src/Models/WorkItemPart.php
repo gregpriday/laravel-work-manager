@@ -82,16 +82,30 @@ class WorkItemPart extends Model
     }
 
     /**
-     * Scope to get the latest part for each key.
+     * Scope to get the latest part for each key (by sequence number, with id as tiebreaker).
+     * This returns a collection, not a query builder.
      */
     public function scopeLatestPerKey($query, string $itemId)
     {
-        return $query->where('work_item_id', $itemId)
-            ->whereIn('id', function ($subQuery) use ($itemId) {
-                $subQuery->selectRaw('MAX(id)')
-                    ->from('work_item_parts')
-                    ->where('work_item_id', $itemId)
-                    ->groupBy('part_key');
-            });
+        // Get all part keys first
+        $partKeys = static::where('work_item_id', $itemId)
+            ->distinct()
+            ->pluck('part_key');
+
+        $latestPartIds = [];
+
+        // For each part_key, get the latest part by seq (or id if seq is same/null)
+        foreach ($partKeys as $partKey) {
+            $latestPart = static::where('work_item_id', $itemId)
+                ->where('part_key', $partKey)
+                ->orderByRaw('seq IS NULL ASC, seq DESC, id DESC')
+                ->first();
+
+            if ($latestPart) {
+                $latestPartIds[] = $latestPart->id;
+            }
+        }
+
+        return $query->whereIn('id', $latestPartIds);
     }
 }

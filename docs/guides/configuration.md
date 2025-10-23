@@ -325,9 +325,9 @@ Writes metrics to Laravel logs:
 ],
 ```
 
-### Prometheus Driver
+### Database Driver (Recommended)
 
-*Not yet implemented. Use `'log'` or `'statsd'` instead.*
+The `'database'` driver is the recommended choice for production. It tracks metrics directly in your database for easy querying and monitoring.
 
 ### StatsD Driver
 
