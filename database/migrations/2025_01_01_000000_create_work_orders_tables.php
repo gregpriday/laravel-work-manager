@@ -25,7 +25,7 @@ return new class extends Migration
                 'failed',
                 'dead_lettered',
             ])->default('queued')->index();
-            $table->smallInteger('priority')->default(0);
+            $table->unsignedSmallInteger('priority')->default(0);
 
             // Requester info
             $table->string('requested_by_type', 50)->nullable();
@@ -43,29 +43,25 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
-            $table->index(['state', 'type']);
+            $table->index(['state', 'type'], 'work_orders_state_type_idx');
+            $table->index(['requested_by_type', 'requested_by_id'], 'work_orders_requester_idx');
         });
 
-        // Add optimized composite index for global checkout queries
-        // Priority DESC for highest-priority-first, created_at ASC for FIFO within priority
+        // Add optimized composite index for checkout queries
+        // Supports: WHERE state='queued' ORDER BY priority DESC, created_at ASC
         $driver = DB::connection()->getDriverName();
 
-        if ($driver === 'mysql' || $driver === 'mariadb') {
-            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority DESC, created_at ASC)');
-        } elseif ($driver === 'pgsql') {
-            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority DESC, created_at ASC)');
-        } elseif ($driver === 'sqlite') {
-            // SQLite doesn't support index direction, but we can still create a composite index
-            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority, created_at)');
+        if ($driver === 'mysql' || $driver === 'mariadb' || $driver === 'pgsql') {
+            DB::statement('CREATE INDEX work_orders_checkout_idx ON work_orders (state, priority DESC, created_at ASC)');
         } else {
-            // Fallback for other drivers
-            DB::statement('CREATE INDEX work_orders_priority_created_at_index ON work_orders (priority, created_at)');
+            // SQLite and other drivers don't support index direction
+            DB::statement('CREATE INDEX work_orders_checkout_idx ON work_orders (state, priority, created_at)');
         }
 
         // Work Items table
         Schema::create('work_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('order_id');
+            $table->foreignUuid('order_id')->constrained('work_orders')->cascadeOnDelete();
             $table->string('type', 120)->index();
             $table->enum('state', [
                 'queued',
@@ -84,7 +80,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('max_attempts')->default(3);
 
             // Lease information
-            $table->string('leased_by_agent_id')->nullable();
+            $table->string('leased_by_agent_id')->nullable()->index();
             $table->timestamp('lease_expires_at')->nullable()->index();
             $table->timestamp('last_heartbeat_at')->nullable();
 
@@ -100,15 +96,10 @@ return new class extends Migration
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
 
-            // Foreign keys
-            $table->foreign('order_id')
-                ->references('id')
-                ->on('work_orders')
-                ->onDelete('cascade');
-
-            // Indexes
-            $table->index(['order_id', 'state']);
-            $table->index(['state', 'lease_expires_at']);
+            // Indexes for common query patterns
+            $table->index(['order_id', 'state'], 'work_items_order_state_idx');
+            $table->index(['state', 'lease_expires_at'], 'work_items_lease_expiry_idx');
+            $table->index(['type', 'state'], 'work_items_type_state_idx');
         });
 
         // Work Events table
@@ -140,10 +131,11 @@ return new class extends Migration
                 ->on('work_items')
                 ->onDelete('cascade');
 
-            // Indexes
-            $table->index(['order_id', 'event']);
-            $table->index(['item_id', 'event']);
-            $table->index(['event', 'created_at']);
+            // Indexes for event queries and timeline pagination
+            $table->index(['order_id', 'event'], 'work_events_order_event_idx');
+            $table->index(['order_id', 'created_at'], 'work_events_order_timeline_idx');
+            $table->index(['item_id', 'event'], 'work_events_item_event_idx');
+            $table->index(['event', 'created_at'], 'work_events_event_time_idx');
         });
 
         // Work Provenance table
@@ -171,6 +163,10 @@ return new class extends Migration
                 ->references('id')
                 ->on('work_items')
                 ->onDelete('cascade');
+
+            // Indexes for audit and provenance queries
+            $table->index(['order_id', 'created_at'], 'work_prov_order_timeline_idx');
+            $table->index('request_fingerprint', 'work_prov_fingerprint_idx');
         });
 
         // Work Idempotency Keys table
@@ -181,16 +177,17 @@ return new class extends Migration
             $table->json('response_snapshot')->nullable();
             $table->timestamp('created_at');
 
-            // Unique constraint
-            $table->unique(['scope', 'key_hash']);
+            // Unique constraint and indexes
+            $table->unique(['scope', 'key_hash'], 'work_idem_scope_hash_unique');
+            $table->index('created_at', 'work_idem_created_idx'); // For TTL cleanup
         });
 
         // Work Item Parts table (for partial submissions)
         Schema::create('work_item_parts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('work_item_id');
+            $table->foreignUuid('work_item_id')->constrained('work_items')->cascadeOnDelete();
             $table->string('part_key', 120)->index();
-            $table->unsignedInteger('seq')->nullable();
+            $table->unsignedInteger('seq')->nullable(); // Nullable for single/unordered parts
             $table->enum('status', ['draft', 'validated', 'rejected'])->default('draft')->index();
 
             // Data
@@ -201,39 +198,34 @@ return new class extends Migration
             $table->string('checksum')->nullable();
 
             // Agent tracking
-            $table->string('submitted_by_agent_id');
-            $table->string('idempotency_key_hash')->nullable();
+            $table->string('submitted_by_agent_id')->index();
+            $table->char('idempotency_key_hash', 64)->nullable();
 
             $table->timestamps();
 
-            // Foreign key
-            $table->foreign('work_item_id')
-                ->references('id')
-                ->on('work_items')
-                ->onDelete('cascade');
-
             // Unique constraint for part_key and seq
-            $table->unique(['work_item_id', 'part_key', 'seq']);
+            // Note: Multiple NULL seq values are allowed per part_key (by design)
+            $table->unique(['work_item_id', 'part_key', 'seq'], 'work_parts_item_key_seq_unique');
 
-            // Additional indexes
-            $table->index(['work_item_id', 'status']);
-            $table->index(['work_item_id', 'part_key']);
+            // Indexes for common query patterns
+            $table->index(['work_item_id', 'status'], 'work_parts_item_status_idx');
+            $table->index(['work_item_id', 'part_key'], 'work_parts_item_key_idx');
         });
     }
 
     public function down(): void
     {
+        // Temporarily disable foreign key constraints for clean drop
+        Schema::disableForeignKeyConstraints();
+
+        // Drop tables in reverse order (respecting foreign key constraints)
         Schema::dropIfExists('work_item_parts');
         Schema::dropIfExists('work_idempotency_keys');
         Schema::dropIfExists('work_provenances');
         Schema::dropIfExists('work_events');
         Schema::dropIfExists('work_items');
-
-        // Drop the optimized index before dropping the table
-        Schema::table('work_orders', function ($table) {
-            $table->dropIndex('work_orders_priority_created_at_index');
-        });
-
         Schema::dropIfExists('work_orders');
+
+        Schema::enableForeignKeyConstraints();
     }
 };
