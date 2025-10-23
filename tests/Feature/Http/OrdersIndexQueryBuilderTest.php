@@ -137,13 +137,11 @@ it('filters with exact requested_by_type filter', function () {
 it('filters with relation filter items.state', function () {
     $allocator = app(\GregPriday\WorkManager\Services\WorkAllocator::class);
 
-    // Order with queued items
+    // Order with queued items (propose already calls plan)
     $order1 = $allocator->propose('test.echo', ['message' => 'test1']);
-    $allocator->plan($order1);
 
     // Order with in-progress items
     $order2 = $allocator->propose('test.echo', ['message' => 'test2']);
-    $allocator->plan($order2);
     $order2->items()->update(['state' => ItemState::IN_PROGRESS]);
 
     $response = $this->getJson('/agent/work/orders?filter[items.state]=queued');
@@ -270,13 +268,11 @@ it('filters with has_available_items callback', function () {
         }
     });
 
-    // Order with available items
+    // Order with available items (propose already calls plan)
     $order1 = $allocator->propose($uniqueType, ['message' => 'available']);
-    $allocator->plan($order1);
 
     // Order with leased items
     $order2 = $allocator->propose($uniqueType, ['message' => 'leased']);
-    $allocator->plan($order2);
     $item = $order2->items()->first();
     $leaseService->acquire($item->id, 'agent-123');
 
@@ -312,7 +308,7 @@ it('supports include with itemsCount', function () {
         ['id' => 'b', 'data' => []],
         ['id' => 'c', 'data' => []],
     ]]);
-    $allocator->plan($order);
+    // Note: propose() already calls plan() internally, so no need to call it again
 
     $response = $this->getJson("/agent/work/orders?filter[id]={$order->id}&include=itemsCount");
 
@@ -330,7 +326,6 @@ it('supports include with events', function () {
     $allocator = app(\GregPriday\WorkManager\Services\WorkAllocator::class);
 
     $order = $allocator->propose('test.echo', ['message' => 'test']);
-    $allocator->plan($order);
 
     $response = $this->getJson('/agent/work/orders?include=events');
 
@@ -435,14 +430,12 @@ it('supports sorting by items_count', function () {
     $order1 = $allocator->propose($uniqueType, ['batches' => [
         ['id' => 'a', 'data' => []],
     ]]);
-    $allocator->plan($order1);
 
     $order2 = $allocator->propose($uniqueType, ['batches' => [
         ['id' => 'a', 'data' => []],
         ['id' => 'b', 'data' => []],
         ['id' => 'c', 'data' => []],
     ]]);
-    $allocator->plan($order2);
 
     $response = $this->getJson("/agent/work/orders?filter[id]={$order1->id},{$order2->id}&sort=-items_count&include=itemsCount");
 

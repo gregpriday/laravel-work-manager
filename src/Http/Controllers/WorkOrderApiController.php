@@ -75,16 +75,50 @@ class WorkOrderApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Build from request using centralized query builder (supports query string OR JSON body)
-        $qb = \GregPriday\WorkManager\Support\WorkOrderQuery::make($request);
+        // Normalize simple filter parameters to Spatie's filter[] format for backward compatibility
+        // Support both ?state=queued and ?filter[state]=queued
+        $normalizedRequest = $this->normalizeFilterParameters($request);
 
-        // Pagination via page[size] and page[number]
-        $size = max(1, min((int) ($request->input('page.size') ?? config('work-manager.query.default_page_size_http', 50)), config('work-manager.query.max_page_size', 100)));
+        // Build from request using centralized query builder (supports query string OR JSON body)
+        $qb = \GregPriday\WorkManager\Support\WorkOrderQuery::make($normalizedRequest);
+
+        // Pagination via page[size] or limit (alias), page[number]
+        // Support both 'limit' and 'per_page' as aliases for 'page.size'
+        $requested = (int) ($request->input('limit') ?? $request->input('per_page') ?? $request->input('page.size') ?? config('work-manager.query.default_page_size_http', 50));
+        $size = max(1, min($requested, config('work-manager.query.max_page_size', 100)));
         $pageNumber = max(1, (int) ($request->input('page.number') ?? 1));
 
         $orders = $qb->paginate($size, ['*'], 'page', $pageNumber)->appends($request->query());
 
         return response()->json($orders);
+    }
+
+    /**
+     * Normalize filter parameters from simple format to Spatie's filter[] format.
+     *
+     * Converts ?state=queued to ?filter[state]=queued for backward compatibility.
+     */
+    protected function normalizeFilterParameters(Request $request): Request
+    {
+        $simpleFilters = ['state', 'type', 'id', 'requested_by_type', 'requested_by_id'];
+        $normalized = $request->all();
+
+        foreach ($simpleFilters as $key) {
+            if ($request->has($key) && !$request->has("filter.{$key}")) {
+                $normalized['filter'][$key] = $request->input($key);
+                unset($normalized[$key]);
+            }
+        }
+
+        return Request::create(
+            $request->getRequestUri(),
+            $request->getMethod(),
+            $normalized,
+            $request->cookies->all(),
+            $request->files->all(),
+            $request->server->all(),
+            $request->getContent()
+        );
     }
 
     /**

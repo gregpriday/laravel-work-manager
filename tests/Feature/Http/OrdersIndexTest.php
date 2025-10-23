@@ -3,6 +3,9 @@
 use GregPriday\WorkManager\Facades\WorkManager;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Support\OrderState;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     WorkManager::routes('agent/work', ['api']);

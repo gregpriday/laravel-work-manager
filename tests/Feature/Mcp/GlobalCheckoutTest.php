@@ -224,10 +224,8 @@ class GlobalCheckoutTest extends TestCase
     public function test_global_checkout_skips_already_leased_items()
     {
         $order1 = $this->allocator->propose('test.echo', ['message' => 'leased'], priority: 100);
-        $this->allocator->plan($order1);
 
         $order2 = $this->allocator->propose('test.echo', ['message' => 'available'], priority: 50);
-        $this->allocator->plan($order2);
 
         // Manually lease the high priority item
         $order1->items()->first()->update([
@@ -301,10 +299,10 @@ class GlobalCheckoutTest extends TestCase
 
         $itemId = $checkoutResult['item']['id'];
 
-        // Should be able to submit the item
+        // Should be able to submit the item (test.echo requires 'ok' and 'verified' fields)
         $submitResult = $this->tools->submit(
             itemId: $itemId,
-            result: ['output' => 'completed'],
+            result: ['ok' => true, 'verified' => true, 'echoed_message' => 'test'],
             agentId: 'mcp-agent-1'
         );
 

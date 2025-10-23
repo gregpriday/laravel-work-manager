@@ -34,7 +34,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $result = $this->tools->submitPart(
@@ -56,7 +56,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $result = $this->tools->submitPart(
@@ -76,7 +76,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $idempotencyKey = 'mcp-part-key-' . uniqid();
@@ -112,7 +112,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         // Submit multiple parts
@@ -132,7 +132,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $this->tools->submitPart($itemId, 'identity', ['name' => 'Acme'], agentId: 'mcp-agent-1');
@@ -150,7 +150,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         // Submit all required parts
@@ -171,7 +171,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         // Submit only one part
@@ -189,7 +189,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $this->tools->submitPart($itemId, 'identity', ['name' => 'Acme'], agentId: 'mcp-agent-1');
@@ -213,7 +213,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         // Submit with sequence number
@@ -234,7 +234,7 @@ class PartialSubmissionsMcpTest extends TestCase
         $orderResult = $this->tools->propose('test.partial.mcp', ['company' => 'Acme']);
         $orderId = $orderResult['order']['id'];
 
-        $checkoutResult = $this->tools->checkout($orderId, 'mcp-agent-1');
+        $checkoutResult = $this->tools->checkout(orderId: $orderId, agentId: 'mcp-agent-1');
         $itemId = $checkoutResult['item']['id'];
 
         $result = $this->tools->submitPart(
