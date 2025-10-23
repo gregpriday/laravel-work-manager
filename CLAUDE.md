@@ -2,6 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Environment Setup (AI Agents: Read This First!)
+
+**If you're working in an environment that hasn't been set up for running tests**, you must first set up PHP, Composer, Xdebug, and other dependencies.
+
+Before proceeding with any development work:
+
+1. **Check if environment is ready**: Run `php --version` and `composer --version`
+2. **If commands are not found or tests fail**: Follow the complete setup guide at **`docs/dev/setup.md`**
+3. **Supported Platform**: Ubuntu/Debian-based systems (tested on Ubuntu 24.04)
+
+The setup guide (`docs/dev/setup.md`) provides step-by-step instructions to install:
+- PHP 8.3 with all required extensions (mbstring, xml, curl, zip, mysql, sqlite3, intl)
+- Composer 2.7.x for dependency management
+- Xdebug 3.2.x with code coverage enabled
+- Project dependencies via `composer install`
+- PHPUnit configuration
+
+**Quick verification**: After setup, run `composer test` to ensure all 300+ tests pass.
+
 ## Project Overview
 
 Laravel Work Manager is a Laravel package providing an AI-agent oriented work order control plane. It enables AI agents to propose work, lease work items with TTL-based concurrency control, submit results with validation, and apply changes idempotently.
