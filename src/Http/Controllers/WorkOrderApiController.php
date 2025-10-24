@@ -645,6 +645,8 @@ class WorkOrderApiController extends Controller
     protected function getAgentId(Request $request): string
     {
         // You can customize this based on your auth setup
-        return $request->header('X-Agent-ID') ?? Auth::id() ?? 'unknown';
+        return $request->header('X-Agent-ID')
+            ?? $request->header('X-Agent-Id') // support both casings
+            ?? (Auth::check() ? (string) Auth::id() : 'unknown'); // ensure string
     }
 }

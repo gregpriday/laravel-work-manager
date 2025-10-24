@@ -867,7 +867,7 @@ class WorkManagerTools
     protected function getAgentId(): string
     {
         return request()->header('X-Agent-ID')
-            ?? Auth::id()
-            ?? 'mcp-agent-'.uniqid();
+            ?? request()->header('X-Agent-Id') // support both casings
+            ?? (Auth::check() ? (string) Auth::id() : 'mcp-agent-'.uniqid()); // ensure string
     }
 }

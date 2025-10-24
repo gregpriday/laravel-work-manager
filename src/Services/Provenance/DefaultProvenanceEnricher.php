@@ -84,7 +84,7 @@ class DefaultProvenanceEnricher implements ProvenanceEnricher
     {
         $errors = [];
 
-        if (! $request->hasHeader('X-Agent-ID')) {
+        if (! ($request->hasHeader('X-Agent-ID') || $request->hasHeader('X-Agent-Id'))) {
             $errors[] = 'Missing required header: X-Agent-ID';
         }
 

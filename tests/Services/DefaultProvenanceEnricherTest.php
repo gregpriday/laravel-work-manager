@@ -207,6 +207,17 @@ it('validate returns empty array when X-Agent-ID is present', function () {
     expect($errors)->toBeEmpty();
 });
 
+it('validate accepts alternative casing X-Agent-Id', function () {
+    $request = createRequest('/test', 'GET', [
+        'HTTP_X_AGENT_Id' => 'agent-alt-casing',
+    ]);
+
+    $enricher = new DefaultProvenanceEnricher;
+    $errors = $enricher->validate($request);
+
+    expect($errors)->toBeEmpty();
+});
+
 it('validate returns error for invalid semver', function () {
     $request = createRequest('/test', 'GET', [
         'HTTP_X_AGENT_ID' => 'agent-123',
