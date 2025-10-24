@@ -40,6 +40,20 @@ vendor/bin/pest tests/ExampleTest.php
 vendor/bin/pest --coverage
 ```
 
+## Code Formatting
+
+**IMPORTANT**: Before committing any changes to git, always run Pint to ensure code formatting is correct:
+
+```bash
+# Check formatting (won't modify files)
+./vendor/bin/pint --test
+
+# Fix formatting issues
+./vendor/bin/pint
+```
+
+All commits should pass `./vendor/bin/pint --test` without errors. This ensures consistent code style across the project using Laravel's official coding standards.
+
 ## Package Structure
 
 This is a Laravel package with the following namespace: `GregPriday\WorkManager`
