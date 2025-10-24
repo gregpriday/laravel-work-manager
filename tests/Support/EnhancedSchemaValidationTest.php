@@ -182,21 +182,34 @@ it('validates integer type correctly', function () {
     expect($errors)->toBeEmpty();
 });
 
-it('treats integer and number types the same', function () {
-    // Note: Current implementation treats 'integer' and 'number' identically using is_numeric()
+it('distinguishes integer and number types correctly', function () {
+    // Integer type should only accept whole numbers, not floats
     $schema = [
         'properties' => [
             'count' => ['type' => 'integer'],
         ],
     ];
 
-    $data = [
-        'count' => 42.5, // Float passes as 'integer' since both use is_numeric()
-    ];
-
+    // Float should fail integer validation
+    $data = ['count' => 42.5];
     $errors = Helpers::validateJsonSchema($data, $schema);
+    expect($errors)->toHaveCount(1);
+    expect($errors[0]['code'])->toBe('schema.type_mismatch');
 
-    expect($errors)->toBeEmpty(); // Passes validation
+    // Whole number should pass
+    $data = ['count' => 42];
+    $errors = Helpers::validateJsonSchema($data, $schema);
+    expect($errors)->toBeEmpty();
+
+    // Numeric string representing integer should pass
+    $data = ['count' => '42'];
+    $errors = Helpers::validateJsonSchema($data, $schema);
+    expect($errors)->toBeEmpty();
+
+    // Numeric string with decimal should fail
+    $data = ['count' => '42.5'];
+    $errors = Helpers::validateJsonSchema($data, $schema);
+    expect($errors)->toHaveCount(1);
 });
 
 // ===== Enhanced validation tests =====

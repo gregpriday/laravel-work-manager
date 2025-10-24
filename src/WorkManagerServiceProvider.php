@@ -196,6 +196,12 @@ class WorkManagerServiceProvider extends ServiceProvider
         $basePath = config('work-manager.routes.base_path', 'agent/work');
         $middleware = config('work-manager.routes.middleware', ['api']);
 
+        // Apply configured auth guard (e.g., 'sanctum') when auto-registering routes
+        $guard = config('work-manager.routes.guard');
+        if ($guard && ! in_array("auth:{$guard}", $middleware, true)) {
+            $middleware[] = "auth:{$guard}";
+        }
+
         $this->app->make(RouteRegistrar::class)->register($basePath, $middleware);
     }
 

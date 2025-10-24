@@ -195,7 +195,8 @@ class Helpers
         foreach ($types as $type) {
             $match = match ($type) {
                 'string' => is_string($value),
-                'number', 'integer' => is_numeric($value),
+                'number' => is_numeric($value),
+                'integer' => is_int($value) || (is_numeric($value) && (int) $value == $value),
                 'boolean' => is_bool($value),
                 'array' => is_array($value),
                 'object' => is_array($value) || is_object($value),
