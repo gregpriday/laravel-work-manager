@@ -1,10 +1,12 @@
 # Laravel Work Manager
 
-**AI-agent oriented work order control plane for Laravel.**
+**Work-order control plane for Laravel—with first-class AI-agent integration (MCP).**
 
-This package gives you a framework-native way to create, lease, validate, approve, and apply **typed work orders**—with strong guarantees around **state**, **idempotency**, **auditability**, and **agent ergonomics**. It ships with a built-in **MCP (Model Context Protocol) server** for AI agents, a thin HTTP API you can mount under any namespace, scheduled commands for auto-generating work, and clean extension points for custom types, validation, and execution.
+For **AI agents, background services, and admin/dashboard flows** that need strong guarantees around state, idempotency, auditability, and safe concurrent execution.
 
-> **Built-in MCP server:** Connect AI agents (Claude/Claude Code, Cursor, etc.) via the MCP protocol to automatically discover tools, check out work, submit results, and poll decisions. The HTTP API remains available for non-MCP clients and custom integrations.
+This package gives you a framework-native way to create, lease, validate, approve, and apply **typed work orders**. It ships with a built-in **MCP (Model Context Protocol) server** for AI agents, a thin HTTP API you can mount under any namespace, scheduled commands for auto-generating work, and clean extension points for custom types, validation, and execution.
+
+> **Built-in MCP server:** Connect AI agents (Claude/Claude Code, Cursor, etc.) via the MCP protocol to automatically discover tools, check out work, submit results, and poll decisions. The MCP server exposes the same services and validation as the HTTP API. The HTTP API remains available for non-MCP clients and custom integrations.
 
 ---
 
@@ -31,9 +33,9 @@ Laravel Work Manager provides exactly that.
 * **Idempotency**: header-based dedupe + stored responses. (`Services\IdempotencyService`)
 * **HTTP API**: mountable controller with propose/checkout/heartbeat/submit/approve/reject/logs. (`Http\Controllers\WorkOrderApiController`)
 * **Scheduled commands**: generator & maintenance. (`work-manager:generate`, `work-manager:maintain`)
-* **"Work-order-only" enforcement**: middleware to block direct mutations. (`Http\Middleware\EnforceWorkOrderOnly`)
+* **"Work-order-only" enforcement**: opt-in middleware to block direct mutations (requires `X-Work-Order-ID` header). (`Http\Middleware\EnforceWorkOrderOnly`)
 * **Auditability**: `WorkEvent`, `WorkProvenance`, and structured `Diff`.
-* **Examples & docs**: full examples for DB inserts and user data sync; architecture + lifecycle docs. (See [Documentation](#documentation) section)
+* **Documentation**: [MCP Server Integration](docs/guides/mcp-server-integration.md), [HTTP API](docs/guides/http-api.md), [Creating Order Types](docs/guides/creating-order-types.md), [Partial Submissions](docs/guides/partial-submissions.md), [Docs Home](docs/index.md)
 
 ---
 
@@ -46,11 +48,58 @@ php artisan vendor:publish --tag=work-manager-migrations
 php artisan migrate
 ```
 
-**Requirements:** PHP 8.2+, Laravel 11 or 12, MySQL 8+ or Postgres 13+.
+**Requirements:** PHP 8.2+, Laravel 11 or 12, MySQL 8+ or Postgres 13+. **Optional Redis lease backend** (default: database; Redis recommended for higher concurrency). See [Installation Guide](docs/getting-started/installation.md) for detailed requirements.
 
 ---
 
-## Quick start (5 steps)
+## Quick start
+
+**1. Install & migrate:**
+```bash
+composer require gregpriday/laravel-work-manager
+php artisan vendor:publish --tag=work-manager-migrations
+php artisan migrate
+```
+
+**2. Register routes:**
+```php
+// routes/api.php
+use GregPriday\WorkManager\Facades\WorkManager;
+
+WorkManager::routes('agent/work', ['api', 'auth:sanctum']);
+```
+
+**3. Schedule maintenance:**
+```php
+// app/Console/Kernel.php
+$schedule->command('work-manager:generate')->everyFifteenMinutes();
+$schedule->command('work-manager:maintain')->everyMinute();
+```
+
+**4. Define an order type** (see [Creating Order Types](docs/guides/creating-order-types.md)):
+```php
+// app/WorkTypes/UserDataSyncType.php
+use GregPriday\WorkManager\Support\AbstractOrderType;
+
+class UserDataSyncType extends AbstractOrderType
+{
+    public function type(): string { return 'user.data.sync'; }
+    public function schema(): array { /* JSON schema */ }
+    public function apply(WorkOrder $order): Diff { /* Idempotent execution */ }
+}
+```
+
+**5. Register your type:**
+```php
+// app/Providers/AppServiceProvider.php
+WorkManager::registry()->register(new UserDataSyncType());
+```
+
+See [Quickstart Guide](docs/getting-started/quickstart.md) for a complete walkthrough.
+
+---
+
+## Detailed examples (5 steps)
 
 ### 1) Register routes (choose your namespace)
 
@@ -58,10 +107,11 @@ php artisan migrate
 // routes/api.php
 use GregPriday\WorkManager\Facades\WorkManager;
 
-// Mount all endpoints under /agent/work with your own middleware/guard.
-// Note: Config default is 'agent/work', but you can override with basePath parameter.
-WorkManager::routes(basePath: 'agent/work', middleware: ['api', 'auth:sanctum']);
+// Mount all endpoints under /agent/work with your own middleware/guard
+WorkManager::routes('agent/work', ['api', 'auth:sanctum']);
 ```
+
+**Note:** If you register in `routes/api.php`, Laravel automatically prefixes with `/api`, so this becomes `/api/agent/work/*`.
 
 Or wire them manually to pick endpoints individually.
 
@@ -266,16 +316,16 @@ Provide `X-Idempotency-Key` for propose/submit/approve/reject. The package store
 
 ### "Work-order-only" enforcement
 
-Attach `EnforceWorkOrderOnly` middleware to any mutating endpoint in your app to ensure all writes flow through a valid work order (e.g., state `approved|applied`).
+Attach `EnforceWorkOrderOnly` middleware to any mutating endpoint in your app to ensure all writes flow through a valid work order. This is **opt-in** and requires the `X-Work-Order-ID` header (or `_work_order_id` request parameter). You can optionally specify allowed states, e.g., `approved|applied`.
 
 ### Partial Submissions
 
-For complex work items (e.g., research tasks, multi-step processes), agents can submit results incrementally rather than all at once:
+**Optional partial submissions** let agents stream large results and finalize later. For complex work items (e.g., research tasks, multi-step processes), agents can submit results incrementally rather than all at once:
 
 * `POST /items/{item}/submit-part` — Submit an incremental part (validated independently)
 * `POST /items/{item}/finalize` — Assemble all validated parts into final result
 
-Enable in config: `'partials.enabled' => true` (enabled by default).
+Enable in config: `'partials.enabled' => true` (enabled by default, with configurable limits on max parts and payload size).
 
 **Benefits:**
 - Handle large/complex work without timeout issues
@@ -292,6 +342,8 @@ Each part is independently validated and stored. Once all parts are submitted, c
 Mount under any prefix (e.g., `/agent/work`), then:
 
 **Note on route prefixes**: If you mount routes in `routes/api.php`, Laravel automatically prefixes them with `/api`, so `/agent/work/*` becomes `/api/agent/work/*`.
+
+**Idempotency:** Send `X-Idempotency-Key` header on enforced endpoints (`propose`, `submit`, `submit-part`, `finalize`, `approve`, `reject`) to get safe retries with cached responses.
 
 * `POST /propose` — create a work order (requires `type`, `payload`)
 * `GET /orders` / `GET /orders/{id}` — list/show orders
@@ -328,6 +380,8 @@ The package includes a **built-in MCP (Model Context Protocol) server** for AI a
 
 ### Quick Start
 
+**Choose one transport** (stdio for local IDEs, HTTP for remote/production):
+
 **Local mode (for Cursor, Claude Desktop, etc.):**
 ```bash
 php artisan work-manager:mcp --transport=stdio
@@ -338,6 +392,8 @@ php artisan work-manager:mcp --transport=stdio
 php artisan work-manager:mcp --transport=http --host=0.0.0.0 --port=8090
 ```
 
+The MCP server runs one transport at a time and exposes the same services as the HTTP API.
+
 **HTTP mode with authentication (recommended for production):**
 ```env
 # .env
@@ -346,7 +402,11 @@ WORK_MANAGER_MCP_AUTH_GUARD=sanctum  # or any Laravel guard
 WORK_MANAGER_MCP_STATIC_TOKENS=token1,token2  # optional: static tokens for dev/testing
 ```
 
-When auth is enabled, clients must include `Authorization: Bearer <token>` header on all requests. Use Sanctum tokens for production, static tokens for development/testing.
+When auth is enabled, clients must include `Authorization: Bearer <token>` header on all requests.
+
+**MCP HTTP endpoints:** `GET /mcp/sse` (server-sent events), `POST /mcp/message` (message endpoint). Enable Bearer auth in production and put it behind TLS/reverse proxy; use static tokens only for dev.
+
+**Note:** MCP and REST auth are separate. MCP HTTP uses Bearer tokens configured above; REST API uses your Laravel guard (e.g., Sanctum) configured in routes.
 
 ### Available MCP Tools
 
@@ -570,15 +630,6 @@ New to Laravel Work Manager? Follow this learning path:
 - **[Events & Listeners](docs/guides/events-and-listeners.md)** - React to lifecycle events
 - **[Deployment Guide](docs/guides/deployment-and-production.md)** - Production deployment and scaling
 
-### 📦 Legacy Documentation
-
-The following files contain legacy documentation (will be archived):
-- `ARCHITECTURE.md` → Migrated to [Architecture Overview](docs/concepts/architecture-overview.md)
-- `docs/MCP_SERVER.md` → Migrated to [MCP Server Integration](docs/guides/mcp-server-integration.md)
-- `docs/USE_CASES.md` → Content distributed across [Examples](docs/examples/overview.md)
-- `examples/QUICK_START.md` → Migrated to [Quickstart Guide](docs/getting-started/quickstart.md)
-- `examples/LIFECYCLE.md` → Migrated to [Lifecycle & Flow](docs/concepts/lifecycle-and-flow.md)
-
 For questions, issues, or feature requests, visit the [GitHub issue tracker](https://github.com/gregpriday/laravel-work-manager/issues).
 
 ---
@@ -620,4 +671,4 @@ See [Support and Community](docs/meta/support-and-community.md) for more resourc
 
 ---
 
-*This README reflects the current package structure with 52+ PHP files implementing a complete work order control plane with lifecycle hooks, Laravel integration, and comprehensive documentation.*
+*This README reflects the current package structure implementing a complete work order control plane with lifecycle hooks, Laravel integration, and comprehensive documentation.*
