@@ -35,13 +35,25 @@ class WorkOrderPolicy
      */
     public function view(?User $user, WorkOrder $order): bool
     {
-        // Allow if user is the requester or has permission
-        if ($user && $order->requested_by_id === (string) $user->id) {
+        if (! $user) {
+            return false;
+        }
+
+        // Allow if user is the requester
+        if ($order->requested_by_id === (string) $user->id) {
             return true;
         }
 
-        // Check viewing permission
-        return $user !== null;
+        // Check for explicit viewing permission via configured gate
+        $ability = config('work-manager.policies.view');
+
+        if ($ability && method_exists($user, 'can')) {
+            return $user->can($ability);
+        }
+
+        // Default deny for security - apps must explicitly grant view permissions
+        // to non-requesters (e.g., admins, supervisors, same-tenant users)
+        return false;
     }
 
     /**

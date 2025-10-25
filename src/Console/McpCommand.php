@@ -4,7 +4,6 @@ namespace GregPriday\WorkManager\Console;
 
 use GregPriday\WorkManager\Mcp\BearerAuthMiddleware;
 use Illuminate\Console\Command;
-use PhpMcp\Laravel\Facades\Mcp;
 use PhpMcp\Server\Server;
 use PhpMcp\Server\Transports\ReactPhpHttpTransportHandler;
 use Psr\Http\Message\ResponseInterface;

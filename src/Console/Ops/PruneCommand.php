@@ -16,7 +16,7 @@ use Illuminate\Console\Command;
 class PruneCommand extends Command
 {
     protected $signature = 'work-manager:ops:prune
-        {--older-than=90d : Prune events older than this (e.g., 30d, 90d)}
+        {--older-than=90d : Prune events older than this (e.g., 24h, 30d, 90d)}
         {--dry-run : Show what would be pruned}
         {--force : Skip confirmation in production}';
 

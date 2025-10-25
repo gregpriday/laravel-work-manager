@@ -142,6 +142,7 @@ return [
     */
     'policies' => [
         'propose' => 'work.propose',
+        'view' => 'work.view',           // Permission to view orders created by others
         'checkout' => 'work.checkout',
         'submit' => 'work.submit',
         'approve' => 'work.approve',
@@ -191,7 +192,8 @@ return [
         // HTTP transport authentication
         'http' => [
             // Enable Bearer token authentication for HTTP transport
-            'auth_enabled' => env('WORK_MANAGER_MCP_HTTP_AUTH', false),
+            // IMPORTANT: Set to true in production for security
+            'auth_enabled' => env('WORK_MANAGER_MCP_HTTP_AUTH', true),
 
             // Laravel auth guard to use for token validation
             'auth_guard' => env('WORK_MANAGER_MCP_AUTH_GUARD', 'sanctum'),
@@ -205,6 +207,8 @@ return [
             // CORS settings for HTTP transport
             'cors' => [
                 'enabled' => env('WORK_MANAGER_MCP_CORS', true),
+                // IMPORTANT: Set specific origins in production (e.g., 'https://yourdomain.com')
+                // Use '*' only for local development
                 'allowed_origins' => env('WORK_MANAGER_MCP_CORS_ORIGINS', '*'),
                 'allowed_methods' => 'GET,POST,OPTIONS',
                 'allowed_headers' => 'Content-Type,Authorization,Mcp-Session-Id',

@@ -15,7 +15,7 @@ use Illuminate\Console\Command;
 class PurgeKeysCommand extends Command
 {
     protected $signature = 'work-manager:ops:purge-keys
-        {--older-than=30d : Purge keys older than this (e.g., 30d, 90d)}
+        {--older-than=30d : Purge keys older than this (e.g., 24h, 30d, 90d)}
         {--dry-run : Show what would be purged}
         {--force : Skip confirmation in production}';
 

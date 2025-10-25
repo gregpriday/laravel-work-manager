@@ -48,41 +48,21 @@ test('mcp command stdio shows correct output before attempting to start', functi
 // which could cause conflicts in CI/CD environments and would hang the test suite.
 // The stdio test above verifies the output logic works correctly.
 test('mcp command http shows correct output before attempting to start', function () {
-    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
-        $this->markTestSkipped('PhpMcp package not installed');
-    }
-
-    $this->markTestSkipped('HTTP transport would bind to ports - tested manually');
+    // Intentionally empty - skipped to avoid binding real ports in CI
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http respects custom host and port in output', function () {
-    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
-        $this->markTestSkipped('PhpMcp package not installed');
-    }
-
-    $this->markTestSkipped('HTTP transport would bind to ports - tested manually');
+    // Intentionally empty - skipped to avoid binding real ports in CI
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows auth disabled by default', function () {
-    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
-        $this->markTestSkipped('PhpMcp package not installed');
-    }
-
-    $this->markTestSkipped('HTTP transport would bind to ports - tested manually');
+    // Intentionally empty - skipped to avoid binding real ports in CI
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows auth enabled when configured', function () {
-    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
-        $this->markTestSkipped('PhpMcp package not installed');
-    }
-
-    $this->markTestSkipped('HTTP transport would bind to ports - tested manually');
+    // Intentionally empty - skipped to avoid binding real ports in CI
 })->skip('HTTP server would bind to actual ports and block');
 
 test('mcp command http shows static token count when configured', function () {
-    if (! class_exists(\PhpMcp\Laravel\Facades\Mcp::class)) {
-        $this->markTestSkipped('PhpMcp package not installed');
-    }
-
-    $this->markTestSkipped('HTTP transport would bind to ports - tested manually');
+    // Intentionally empty - skipped to avoid binding real ports in CI
 })->skip('HTTP server would bind to actual ports and block');

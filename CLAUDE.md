@@ -42,17 +42,19 @@ vendor/bin/pest --coverage
 
 ## Code Formatting
 
-**IMPORTANT**: Before committing any changes to git, always run Pint to ensure code formatting is correct:
+**IMPORTANT**: After making any significant PHP code changes, always run Pint to automatically format the code:
 
 ```bash
-# Check formatting (won't modify files)
-./vendor/bin/pint --test
-
-# Fix formatting issues
+# Automatically fix formatting
 ./vendor/bin/pint
 ```
 
-All commits should pass `./vendor/bin/pint --test` without errors. This ensures consistent code style across the project using Laravel's official coding standards.
+**When to run Pint**:
+- After editing any PHP files (service classes, models, controllers, etc.)
+- After creating new PHP files
+- Before committing changes to git
+
+Pint will automatically format all code according to Laravel's official coding standards.
 
 ## Package Structure
 

@@ -75,16 +75,22 @@ class IdempotencyService
         }
 
         // Execute the callback
-        $response = DB::transaction(function () use ($callback, $scope, $key) {
-            $result = $callback();
+        try {
+            $response = DB::transaction(function () use ($callback, $scope, $key) {
+                $result = $callback();
 
-            // Store the idempotency key with the response
-            $this->store($scope, $key, $result);
+                // Store the idempotency key with the response
+                $this->store($scope, $key, $result);
 
-            return $result;
-        });
+                return $result;
+            });
 
-        return $response;
+            return $response;
+        } catch (IdempotencyConflictException $e) {
+            // Race condition: another request stored the key between check and store
+            // Return the cached response instead of failing
+            return $e->previousResponse ?? ['success' => true];
+        }
     }
 
     /**

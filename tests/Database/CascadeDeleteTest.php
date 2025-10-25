@@ -4,11 +4,12 @@ use GregPriday\WorkManager\Models\WorkEvent;
 use GregPriday\WorkManager\Models\WorkItem;
 use GregPriday\WorkManager\Models\WorkOrder;
 use GregPriday\WorkManager\Models\WorkProvenance;
+use GregPriday\WorkManager\Support\OrderState;
 
 it('cascades delete from work_order to work_items', function () {
     $order = WorkOrder::create([
         'type' => 'test.echo',
-        'state' => 'queued',
+        'state' => OrderState::QUEUED,
         'payload' => ['message' => 'test'],
     ]);
 
@@ -28,7 +29,7 @@ it('cascades delete from work_order to work_items', function () {
 it('cascades delete from work_order to work_events', function () {
     $order = WorkOrder::create([
         'type' => 'test.echo',
-        'state' => 'queued',
+        'state' => OrderState::QUEUED,
         'payload' => ['message' => 'test'],
     ]);
 
@@ -48,7 +49,7 @@ it('cascades delete from work_order to work_events', function () {
 it('cascades delete from work_order to work_provenances', function () {
     $order = WorkOrder::create([
         'type' => 'test.echo',
-        'state' => 'queued',
+        'state' => OrderState::QUEUED,
         'payload' => ['message' => 'test'],
     ]);
 
@@ -68,7 +69,7 @@ it('cascades delete from work_order to work_provenances', function () {
 it('cascades delete all related records when order is deleted', function () {
     $order = WorkOrder::create([
         'type' => 'test.echo',
-        'state' => 'queued',
+        'state' => OrderState::QUEUED,
         'payload' => ['message' => 'test'],
     ]);
 
